@@ -1,0 +1,70 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+
+!define RECTANGLE class
+
+RECTANGLE "特許権者リスト" as input {
+  + 特許権者名
+  + 対象期間
+}
+
+RECTANGLE "特許情報\n(DynamoDB)" as patentdb {
+  + 特許番号
+  + 請求項
+  + 発明の内容
+  + 特許概要
+  + 特許公報リンク
+}
+
+RECTANGLE "侵害分析エンジン" as analysis {
+  + 構成要件抽出
+  + 製品マッチング
+  + 充足性判定
+  + 根拠URL収集
+}
+
+RECTANGLE "売上推定エンジン" as revenue {
+  + 企業情報収集
+  + 製品特定
+  + 売上推定
+  + 収益性ランク付け
+}
+
+RECTANGLE "DD管理シート" as output {
+  + 特許番号
+  + 侵害可能性
+  + 侵害企業・製品
+  + 収益見込み
+  + 分析根拠
+  + ステータス
+}
+
+RECTANGLE "Web情報源" as web {
+  + 企業公式サイト
+  + 製品仕様ページ
+  + プレスリリース
+  + 財務情報
+  + 市場調査レポート
+}
+
+input --> patentdb : 特許情報\n取得
+patentdb --> analysis : 請求項\n抽出
+web --> analysis : 製品情報\n収集
+analysis --> revenue : 侵害可能性\nあり
+web --> revenue : 企業・財務\n情報収集
+revenue --> output : 分析結果\n統合
+analysis --> output : 侵害可能性\nなし
+
+note right of analysis
+  **AI Agent 1**
+  構成要件ベースの
+  自動マッチング
+end note
+
+note right of revenue
+  **AI Agent 2**
+  財務情報ベースの
+  収益性分析
+end note
+
+@enduml

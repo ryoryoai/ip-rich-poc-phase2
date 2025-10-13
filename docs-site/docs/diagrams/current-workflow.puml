@@ -1,0 +1,97 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam swimlaneWidth 300
+
+|知財担当者|
+start
+:特許権者を選定;
+
+partition "自動化対象①\n特許一覧作成" #TECHNOLOGY {
+  :特許一覧を作成;
+}
+note right
+  **出力項目**
+  ・特許権者
+  ・特許番号
+  ・発明の内容
+  ・特許概要
+end note
+
+|技術担当者|
+:特許情報を受領;
+
+partition "自動化対象②\n侵害調査" #TECHNOLOGY {
+  :侵害調査プロンプトを準備;
+  note right
+    **プロンプト内容**
+    ・請求項1の全構成要件の照合
+    ・Web検索による製品仕様確認
+    ・構成要件ごとの充足性判断
+  end note
+
+  |ChatGPT (手動)|
+  :侵害可能性分析を実行;
+  :構成要件分析レポートを生成;
+  note right
+    **分析内容**
+    ・構成要件
+    ・製品の対応構成
+    ・充足判断（○/×）
+    ・根拠（URL、公開情報）
+  end note
+}
+
+|技術担当者|
+if (侵害可能性あり?) then (○)
+
+  partition "自動化対象③\n売上推定" #TECHNOLOGY {
+    :被疑侵害製品の売上推定;
+    note right
+      **推定対象**
+      ・被疑侵害企業
+      ・製品名
+      ・推定売上額
+      ・収益見込みランク（A〜E）
+    end note
+
+    |ChatGPT (手動)|
+    :売上・収益性分析を実行;
+    :収益見込みレポートを生成;
+  }
+else (×)
+  :DD管理シートに記録（×）;
+  stop
+endif
+
+|技術担当者|
+:DD管理シートに記録;
+note right
+  **記録内容**
+  ・侵害可能性（○/×/△）
+  ・侵害企業・製品候補
+  ・収益見込み（A〜E）
+  ・関連情報（ChatGPT URL等）
+  ・無効可能性
+  ・進捗・メモ
+end note
+
+|知財担当者|
+:DD管理シートをレビュー;
+:総合的に判断;
+note right
+  **判断基準**
+  ・侵害可能性
+  ・収益見込み
+  ・無効リスク
+  ・戦略的価値
+end note
+
+if (訴訟すべきか?) then (Yes)
+  :訴訟準備開始;
+  stop
+else (No)
+  :終了;
+  stop
+endif
+
+@enduml

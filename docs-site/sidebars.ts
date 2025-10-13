@@ -4,6 +4,7 @@ const sidebars: SidebarsConfig = {
   docsSidebar: [
     "intro",
     "architecture",
+    "patent-workflow",
   ],
 };
 
