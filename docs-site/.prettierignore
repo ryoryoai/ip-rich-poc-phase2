@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build output
+build/
+.docusaurus/
+.cache-loader/
+
+# Generated files
+*.min.js
+*.min.css

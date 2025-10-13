@@ -1,0 +1,11 @@
+# mise configuration for fullstack-docusaurus-cloudfront
+# https://mise.jdx.dev/
+
+[tools]
+# Global tools
+terraform = "1.9.8"
+node = "20.18.0"
+
+[env]
+# Environment variables
+_.file = ".env"
