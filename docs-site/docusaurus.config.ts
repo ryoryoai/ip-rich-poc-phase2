@@ -40,6 +40,7 @@ const config: Config = {
           sidebarPath: "./sidebars.ts",
           routeBasePath: "/",
           editUrl: "https://github.com/your-org/your-project/tree/main/docs-site/",
+          exclude: ["**/diagrams/README.md"],
           remarkPlugins: [remarkLocalPlantUML],
           rehypePlugins: [
             [
