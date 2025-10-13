@@ -5,6 +5,7 @@ const sidebars: SidebarsConfig = {
     "intro",
     "architecture",
     "patent-workflow",
+    "poc-development-plan",
   ],
 };
 
