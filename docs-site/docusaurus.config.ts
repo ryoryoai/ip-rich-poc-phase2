@@ -1,6 +1,8 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import remarkLocalPlantUML from "@mstroppel/remark-local-plantuml";
+import rehypeRaw from "rehype-raw";
 
 const config: Config = {
   title: "My Documentation",
@@ -38,6 +40,21 @@ const config: Config = {
           sidebarPath: "./sidebars.ts",
           routeBasePath: "/",
           editUrl: "https://github.com/your-org/your-project/tree/main/docs-site/",
+          remarkPlugins: [remarkLocalPlantUML],
+          rehypePlugins: [
+            [
+              rehypeRaw,
+              {
+                passThrough: [
+                  "mdxjsEsm",
+                  "mdxFlowExpression",
+                  "mdxJsxFlowElement",
+                  "mdxJsxTextElement",
+                  "mdxTextExpression",
+                ],
+              },
+            ],
+          ],
         },
         blog: false,
         theme: {
