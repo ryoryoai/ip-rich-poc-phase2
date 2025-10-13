@@ -1,0 +1,1048 @@
+特許権者,特許番号,技術担当者,知財担当者,発明の内容,侵害可能性,侵害企業・製品候補,無効可能性,収益見込み,関連情報,進捗・メモ,特許公報リンク,重複チェック,特許番号(番号のみ)
+NTT,特許07666636,布施,草野,球技の挙動評価,〇※,ProPlayAI（PitchAI、カナダ3MotionAI社）,,D,https://chatgpt.com/share/6888b4c6-0cf0-8006-9184-df70dcf05384,※侵害額が小さいので保留,,1,7666636
+NTT,特許07492160,布施,草野,,,,,,,,,1,7492160
+NTT,特許07396460,布施,草野,,,,,,,,,1,7396460
+NTT,特許07396359,布施,草野,支援者選定,×,,,,,,,1,7396359
+NTT,特許07248928,布施、高橋,草野,冷蔵庫レシピ,〇,,,,,,,1,7248928
+NTT,特許07168093,布施,草野,３次元点群データ,〇,,,,,,,1,7168093
+NTT,特許07090250,布施,草野,マンホールリスク,〇※,,,,,※共願のためNG,,1,7090250
+NTT,特許06974732,布施,草野,影響因子混在範囲分析,×,,,,,,,1,6974732
+オプティム,特許06267841,布施,奥野,ウェアラブル端末,〇,中国農業大学　研究開発段階,,E,https://chatgpt.com/share/689694c5-ad04-800b-bc9a-3c6223cfee4c,,,1,6267841
+オプティム,特許06195960,布施,奥野,遠隔指示システム,〇,"①TeamViewer Assist AR（TeamViewer社）約1億円前後
+②Vuforia Chalk（PTC社）約0.8〜1.2億円
+③Microsoft Dynamics 365 Remote Assist / Teamsの空間注釈（Microsoft社）約10〜15億円
+④Zoho Lens（Zoho Corporation社）約0.3〜0.5億円
+⑤AirDroid Remote Support（Sand Studio社）約0.7〜1.0億円
+⑥SightCall（米国）約1.5〜2.0億円
+⑦TechSee（イスラエル）約1.5〜2.5億円
+⑧VSight（リトアニア）約0.2〜0.3億円
+",,A,https://chatgpt.com/share/6896950a-8420-800b-8ad7-1b347a45d004,要検討,,1,6195960
+オプティム,特許06169748,布施,奥野,ネットのセキュリティシステム,✕,,,,https://chatgpt.com/share/6896960e-a978-800b-bb1a-607bbd4ff605,「所定の質問項目に対する回答」の該当性が問題（親出願意見書）。年齢によるフィルタリングのみではない,,1,6169748
+オプティム,特許06145230,布施,奥野,遠隔診察システム,✕,,,,https://chatgpt.com/share/689696e4-960c-800b-b9b5-e78402e23c09,「医師の時給を変動させる」なし,,1,6145230
+オプティム,特許06134302,布施,奥野,電化製品と通信可能な管理サーバ,✕,,,,https://chatgpt.com/share/689696e4-960c-800b-b9b5-e78402e23c09,「所定の電化製品から電話番号を特定する」なし,,1,6134302
+オプティム,特許06105181,布施,奥野,殺虫器バランス調整システム,✕,,,,https://chatgpt.com/share/6896a3e2-2f38-800b-bdd1-518f586a918a,,,1,6105181
+オプティム,特許06077068,布施,奥野,拡張現実システム,✕,,,,https://chatgpt.com/share/6896b6a6-fb10-800b-a772-b2d0c1226c1b,多くのASAアプリは位置は指定できても「方向」まで明示的に指定するUIがない,,1,6077068
+オプティム,特許05997824,布施,奥野,遠隔端末,〇,"①Microsoft（Dynamics 365 Remote Assist / HoloLens）約100億円
+②PTC（Vuforia Chalk）約1億円
+③TeamViewer（Assist AR〈旧Pilot〉）約1億円
+④Onsight　約0.5億円",,A,https://chatgpt.com/share/68981f17-aaac-800b-be04-3dcc6d3563a5,,,1,5997824
+オプティム,特許05853003,布施,奥野,画面共有端末,△,TeamViewer（ドイツ）114.0,,A,https://chatgpt.com/share/689833a3-b73c-800b-ab3c-629ebd170086,「前記変化を検出した領域が、所定の範囲より大きい場合には、前記送信を中止する」要検討,,1,5853003
+オプティム,特許05815650,布施,奥野,画面共有端末,〇,"①Parallels Access（Parallels社）約0.3億円
+②Parallels Secure Workspace　0.1億円未満",,D,https://chatgpt.com/share/68984312-afa0-800b-848f-0fcd3eaf2d35,,,1,5815650
+オプティム,特許05770782,布施,奥野,オペレータ端末,〇,Citrix Virtual Apps and Desktops 1200億円,,A,https://chatgpt.com/share/689a848f-d094-800b-a156-90ac753de6f0,"Google（Android端末のDuoプレビュー通話機能）約18,000億円",,1,5770782
+オプティム,特許05687149,布施,奥野,アプリをDLするモジュールを備える通話端末,〇,"Google（Android端末のDuoプレビュー通話機能）約18,000億円",,A,https://chatgpt.com/share/689a9f4a-9454-800b-b1d0-3690eb21eab2,,,1,5687149
+オプティム,特許05653301,布施,奥野,リモートシステム,〇,"①TeamViewer (Remote　)約180億円
+②TeamViewer Tensor　約15億円",,A,https://chatgpt.com/share/689ab2a4-fedc-800b-898b-84b2cf96f488,,,1,5653301
+オプティム,特許05398392,布施,奥野,空調機器制御装置,〇,"①tado° Smart AC Control (tado GmbH, ドイツ)0.4億円
+②Ambi Climate (Ambi Labs, 香港)0.2億円
+③Cielo Breez シリーズ (Cielo WiGle Inc., アメリカ)0.03億円",,D,https://chatgpt.com/share/689ac4c7-c79c-800b-a8c9-088529da1b7e,,,1,5398392
+オプティム,特許05378970,布施,奥野,販売価格決定装置,〇,"Spot by NetApp　約5.0億円
+",,B,https://chatgpt.com/share/689d41ab-9e34-800b-957c-e2c6d935a932,,,1,5378970
+オプティム,特許05148670,布施,奥野,固有アドレスにより電化製品の設定を行う設定方法,〇,"①Amazon Alexa 約300億円
+②Philips Hue　約500億円
+③SwitchBotシリーズ　約200億円",,A,https://chatgpt.com/share/689e8daf-d510-800b-bf56-06b5962421a2,,,1,5148670
+オプティム,特許05010653,布施,奥野,電源制御装置,〇,Amazon Echoシリーズ約800億円,,A,https://chatgpt.com/share/689e953f-a45c-800b-9870-b66f19697f3c,,,1,5010653
+オプティム,特許04895405,布施,奥野,レピュテーションに基づいたセキュリティ管理,〇,"①Cisco　約35000億円
+②Palo Alto Networks　約1000億円
+③Check Point Software　約800億円
+④Forescout　約150億円
+⑤Huawei　約2500億円",,A,https://chatgpt.com/share/689ebbc9-2da8-800b-8823-2ce9eb637696,,,1,4895405
+IBM,特許05852399,柿崎,草野,アプリケーション間コミュニケーション,〇,"Red Hat Enterprise Linux(2,200億)
+SUSE Linux Enterprise Server(150～200億)
+Ubuntu（Canonical社）(30～50億円)",,A,,,,1,5852399
+IBM,特許05802041,柿崎,草野,,,,,,,年金不納,,1,5802041
+IBM,特許05783630,柿崎,草野,デジタル署名,〇,"DocuSign（1,500億円）
+Galaxyシリーズ（14,800億円）
+Huawei（約1,860億円）
+APPLE（）",,A,,,,1,5783630
+IBM,特許05754704,柿崎,草野,システム監視,〇,,,D,,売上小,,1,5754704
+IBM,特許05731223,柿崎,草野,,,,,,,,,1,5731223
+IBM,特許05710325,柿崎,草野,マルコフ決定,〇,"Stem社 - Athenaプラットフォーム：約6億円  
+Moixa社 - GridShare：約5億円  
+Nuvve社 - GIVeプラットフォーム：約2億円  
+Huawei社 - AI搭載家庭用エネルギー貯蔵システム：約200億円  
+AutoGrid Systems社 - Flexバーチャル発電所プラットフォーム：約20億円  
+ToolsGroup社 - 在庫最適化ソフトウェア：約3億円",,B,,,,1,5710325
+IBM,特許05689333,柿崎,草野,ネットワーク異常検知,〇,,,C,"侵害判断・売上推定
+https://chatgpt.com/share/689178e8-d1d4-8010-b0b0-ccd476a336b6",,,1,5689333
+IBM,特許05669851,柿崎,草野,バイパスプロトコル,〇,,,D,"侵害判断・売上推定
+https://chatgpt.com/share/689177e5-51a4-8010-b681-f6ccdebb68ef",売上小,,1,5669851
+IBM,特許05570008,柿崎,草野,ラプラシアン,〇※,,,E,"侵害判定
+https://chatgpt.com/share/68919ec8-6b18-8010-bda8-48d5dead173a",CIscoがLOT加入企業,,1,5570008
+IBM,特許05295355,柿崎,草野,,〇,Apple330億円,,B,,,,1,5295355
+IBM,特許06351723,柿崎,岩瀬,,,,,,,権利移転,,1,6351723
+IBM,特許06250054,柿崎,岩瀬,ニューロン属性メモリ,〇,"Intel Loihi 2（Intel Corporation）0.1億円未満
+BrainChip Akida（BrainChip Holdings社）0.1億円未満
+GrAI One / GrAI VIP（GrAI Matter Labs社）0億円
+SynSense Dynap-CNN（SynSense社）0億円",,D,https://chatgpt.com/share/68b0278d-0678-8010-8dcb-94b81a9843c3,BrainChipの日本における売上は日本企業(Megachips)からのライセンス収入と考えられるため、外国企業と言えるかは疑問,,1,6250054
+IBM,特許06075581,柿崎,岩瀬,経路生成方法,〇,Esri（米）｜ArcGIS Indoors　約0.90億円,,D,https://chatgpt.com/share/68b027a2-0798-8010-b9c1-9effa69cb1e4,,,1,6075581
+IBM,特許06004451,柿崎,岩瀬,データセンターにおける省電力制御,△,Lancium社の「Clean Campus」データセンター 0,,E,https://chatgpt.com/share/68b06e9d-8a18-8010-ae45-2434388a9b9b,テンセントクラウドなどは今後実施する可能性はあるものの、現時点では実施が確認できない。,,1,6004451
+ミツトヨ,特許07565179,滝波,幸谷,スケール,〇,"Renishaw社（英国）ASTRiA™ 絶対誘導式ロータリエンコーダ　0.5億円
+Celera Motion社（旧Zettlex、米国）IncOder™ 絶対誘導式角度エンコーダ  5億円",,C,,,https://www.j-platpat.inpit.go.jp/c1801/PU/JP-2020-153548/10/ja,1,7565179
+ミツトヨ,特許07344625,滝波,幸谷,,✕,,,,,,,1,7344625
+ミツトヨ,特許07337637,滝波,幸谷,,✕,,,,,,,1,7337637
+ミツトヨ,特許07232054,滝波,幸谷,,〇,"Starrett AVRシリーズ（米国 Starrett社 製品）　0.6億円
+Vision Engineering社 LVCシリーズ（英国製品）　0.5億円",,E,,数千万円程度,https://www.j-platpat.inpit.go.jp/c1801/PU/JP-2019-002410/10/ja,1,7232054
+ミツトヨ,特許07196033,滝波,幸谷,スケール,✕,,,,,,,1,7196033
+ミツトヨ,特許07140495,滝波,幸谷,,△,,,,,,,1,7140495
+ミツトヨ,特許07078403,滝波,幸谷,,〇,"Vision Engineering社（英国）「Falcon」画像測定システム　1.5億円　
+Starrett社（米国）「AVRシリーズ」画像測定システム （MetLogix M3ソフト搭載）　1億円
+カール・ツァイス社（独）「Smartzoom 5」デジタル顕微鏡（画像測定機能付き） 　1.8億円",,C,,,https://www.j-platpat.inpit.go.jp/c1801/PU/JP-2018-003148/10/ja,1,7078403
+ミツトヨ,特許06964452,滝波,幸谷,,〇,"IBM Maximo（IBM社） 測定機管理システム　80～100億円
+SAP Predictive Maintenance（SAP社）　5億円
+Siemens MindSphere（シーメンス社） IoTプラットフォーム　5億円",,C,,,https://www.j-platpat.inpit.go.jp/c1801/PU/JP-2017-137210/10/ja,1,6964452
+ミツトヨ,特許06956611,滝波,幸谷,ワーク,〇,英国Renishaw社製の比較ゲージ「Equator」　8億円,,C,,,https://www.j-platpat.inpit.go.jp/c1801/PU/JP-2017-230205/10/ja,1,6956611
+ミツトヨ,特許06746376,滝波,草野,ミツトヨフィルター切替,〇,"Hach社 DR/700 ポータブルカラーメータ　0円程度（実質ゼロ）
+Mettler Toledo社 UV/VIS Excellence分光光度計（CertiRef™/LinSet™モジュール）　約8000万円
+Molecular Devices社 SpectraMax® iD5 マルチモードリーダー　約4億円
+Tecan社 Infinite® 200 PRO マイクロプレートリーダー　約10億円",,D,,売上小,,1,6746376
+ミツトヨ,特許06650860,滝波,草野,ミツトヨ同一面端子,×,,,,,,,1,6650860
+ミツトヨ,特許06427332,滝波,草野,ミツトヨXY軸パターンマッチ,〇,"OGP社「Fusion 400」（QVI傘下）　約数千万円～1億円未満
+Micro-Vu社「Excel」シリーズ　約1～2億円規模
+Starrett社「AV450」シリーズ　数千万円程度
+カールツァイス社「O-Detect／O-Select」シリーズ　約1億円前後
+Hexagon社「Optiv」シリーズ（ビデオ測定機）　1～2億円規模
+Nikon Metrology「NEXIV」自動画像計測システム　数億円規模（推定3～5億円前後）
+キーエンス「IM」シリーズ（画像寸法測定器）　数十億円規模（推定20～30億円程度）
+Vision Engineering社「LVC」シリーズ（CNC画像測定機）　1億円未満
+Carmar社「One-Click Large Image」測定機　数千万円以下（ほぼゼロに近い）
+Scienscope社「XT」シリーズ他ビデオ測定システム　ほぼゼロ（～数百万円程度）",,C,,売上小,,1,6427332
+ミツトヨ,特許06425875,滝波,草野,ミツトヨ反射膜スケール,〇,"Renishaw社 RGSZ20 ゴールドテープスケール　約2.75億円
+Heidenhain社 AURODUR テープスケール　約1.80億円
+Fagor Automation ステンレステープスケール　約0.25億円
+Givi Misure GVS 202S/GVS 206S　約0.10億円
+RSF Elektronik MSシリーズ　約0.18億円
+Celera Motion PurePrecision　約0.10億円",,E,,売上小,,1,6425875
+ミツトヨ,特許06415117,滝波,草野,ミツトヨ赤外線可視一体,〇,"Fluke社「Ti」シリーズ（Fluke）：約40億円
+Teledyne FLIR社「E8」（Teledyne FLIR）：約18億円
+Testo社「testo 883」（Testo）：約5〜6億円
+Bosch社「GTC 400 C」（Bosch）：約4億円
+HIKMICRO社「B20」（HIKMICRO）：約1.4億円",,C,,売上中,,1,6415117
+ミツトヨ,特許06109536,滝波,草野,最小値最大値表示,×,,,,,,,1,6109536
+ミツトヨ,特許06084364,滝波,草野,移動量換算,〇,"Mahr Digimar 817 CLT（Mahr） 約1.0億円
+TESA Micro-Hite +M（TESA） 約0.8億円
+Starrett W4900-1（Starrett） 約0.1億円未満
+Trimos V7（Trimos） 約1.0億円
+Sylvac D300S（Sylvac） 約0.1億円
+FARO Edge（FARO） 約1200億円
+Baty R14-FT2-E（Baty） 約0.2億円以下
+ZEISS O-SELECT（ZEISS） 約0.5億円",,A,,,,1,6084364
+ミツトヨ,特許05970295,滝波,草野,スマホ,〇,"Samsung Galaxy S9/S9+（サムスン電子ジャパン） 約70～80万台 約700～800億円
+Google Pixel 6 Pro（グーグル合同会社） 約10万台 約100～120億円
+HUAWEI P30 Pro（華為技術日本株式会社） 約1～2万台 約10～20億円
+Xiaomi Mi 11（小米技術日本株式会社） 0台（未発売） 0円
+OPPO Find X3 Pro（オウガ・ジャパン株式会社） 約1万台 約10～15億円
+OnePlus 9 Pro（OnePlus Japan） 0台（未発売） 0円
+Motorola Edge（モトローラ・モビリティ・ジャパン合同会社） 0台（未発売） 0円",,A,,,,1,5970295
+ミツトヨ,特許05639836,滝波,草野,,〇,,,E,,売上小,,1,5639836
+ミツトヨ,特許05601910,滝波,草野,,〇,,,E,,,,1,5601910
+ミツトヨ,特許05508793,滝波,草野,移設検出装置,×,,,,,,,1,5508793
+ミツトヨ,特許05466030,滝波,草野,硬さ試験,〇,"Anton Paar ナノインデンテーション試験装置（Anton Paar社） — 累計売上：約 11.4 億円
+FISCHERSCOPE HM2000（Helmut Fischer社） — 累計売上：約 4.2 億円",,,,売上中,,1,5466030
+ミツトヨ,特許05457659,滝波,草野,,,,,,,,,1,5457659
+ミツトヨ,特許05432739,滝波,草野,,,,,,,,,1,5432739
+ミツトヨ,特許05308059,滝波,草野,ＤＬＣ層,×,,,,,,,1,5308059
+ミツトヨ,特許05303392,滝波,草野,変位計測定,〇,"Verifireシリーズ｜Zygo社（米国）｜累計売上 約12億円
+NewView / Nexviewシリーズ｜Zygo社（米国）｜累計売上 約18億円
+Compassシリーズ｜Zygo社（米国）｜累計売上 約2億円
+Qualifireシリーズ｜Zygo社（米国）｜累計売上 約1億円未満",,,,売上中,,1,5303392
+ミツトヨ,特許05234987,滝波,草野,リング照明装置,×,,,,,,,1,5234987
+ミツトヨ,特許05208808,滝波,草野,,,,,,,,,1,5208808
+ミツトヨ,特許05139176,滝波,草野,,,,,,,年金不納,,1,5139176
+ミツトヨ,特許05128187,滝波,草野,,,,,,,年金不納,,1,5128187
+ミツトヨ,特許05038691,滝波,草野,,,,,,,,,1,5038691
+ミツトヨ,特許05027611,滝波,草野,被加工物を微細加工,×,,,,,,,1,5027611
+ミツトヨ,特許04833662,滝波,草野,,,,,,,,,1,4833662
+ミツトヨ,特許04819599,滝波,草野,干渉測長機,〇,"XL-80 レーザー干渉計システム（Renishaw社）：16億円
+5530 レーザーキャリブレーションシステム（Keysight社）：3億円
+SP 15000 C6 NG 校正用レーザー干渉計（SIOS社）：0億円（発売直後・未導入）
+XM-60 マルチ軸キャリブレータ（Renishaw社）：4億円
+Absolute Tracker（レーザートラッカー）シリーズ（Leica／Hexagon社）：18億円
+XD Laser 多軸干渉計システム（API社）：1億円
+Laser Tracker シリーズ（FARO社）：15億円",,,,売上中,,1,4819599
+ミツトヨ,特許04417986,滝波,草野,表面性状,×,,,,,,,1,4417986
+IBM,特許06415556,柿崎,岩瀬,データ受信リンク内,〇,Samsung社の仮想化RAN(vRAN)ソリューション 約42億円,,C,https://chatgpt.com/share/68b00c03-93d0-8010-8dbb-93cbd740485b,,,1,6415556
+IBM,特許06407298,柿崎,岩瀬,条件付きトランザクション終了命令,×,,,,,,,1,6407298
+IBM,特許06324157,柿崎,岩瀬,移動経路の最適化,〇,"Baidu Apollo（自動運転プラットフォーム「Apollo」および自動運転バス「アポロン」）3億円
+DJIドローンの自律飛行・障害物回避機能　2580億円",,A,https://chatgpt.com/share/68ac0b19-4870-8010-b127-fdcd4594a724,,,1,6324157
+IBM,特許06222977,柿崎,岩瀬,,,,,,,年金不納による特許権の消滅,,1,6222977
+IBM,特許06218815,柿崎,岩瀬,トランザクション実行に関連付けられた処理を実行する方法,×,,,,https://chatgpt.com/share/68b06897-69d0-8010-af83-295968298a38,,,1,6218815
+IBM,特許06183811,柿崎,岩瀬,接合構造体および無線通信装置,〇,"Qualcomm社 QTM052 5Gミリ波アンテナモジュール (スマートフォン向け)
+Apple社（USI/Murata製）5Gミリ波アンテナモジュール (iPhone 12/13搭載AiP)",,E,https://chatgpt.com/share/68ac0aaa-e55c-8010-9d95-353f3be1a1b4,,,1,6183811
+IBM,特許06176622,柿崎,岩瀬,マルウェアの検出方法,〇,"Kaspersky Endpoint Security（AEP搭載版）100億円
+カスペルスキー セキュリティ（個人向け製品）200億円",,B,https://chatgpt.com/share/68a6d7ec-91e4-800b-a1b1-1ea5af9fd1a8,,,1,6176622
+IBM,特許06150244,柿崎,岩瀬,送信装置、受信装置、回路装置、通信方法,×,,,,https://chatgpt.com/share/68ad95ce-7844-8010-b7b8-b8fff5988ef1,,,1,6150244
+IBM,特許06143306,柿崎,岩瀬,オペランド・ストア比較ハザードの予測,〇,"Intel Core i7-8700K（Intel）約40億円
+Ryzen 7 1800X（AMD）約5～10億円程度
+Apple A11 Bionic（Apple）　約8,000億円
+Snapdragon 845（Qualcomm）約380億円",,A,https://chatgpt.com/share/68b0b351-af64-8010-9e81-459051082254,,,1,6143306
+IBM,特許06138249,柿崎,岩瀬,トランザクション診断ブロック,×,,,,https://chatgpt.com/share/68b09fc5-d278-8010-b9da-db14d57ce42e,,,1,6138249
+IBM,特許06128526,柿崎,岩瀬,仮想計算機のクラスタを操作するための方法,×,,,,https://chatgpt.com/share/68b30480-282c-8010-b7ea-634e3a105047,,,1,6128526
+IBM,特許06103540,柿崎,岩瀬,生成装置,〇,Apple Siri 1550億円,,S,https://chatgpt.com/share/68b275da-4edc-8010-b4c7-8aedc6adc624,"1550億円/2%(Siri寄与率)×0.2%(実施料率推定中央値)
+=155億円",,1,6103540
+IBM,特許06095018,柿崎,岩瀬,移動オブジェクトの検出及び追跡,×,,,,https://chatgpt.com/share/68b30d6a-dbb0-8010-a540-43ce598b933e,,,1,6095018
+IBM,特許06066101,柿崎,岩瀬,構造化文書に基づいて動画を動的に作成する方法,×,,,,https://chatgpt.com/share/68ae8564-cc5c-8010-83d4-fb1899dcc67a,,,1,6066101
+IBM,特許06021741,柿崎,岩瀬,時空間データベースの処理方法,〇,"OneTick（OneMarketData社）約1億円
+TIBCO StreamBase（現称：TIBCO Streaming）約2億円",,D,https://chatgpt.com/share/68af4b64-d464-8010-9f8c-d06f006e8c3a,,,1,6021741
+IBM,特許05988450,柿崎,岩瀬,ノードを表示する方法,〇,"TheBrain (米TheBrain Technologies社)　0.8億円
+DS Imaging社製
+Polarsens搭載偏光カメラ（日本法人：アイ・ディー・エス㈱）約0.2億円",,D,https://chatgpt.com/share/68b279b7-f748-8010-810f-cbccf48c3984,侵害確認は容易そう,,1,5988450
+IBM,特許05963314,柿崎,岩瀬,テープ媒体上での総シーク時間を減らすための方法,〇,"テレダイン社（Teledyne FLIR/DALSA）製
+偏光イメージングカメラ 約0.8億円",,D,https://chatgpt.com/share/68a6dd2c-ac88-800b-a340-468bccc44777,権利範囲は狭そう,,1,5963314
+IBM,特許05959073,柿崎,岩瀬,検出装置,△,"Hikvision DS-2CD6825G0/C シリーズ　0.05〜0.1億円未満
+Dahua WizMind DH-IPC-HDW8341XN-3D シリーズ　0.05〜0.1億円未満
+Xovis PCシリーズ（PC2, PC3等）0.5〜1.0億円
+FootfallCam 3D Pro2　0.1〜0.2億円",,D,https://chatgpt.com/share/68b0b1c7-a768-8010-9ab6-bb553809cbab,権利範囲は広い,,1,5959073
+IBM,特許05951139,柿崎,岩瀬,,,,,,,権利移転,,1,5951139
+IBM,特許05946394,柿崎,岩瀬,複数種類のデータソースを用いた経路の始点・終点の統計的推測手法,〇,"DiDi Mobility Japan　40億円
+PTV Visum　2億円",,C,https://chatgpt.com/share/68adfa36-7448-8010-b5f1-3b703038c8db,,,1,5946394
+IBM,特許05943357,柿崎,岩瀬,検出装置,×,,,,https://chatgpt.com/share/68b2601a-8190-8010-b827-ae999d11fb00,,,1,5943357
+IBM,特許05939581,柿崎,岩瀬,表示画面上に表示された移動対象であるオブジェクトを移動する方法,×,,,,https://chatgpt.com/share/68b30e87-ff78-8010-a105-3d830933c644,,,1,5939581
+IBM,特許05930218,柿崎,岩瀬,ユーザの操作を制限する機能を有する情報処理装置,◎,"Samsung（Galaxyスマートフォン）約 4,310億円
+HUAWEI、OPPO / OnePlus、SOTI",,B,https://chatgpt.com/share/68a745dc-9cec-800b-8e15-c8c9fb7a8773,,,1,5930218
+IBM,特許05916653,柿崎,岩瀬,交通シミュレーション方法,×,,,,https://chatgpt.com/share/68a746a2-083c-800b-8231-b5591ea1fe37,,,1,5916653
+IBM,特許05896952,柿崎,岩瀬,メモリを管理する方法,〇,"Oracle Java HotSpot（ガベージコレクションのファイナライゼーション機構）約500億円
+Apple Cocoa（Objective-CのNSAutoreleasePool機構）約200000億円",,S,https://chatgpt.com/share/68ae0bea-eb20-8010-921a-1be7dbe4e6a3,,,1,5896952
+IBM,特許05889332,柿崎,岩瀬,並行ソフトウェア環境のためのアクティビティ記録システム,〇,Intel VTune Profiler（Threading Analysis）　不明,,E,https://chatgpt.com/share/68b26469-ebec-8010-a814-709d65e71e97,,,1,5889332
+IBM,特許05816936,柿崎,岩瀬,,,,,,,権利移転,,1,5816936
+IBM,特許05773493,柿崎,岩瀬,情報処理装置,〇,"HPE InfoSight　数十億円規模
+Huawei OceanStor　数億～10億円規模
+OpenIO SDS　1億円未満規模",,C,https://chatgpt.com/share/68a74fa2-9ae8-800b-adfb-3901d1430548,,,1,5773493
+IBM,特許05771348,柿崎,岩瀬,ハイパーリンクのレイアウト・サイズを調整するための方法,×,,,,https://chatgpt.com/share/68ad742c-1860-8010-ab07-c8cc946b0f58,,,1,5771348
+IBM,特許05767646,柿崎,岩瀬,クラウド・サービス・カタログを用いたサービスの供給,〇,"Jamcracker（クラウドサービス・ブローカープラットフォーム）１億未満
+Flexera Cloud Management Platform（旧RightScale）数億
+Morpheus（HPEのマルチクラウド管理プラットフォーム）１億未満
+CloudBolt（クラウドボルトのマルチクラウド管理ソリューション）１億未満",,D,https://chatgpt.com/share/68ae0886-fc0c-8010-a392-b78f5e051151,,,1,5767646
+IBM,特許05764220,柿崎,岩瀬,症例ごとの代表画像及び読影情報を生成する方法,×,,,,https://chatgpt.com/share/68a8a9bd-3768-800b-a219-3d70f25369d0,,,1,5764220
+IBM,特許05744898,柿崎,草野,ローカルトランザクション,〇,,,,,,,1,5744898
+IBM,特許05736090,柿崎,草野,,,,,,,権利移転,,1,5736090
+IBM,特許05731641,柿崎,草野,PCI機能制御修正,〇,"Intel VT‑d搭載サーバ（Intel） 約2,197,367台 約17,419.72億円
+AMD EPYC搭載サーバ（AMD） 約172,046台 約2,410.08億円
+Ampere Altra/SMMU搭載サーバ（Ampere） 約48,241台 約513.12億円",,S,https://chatgpt.com/share/68a803a7-590c-8010-872c-113a022314ee,,,1,5731641
+IBM,特許05731165,柿崎,草野,,,,,,,権利移転,,1,5731165
+IBM,特許05723973,柿崎,草野,仮想世界シーン,〇,,,C,https://chatgpt.com/share/68a31426-0d0c-8010-b89b-b0dff95bf823,,,1,5723973
+IBM,特許05717879,柿崎,草野,マルチテナント共用プール,〇,"Datadog（Datadog社）　約60億円（推定）
+Grafana Loki（Grafana Labs社）　ほぼ0億円（商用収益は限定的）
+Sumo Logic（Sumo Logic社）　約1億円（推定）
+Splunk（Splunk社）　約250億円（推定）
+New Relic（New Relic社）　約100億円（推定）
+Dynatrace（Dynatrace社）　約5億円（推定）
+SolarWinds Loggly（SolarWinds社）　ほぼ0億円（推定）
+Graylog（Graylog社）　ほぼ0億円（商用収益なし）
+Logz.io（Logz社）　0億円（推定）
+Stellar Cyber Open XDR（Stellar Cyber社）　約3億円（推定）",,B,https://chatgpt.com/share/68a309b0-15f8-8010-b150-4b9d6d993c51,,,1,5717879
+IBM,特許05705321,柿崎,草野,相変化メモリセル,×,,,E,,,,1,5705321
+IBM,特許05695579,柿崎,草野,化学,×,,,E,,,,1,5695579
+IBM,特許05649200,柿崎,草野,割込コード,〇,,,,,売上小,,1,5649200
+IBM,特許05648939,柿崎,草野,,,,,,,権利移転,,1,5648939
+IBM,特許05632817,柿崎,草野,強調ウィンドウ,〇,"Genesys Cloud CX（ジェネシス社）：約100億円
+Zoom（Zoom社）：約300億円
+Lark（ByteDance社）：1億円未満
+DingTalk（Alibaba社）：ほぼ0円
+如流（Baidu社）：0円",,B,https://chatgpt.com/share/68a1c6de-a6c4-8010-bdb3-d0388a4eb0e7,売却不可,,1,5632817
+IBM,特許05623543,柿崎,草野,電話通信,〇,"Apple iPhone（ダイヤルアシスト機能）: Apple, 約12兆円
+
+Samsung Galaxy（ローミングアシスト機能）: Samsung, 約1兆円
+
+Movius MultiLine（契約型副番号サービス）: Movius, 数十億円未満",,S,https://chatgpt.com/share/68a1c833-2950-8010-a281-e1e70fffff26,,,1,5623543
+IBM,特許05613237,柿崎,草野,,,,,,,,,1,5613237
+IBM,特許05607514,柿崎,草野,ボイス・オーバーＩＰ,〇,"Zoom（Zoom Video Communications, Inc.） 累計売上：約600億円（2014年9月5日以降、日本法人経由）
+Wordly（Wordly, Inc.） 累計売上：1億円未満（2014年9月5日以降、日本国内導入は限定的）
+Interprefy（Interprefy AG） 累計売上：約3億円（2014年9月5日以降、日本国内イベント通訳案件ベース）
+Translate Your World（TYW / TYWI-Live） 累計売上：0億円（2014年9月5日以降、日本国内で実績ほぼなし）",,A,https://chatgpt.com/share/68a1c6fe-c2d4-8010-8db1-e996e6bf5e2f,,,1,5607514
+IBM,特許05596119,柿崎,草野,,,,,,,,,1,5596119
+IBM,特許05571786,柿崎,草野,重複排除,〇,"Commvault Complete Backup & Recovery（米国 Commvault）：累計売上 約100億円
+Dell EMC Data Domain（米国 Dell）：累計売上 約300億円
+HPE StoreOnce Catalyst（米国 HPE）：累計売上 約100億円
+Veeam Backup & Replication（スイス Veeam Software）：累計売上 約150億円
+Cohesity DataProtect（米国 Cohesity）：累計売上 約30億円
+Acronis Cyber Protect（シンガポール Acronis）：累計売上 約50億円
+Arcserve Unified Data Protection（米国 Arcserve）：累計売上 約150億円
+Huawei OceanProtect Backup Storage（中国 Huawei）：累計売上 10億円未満
+Quantum DXiシリーズ（米国 Quantum）：累計売上 約20～30億円",,B,https://chatgpt.com/share/68a17205-7be8-8010-bbab-23a989809287,,,1,5571786
+IBM,特許05567851,柿崎,草野,,,,,,,権利移転,,1,5567851
+IBM,特許05567380,柿崎,草野,,,,,,,,,1,5567380
+IBM,特許05511615,柿崎,草野,,,,,,,,,1,5511615
+IBM,特許05497201,柿崎,草野,資源を配分,〇,,,C,,売上小,,1,5497201
+IBM,特許05496853,柿崎,草野,構造化文書ルール決め,〇,"SAS Enterprise Miner（SAS Institute Inc.） 累計売上：約350億円（2014年3月14日以降、日本国内）
+SAS Viya: Machine Learning（Visual Data Mining and Machine Learning, SAS Institute Inc.） 累計売上：約50億円（同上）
+SAS Visual Machine Learning（SAS Institute Inc.） 累計売上：約200億円（同上）",,B,https://chatgpt.com/share/68a30a99-2ed4-8010-8d88-91b74fe8854e,,,1,5496853
+IBM,特許05341207,柿崎,草野,データテープ,〇,"LTO Ultrium テープドライブ（外国企業製） ― 約250億円
+Quantum LTO-8 テープドライブ（Quantum社） ― 約16.7億円
+Overland-Tandberg LTO-8 テープドライブ（Overland Storage社） ― 約5.6億円
+Quantum DLT-S4 テープドライブ（Quantum社） ― 0億円
+Exabyte Mammoth-2 (M2) テープドライブ（Exabyte社） ― 0億円",,B,https://chatgpt.com/share/68a30a7e-d1ec-8010-b5a4-8f9642fc86a4,,,1,5341207
+IBM,特許05209059,柿崎,草野,,,,,,,,,1,5209059
+IBM,特許05204300,柿崎,草野,,,,,,,,,1,5204300
+IBM,特許05181141,柿崎,草野,間接データアドレッシング,〇,"Samsung製NVMe SSD（Samsung Electronics）– 累計売上約130億円
+NVIDIA Mellanox ConnectX NIC（NVIDIA）– 累計売上約80億円
+Realtek RTL8125B搭載NIC（Realtek）– 累計売上約5億円
+Western Digital WD_BLACK SN850X NVMe SSD（Western Digital）– 累計売上約24億円",,B,https://chatgpt.com/share/68a31331-ab14-8010-8f05-2f18bc873995,,,1,5181141
+IBM,特許05159900,柿崎,草野,アクセス競合低減,〇,Huawei OceanStor Dorado：377億円,,B,https://chatgpt.com/share/689f4264-dab0-8010-b5f1-baf096a05817,,,1,5159900
+IBM,特許05102901,柿崎,草野,,,,,,,,,1,5102901
+IBM,特許05005005,柿崎,草野,,,,,,,,,1,5005005
+IBM,特許04965623,柿崎,草野,パラメータ,〇,,,C,,売上中,,1,4965623
+IBM,特許04917173,柿崎,草野,,,,,,,,,1,4917173
+IBM,特許04668332,柿崎,草野,,,,,,,,,1,4668332
+東芝,特許06577324,徳田,小田,行動解析,△,"Avigilon（Motorola Solutions社の映像解析システム）２８億～５７億の売り上げ
+Irisity社 innoVi（旧Agent Vi社のクラウド映像解析プラットフォーム）",,C,https://chatgpt.com/g/g-p-68a1ab8bd59c8191a6ab1e97ca7e4fd2-xiao-tian/c/68a1e2a7-eb84-8325-ba82-f1810dc67908,無効理由：新規性なしリスク中程度,,1,6577324
+東芝,特許06517718,徳田,小田,会議の文字起こしの訂正処理,×,,,E,https://chatgpt.com/share/68b2365c-cd3c-800b-b65a-6bbebd8d3a64,「前記字幕情報に対する訂正作業を検知する検知部」以下の構成を充足したシステムは見つかっていない。,,1,6517718
+東芝,特許06505421,徳田,小田,文書の属性抽出,△,IBM Watson Explorer（Analytical Components）＋ Watson Knowledge Studio（AQLルール・アノテータ）約７２億円,△新規性はある,C,https://chatgpt.com/share/68ab8e6a-edd0-800b-9def-1533034c5ef1,侵害立証が難しい内容,,1,6505421
+東芝,特許06470165,徳田,小田,最適学習パラメータ探索,△,"Amazon SageMaker ハイパーパラメータチューニング (Automatic Model Tuning)
+ Google Cloud Platform のハイパーパラメータチューニング（Vizier ベース）
+ Microsoft Azure Machine Learning のハイパーパラメーター調整
+  が実施している可能性が高い。いずれも１００億以上",,A,https://chatgpt.com/g/g-p-68a1ab8bd59c8191a6ab1e97ca7e4fd2-xiao-tian/c/68a1d1b4-5548-8324-8559-878629b6e1ec,３つのサーバで構成されたシステム。学習モデルのパラメータ調整を3つのサーバで行っていることが特徴。そうしているのかどうかを特定するのが、困難な特許。,,1,6470165
+東芝,特許06392114,徳田,小田,仮想試着システム,△,"韓国FXGear社「FXMIRROR」システム（日本国内でMakip社により展開）
+売り上げは、２５００万円ほど。",,D,https://chatgpt.com/g/g-p-68a1ab8bd59c8191a6ab1e97ca7e4fd2-xiao-tian/c/68a1d02b-0b18-8330-be69-04b4ad72b0fd,,,1,6392114
+東芝,特許06334442,徳田,小田,点群→サーフェス／ソリッド変換の自動化,△,"米国FARO社の3D点群処理ソフト「FARO SCENE」と、そのアドオン「SCAN2FX Depth Fixer」が請求項１を充足。47.95億USD×12.4%×23.4%×25%×40% ≒ 1,391万USD → 約20.5億円 推定",,C,https://chatgpt.com/share/68ab9212-f42c-800b-b0ff-b9df1258a2fa,,,1,6334442
+東芝,特許06207889,徳田,小田,浸水予測システム,△,One Concern社　SONPOと提携,〇,B,https://chatgpt.com/share/68b2d4a7-9830-800b-a983-53ceed6489f5,新規性なしの無効理由あり,,1,6207889
+東芝,特許06203208,徳田,小田,道路の劣化自動診断,〇,"デンソーなど、日本の自動車関連メーカ
+Gaist×みちログ（アイシン）：少なくとも岡崎市・刈谷市・豊川市・磐田市で確認。**国内導入は計8件（公的機関8件）**の記載が公的サイトにあり、国内売上は概ね2,200万〜4,800万円/",,D,https://chatgpt.com/share/68b3bc70-ff24-800b-9e5b-795624f3e8f4,日本で実施しているのは、ほぼ日本企業,,1,6203208
+東芝,特許06091560,徳田,小田,点群解析,×,ドイツメーカのNavVis IVION　が類似,,E,https://chatgpt.com/s/dr_68b23703a87481918ffa7b3b40d658c5,点群解析の特許の基本は、公知技術であり、特許になった限定要素の構成部分はほぼ見えない処理なので、侵害立証がそもそも難しいと考えています。ChatGPTは、ドイツメーカのNavVis IVIONを例に比較したが、限定要素が×となる分析でした。,,1,6091560
+東芝,特許06026651,徳田,小田,装着者データの送信判断,×,"アップルウォッチ
+FitBit",,A→E,https://chatgpt.com/share/68ab9acb-ccec-800b-8f2d-137c7ddf9d03,特許の構成要素である、判定部の機能が、アップルウォッチとiPhone間のBTペアリングに当てはめれないか検討したが、該当しない。,,1,6026651
+東芝,特許05707369,徳田,小田,EV管理システム,×,テスラのEV管理システム,,E,https://chatgpt.com/share/68ac1636-8b64-800b-808d-f3105506578c,貸出時刻や複数充電器の統合管理といった機能は現行のテスラ充電管理システムには含まれていない。,,1,5707369
+東芝,特許05638578,徳田,小田,３Dモデル生成における観測漏れ防止,〇,DDIのQloneというアプリが、請求項１に抵触する可能性があるが、売り上げが２００万未満。,,E,https://chatgpt.com/share/68ac6e71-0770-800b-ad95-aa6ab5dfc646,,,1,5638578
+東芝,特許05417217,徳田,小田,駐車車両管理システム,△,"Geminiの分析では、車止めの構成要素で、実施サービスから外れる。
+GPTは、Nietzsche Enterprise（NHR）社のスマート駐車システムが実施していると判定",,D,https://chatgpt.com/share/68b380de-f438-800b-8812-2d10607edbb6,台湾メーカが実施可能性あり。,,1,5417217
+東芝,特許05225344,徳田,小田,利用者の種類に応じて観測対象者の生活行動データの表示を切り替え提示,△,"アップルウォッチ単体では無理。
+ヘルスケアシステムだと該当可能性あり。
+https://www.dgs-j.com/system/managementsystem/",,A→E,https://chatgpt.com/share/68ac700c-6318-800b-9e33-b5a78ea012e9,"「観測対象者」と「利用者」が同一人物であれば、侵害と言える可能性があったが、明細書にはそのような記載はなく、あくまで「観測対象者＝老人、患者」、「利用者＝医者、看護者」なので、訴えても負ける可能性が高い。
+ヘルスケアシステムは、該当可能性あり",,1,5225344
+NTT,特許06675806,滝波,奥野,違法コンテンツ検知装置,×,,,,https://chatgpt.com/share/68a90cb9-ecb8-800b-afb3-6eb371c7e195,周波数スペクトルの確認困難,,1,6675806
+NTT,特許06556064,滝波、高橋,奥野,情報案内システム,×,,,,https://chatgpt.com/share/68a95527-6f6c-800b-a3c9-5284995e226c,電子スタンプラリー情報なし,,1,6556064
+NTT,特許06513562,滝波,奥野,閲覧管理システム,×,,,,https://chatgpt.com/share/68aac1e7-9bec-800b-8bc3-a9d22a4b84ab,,,1,6513562
+NTT,特許06473048,滝波,奥野,移動装置操作端末,×,,,,https://chatgpt.com/share/68aac431-9b40-800b-8589-9024ee45b85a,,,1,6473048
+NTT,特許06470112,滝波,奥野,移動装置操作端末,×,,,,https://chatgpt.com/share/68aafac2-6db4-800b-ad73-b78ae40d33ec,,,1,6470112
+NTT,特許06346585,滝波、高橋,奥野,操作支援装置,×,,,,https://chatgpt.com/share/68ab1818-6334-800b-b1c0-9c1cfe36589e,,,1,6346585
+NTT,特許06170881,滝波,奥野,情報分析システム,×,,,,https://chatgpt.com/share/68ae2ab5-24f0-800b-b208-029e6b1e7ec6,,,1,6170881
+NTT,特許06154072,滝波、高橋,奥野,情報分析システム,×,,,,https://chatgpt.com/share/68ae2f96-c2f8-800b-80ee-f051629f11dd,,,1,6154072
+東芝,特許06707427,徳田,小田,列の構造に応じて情報を空間表示する情報処理技術,△,日本国内（関西国際空港）での導入実績が公表されている **Xovis（スイス）「Xovis Airport PFMS / AERO + 3Dセンサー」　売り上げ予想4億円,,D,https://chatgpt.com/share/68ae3bb2-f4b4-800b-ab40-19626cb1f4df,,,1,6707427
+東芝,特許06709281,徳田,小田,加速度センサを用いた高精度な行動推定技術,×,スマートウォッチ系,,E,https://chatgpt.com/share/68ae370d-37a8-800b-b305-25ea45a81893,各社のアルゴリズムが不明なため、構成要素を満たしていない,,1,6709281
+東芝,特許06797780,徳田,小田,クラス別に予測モデルを構築・評価する情報処理技術,△,Amazon　Forcast,〇　新規性なし,B,https://chatgpt.com/share/68b2aada-f524-800b-8f0f-3e00f4c5b374,,,1,6797780
+東芝,特許06818639,徳田,小田,河川データに基づく危険度評価と情報提供システム,△,"Google社：洪水予測システム (Google Public Alerts / Flood Hub 等
+他、IBM社など",,C,https://chatgpt.com/share/68b23e39-90dc-800b-ac93-7e61954f936e,,,1,6818639
+東芝,特許06847881,徳田,小田,画像センサとサーバによる空席情報提供システム,△,海外企業で該当するものはあるが、日本でサービスなし,,E,https://chatgpt.com/share/68b2ab5e-5f5c-800b-ba29-e54fc8bdbbd0,,,1,6847881
+東芝,特許06910987,徳田,小田,認識モデルの精度向上とタグ抽出によるモデル再構築技術,×,,,E,https://chatgpt.com/share/68b2aa5b-9714-800b-a95a-d7f90c38770b,やってそうな感じはあるが、該当サービスは見つけれていない。侵害立証が困難な技術要素,,1,6910987
+東芝,特許06926224,徳田,小田,熟練工の技能をデータ化・モデル化し、他拠点へ提供する技能基盤システム,〇,Siemens Senseye Predictive Maintenance（Siemens社、ドイツ）,,D,https://chatgpt.com/share/68b2b0d2-e2fc-800b-8097-2199b13a9d57,カタログなどから立証できるかもしれない。,,1,6926224
+東芝,特許06982657,徳田,小田,加速度波形と角度情報に基づく行動推定信号処理システム,〇,アップルウォッチなど,"△
+https://chatgpt.com/s/dr_68b42fa6a6ec819186865a8bf4f3d02a",A→E,https://chatgpt.com/share/68b2b1bc-6ff0-800b-87c5-2d1ceeb56bb2,要検討。親特許は、06709281。アリゴリズムが不明なため、親は×。本特許は、システムクレームのため、可能性あり。2017年3月28日より前の無効理由調査を行う。→無効になる可能性がある先行文献あり。,,1,6982657
+東芝,特許07023690,徳田,小田,道路の点検・補修情報と住民通報を統合表示する維持管理システム,△,"米国Citylogix社「Streetlogix」（日本国内未導入だが同種技術）,日本企業　富士通、アイシンが侵害可能性あり",,E,https://chatgpt.com/share/68b2b329-bf6c-800b-822c-f132a8d4f6b6,,,1,7023690
+東芝,特許07114407,徳田,小田,顔画像・座席・所持品の関連付けによる本人照合と通知システム,〇,iOmniscient社（豪州）のスマート監視システム（日本国内でも導入実績あり）,,C,https://chatgpt.com/share/68b2b2d6-7440-800b-9e4a-5d9112081662,,,1,7114407
+東芝,特許07140695,徳田,小田,画像センサによる混雑度検知と出力制御を行う情報出力制御システム,〇,WaitTime、Xovis、RetailNextの3社、RetailNextの日本での推定売上が高い,,D,https://chatgpt.com/share/68b2cb75-e6fc-800b-b256-8ed09f5eb5d9,,,1,7140695
+東芝,特許07155231,徳田,小田,地図上の2次元領域に対応する3次元空間を選択・強調表示する技術,〇,Esri/Mapbox/Cesium,△,C→E,https://chatgpt.com/share/68b2d0e1-3c7c-800b-b050-43a9b1fde582,見た目特許なので、有望→無効理由の文献抽出,,1,7155231
+東芝,特許07204824,徳田,小田,流通後の機器を対象とした制御支援システム・プログラム・方法,〇,シーメンス、PTC、IBM、GE,,C,https://chatgpt.com/share/68b2d234-0f30-800b-a593-81e406aa2605,,,1,7204824
+東芝,特許07258702,徳田,小田,二次電池の再製品化・回収支援に関するサーバシステム,〇,中国ＰＡＮＤ社、,△,C→E,https://chatgpt.com/share/68b2f1d5-3c44-800b-8d6b-05ac5f0f34d1,伊藤忠が提携。5年で売上高100億円規模→出願日より前に実施している可能性が高い。,,1,7258702
+東芝,特許07313907,徳田,小田,モビリティ利用者と車両の関連付け・イベント連携によるサービス提供管理システム,〇,Uber、Limeなど配車システム,△,C→E,https://chatgpt.com/share/68b2d9b3-bc30-800b-9e88-9bbae1f100a2,無効理由調査の結果、新規性なし文献あり,,1,7313907
+東芝,特許07341962,徳田,小田,クエリ画像・テキストを用いた物体検出モデルの学習データ自動収集技術,△,グーグルレンズ,〇　新規性なし,A→E,https://chatgpt.com/share/68b2d8dd-0798-800b-b85f-d67ce1d59b6e,侵害特定が難しい→無効理由調査の結果では、新規性もない結果,,1,7341962
+東芝,特許07353964,徳田,小田,人感センサと天候・混雑情報を活用した人の移動誘導システム,〇,Mode社の統合IoTプラットフォーム「BizStack/BizStack Assistant」,,C,https://chatgpt.com/share/68b2f3fe-4850-800b-9e60-a586e7e90f6a,,,1,7353964
+東芝,特許07434117,徳田,小田,複数データベースを横断検索する対話装置,〇,アップルSiri,〇,A→E,https://chatgpt.com/share/68b2f4dd-a410-800b-89a5-07e0e256b776,要検討　出願日が、令和２年９月１０日であり、Siriより後というのが気になる。→追加無効調査。やはり、Siriの方が先。,,1,7434117
+東芝,特許07446772,徳田,小田,避難支援システム,×,日本で抵触するサービスなし,,E,https://chatgpt.com/share/68b2d957-8538-800b-b6eb-1b53f2603539,,,1,7446772
+東芝,特許07481914,徳田,小田,顔認証による通行制御装置・システム,〇,中国メーカ　ハイクビジョン,,C,https://chatgpt.com/share/68b2f932-84f4-800b-b136-2ced3d13f8b6,,,1,7481914
+東芝,特許07493981,徳田,小田,電子駐車券管理システム,〇,SKIDATA社（本社オーストリア）,,D,https://chatgpt.com/share/68b2fb0d-4cd4-800b-9072-2075df774028,,,1,7493981
+東芝,特許07577600,徳田,小田,複数カメラによる高精度な3次元マップ推定技術,〇,Tesla,〇　先行のSony特許など、多数,A→E,https://chatgpt.com/share/68b2fa94-db80-800b-bcb3-27540756e20b,要検討→無効理由あり。,,1,7577600
+東芝,特許07594403,徳田,小田,微小位置変化に対応する画像特徴抽出モデルの生成技術,△,グーグル、アップル、NVIDIA,,D,https://chatgpt.com/share/68b2fe0b-fb04-800b-a3af-b793ac84f115,無償提供機能,,1,7594403
+東芝,特許07607087,徳田,小田,視線検出に基づく拡張現実表示制御技術,〇,Magic Leap 2　ヘッドマウントディスプレイ,×新規性はある,D,https://chatgpt.com/share/68b302a6-0944-800b-865c-67264a5b6917,無効理由調査結果は、新規性あり。,,1,7607087
+東芝,特許07642335,徳田,小田,FAQ対話データの生成・分析・最適化技術,△,IBM Watson Assistant（米国IBM社のチャットボットサービス。日本国内でも提供あり）Azure QnA Maker / Custom Question Answering（米国Microsoft社のFAQ自動応答サービス。日本リージョン対応あり）,×新規性はある,B,https://chatgpt.com/share/68b2f9f9-d10c-800b-a67b-1d8bcce987cb,新規性はある,,1,7642335
+NTT,特許07704245,高橋,小田,複数の形式の応答を生成するAIモデル,×,,,,https://chatgpt.com/share/68ea59e5-1434-800b-9bb4-b59c94e880d4,,,1,7704245
+NTT,特許07704190,高橋,小田,マルチモーダルAI,〇,OpenAI、Microsoft Azure、Google Cloud、AWS Bedrock、IBM watsonx.ai,,A,https://chatgpt.com/share/68ea5a39-c62c-800b-8167-1c61f918010d,https://chatgpt.com/s/dr_68ec5c7b8f808191a5b4bc8391e09f25,,1,7704190
+NTT,特許07700849,高橋,小田,AI（自然言語処理）を用いたESG/SDGs評価システム,×,,,,https://chatgpt.com/share/68ea5a85-0164-800b-8ff1-e418fdfba351,,,1,7700849
+NTT,特許07694710,高橋,小田,音の方向で振動位置を錯覚させる技術,×,,,,https://chatgpt.com/share/68ea5ac9-a988-800b-a9e5-2da69b4a6b89,,,1,7694710
+NTT,特許07652292,高橋,小田,ユーザの特徴をベクトル化しパーソナライズする学習方法,×,,,,https://chatgpt.com/share/68ea5b0a-5b1c-800b-ac6c-95bb4bb85e25,,,1,7652292
+NTT,特許07647919,高橋,小田,画像パターンおよび付随テキストパターンをベクトル化し、同一ベクトル空間で混合特徴量を生成する画像処理技術,〇,Google社・Microsoft社・Amazon社の提供する各サービス,,A,https://chatgpt.com/share/68eb7761-1dcc-800b-95ef-fae0baa91d41,https://chatgpt.com/s/dr_68ec62c7898081918d06915c9d8495d5,,1,7647919
+NTT,特許07632696,高橋,小田,OSバイパスによるアクセラレータ利用,×,,,,https://chatgpt.com/share/68eadb38-046c-800b-8d57-b39efa5de6b7,,,1,7632696
+NTT,特許07632626,高橋,小田,: 「相互許可」と「許可の非通知性」を組み合わせた表示制御,×,,,,https://chatgpt.com/share/68eadba5-112c-800b-b974-55da807815b3,,,1,7632626
+NTT,特許07582500,高橋,小田,価格決定（報酬制御）とリソース割当（マッチング戦略）を統合的に最適化するマッチングシステム,〇,Uber の配車マッチングシステム,,B,https://chatgpt.com/share/68eadbe0-e294-800b-b9ba-13488714acc1,https://chatgpt.com/s/dr_68ec6302ac908191ab23850c4e575ad8,,1,7582500
+NTT,特許07563480,高橋,小田,,〇,"WalkMe Desktop, Whatfix Desktop, SAP Enable Now",,C,https://chatgpt.com/share/68eadc4a-2324-800b-bc3e-9411a787950d,https://chatgpt.com/s/dr_68ec6321bc80819186418683642f5fc5,,1,7563480
+NTT,特許07553838,高橋,小田,複数のハードウェアリソースを効率的に利用するためのクラウド通信システム,×,,,,https://chatgpt.com/share/68eb7c97-ce2c-800b-a05b-e6743bb9e7a7,,,1,7553838
+NTT,特許07548439,高橋,小田,基板の変形により無線通信部を身体から離すウェアラブルデバイス,×,,,,https://chatgpt.com/share/68eadd15-f950-800b-85d8-30beb3410920,,,1,7548439
+NTT,特許07548421,高橋,小田,複数アクセラレータ連携パイプライン技術,〇,"Intel QuickAssist Technology（QAT）搭載製品（例：Cisco UCS、HPE ProLiantサーバーなど）
+NXP Layerscape LS1088Aを搭載した製品（DPAA2を活用したネットワーク機器）
+Marvell Octeon TX2（旧Cavium）を搭載したセキュリティアプライアンスやネットワーク装置",,A,https://chatgpt.com/share/68eaf183-a454-800b-a288-741ca1a76544,,,1,7548421
+NTT,特許07522374,高橋,小田,メッセージングミドルウェアにおけるPublish/Subscribe（Pub/Sub）モデル,〇,"AWS IoT Core
+Google Cloud Pub/Sub
+Microsoft Azure Service Bus",,A,https://chatgpt.com/share/68eaf66b-5694-800b-a99a-af42238aeb9e,https://chatgpt.com/s/dr_68ec6392c6408191a8c3c053e4977ab8,,1,7522374
+NTT,特許07509255,高橋,小田,ウェイクワード単体で呼びかけた場合に応答音を出す挙動,〇,"Googleアシスタント搭載製品
+AppleのSiri搭載製品",,A,https://chatgpt.com/share/68ec2388-2308-800b-88b7-89c2f0c6188b,https://chatgpt.com/s/dr_68ec655ce9f88191b19ceb06acf7ef8a,,1,7509255
+NTT,特許07505585,高橋,小田,AIOps（AIによるIT運用自動化）分野における、障害からの自動復旧ワークフローを構築する技術,〇,Amazon Web Services (AWS)の「AWS Resilience Hub」および「AWS Fault Injection Simulator (FIS)」,,C,https://chatgpt.com/share/68eaf6e2-d5a0-800b-81e6-59890e7d95e2,https://chatgpt.com/share/68ec96a5-9388-800b-b071-f456701f6335,,1,7505585
+NTT,特許07505579,高橋,小田,エッジAIにおける分散処理システム,〇,"AWS (IoT Greengrass＋クラウドAI): 約4.4兆円
+Azure (IoT Edge＋クラウドAI): 約3.7兆円",,S,https://chatgpt.com/share/68eb7ea7-3f20-800b-9a56-09db10a5c10e,https://chatgpt.com/share/68ec973b-1bdc-800b-aa58-612914f66da1,,1,7505579
+NTT,特許07501619,高橋,小田,物体認識において、「位置情報（状況）」と「把持センサ情報（行動）」を組み合わせて候補を絞り込み、識別する技術,×,,,,https://chatgpt.com/share/68eb8041-a40c-800b-ba30-258cfb0ce7db,,,1,7501619
+NTT,特許07452690,高橋,小田,NFT発行の基本システム,〇,"WISeKeyのWISe.ART／WISeAuthentic
+売り上げほぼ０",,E,https://chatgpt.com/share/68eb81f2-dde0-800b-a53a-9fa3cb5b9078,,,1,7452690
+NTT,特許07452687,高橋,小田,スマートコントラクトを用いてIDや所有権の管理権限を安全に移転する技術,〇,Microsoft （Entra Verified ID / DID:ION）,,D,https://chatgpt.com/share/68eb82b6-e5d8-800b-9193-0fe3a66ca461,https://chatgpt.com/s/dr_68ec97eefb788191a7a7b2af44348656,,1,7452687
+NTT,特許07439938,高橋,小田,クラウドサービスの予測オートスケーリング機能,〇,AWS（Amazon Web Services） Auto Scaling（予測スケーリング）など,,A,https://chatgpt.com/share/68eb85d8-70f4-800b-be70-cafb77542651,https://chatgpt.com/s/dr_68ec982ce7b48191a9c4f5bc47b755f1,,1,7439938
+NTT,特許07425368,高橋,小田,AIによる対話の話題分割,〇,"Zoom IQ for Sales
+Microsoft Teams",,C,https://chatgpt.com/share/68eb8c8f-7be0-800b-9ff6-7e2589f1b1a7,https://chatgpt.com/s/dr_68ec98def7448191916bd33f8337c5b4,,1,7425368
+NTT,特許07414139,高橋,小田,AR技術,〇,Googleマップ（Live View / ARナビゲーション）,,A,https://chatgpt.com/share/68eb8cf6-4234-800b-933c-ee2c4f6811c1,https://chatgpt.com/s/dr_68ec9df12cc8819193d1ae2ac397dd1a,,1,7414139
+NTT,特許07375835,高橋,小田,自然言語の仕様に基づきベクトル検索で類似コードを探し、それを具体的な入出力例（テストケース）で修正する技術,〇,GitHub Copilot,,C,https://chatgpt.com/share/68ec9e77-2404-800b-8e2e-670538d643e8,,,1,7375835
+NTT,特許07363908,高橋,小田,生成AIのRAG技術,〇,ChatGPT Plus、Bard、Bing Chat、BlenderBot、Cohere Command-R など,,C,https://chatgpt.com/share/68eb8dcb-6dec-800b-9ad3-638324e1db99,,,1,7363908
+NTT,特許07360077,高橋,奥野,制御装置、制御方法、および制御プログラム,〇,Dynatrace AutomationEngine(約5億円),,C,https://chatgpt.com/share/68e9ccef-6f24-800b-b37e-fa71a9264174,,,1,7360077
+NTT,特許07359207,高橋,奥野,多角形検索方法,〇,Mapbox Geofencing API(15億円),,C,https://chatgpt.com/share/68eafaf1-bc0c-800b-b7c9-bcdbec306f38,Google BigQuery、HERE Geofencing APIなど出願前に販売,,1,7359207
+NTT,特許07355237,高橋,奥野,ランキング関数生成装置,×,,,E,https://chatgpt.com/share/68eb0a03-c108-800b-a04e-fa17ce53c1a4,製品は見つかったが全て出願前から販売,,1,7355237
+NTT,特許07351352,高橋,奥野,プログラム生成装置,〇,"Cursor（Anysphere社：20億円）
+Windsurf（Codeium〈Exafunction社〉数億円）",,A,https://chatgpt.com/share/68eb2d49-1118-800b-bf88-f36c29a248a9,,,1,7351352
+NTT,特許07347549,高橋,奥野,モデル管理装置,×,,,E,https://chatgpt.com/share/68eb3443-54b4-800b-be77-f3428d2dafb4,製品は見つかったが全て出願前から販売,,1,7347549
+NTT,特許07338698,高橋,奥野,学習装置、検知装置,〇,Amazon SageMaker Autopilot(約100億円),,A,https://chatgpt.com/share/68eb3a99-fed8-800b-ae6d-575737e6a43f,"Microsoft Azure AutoML
+Google Cloud AutoML
+DataRobotは出願前から販売
+",,1,7338698
+NTT,特許07335532,高橋,奥野,保守管理システム、メッセージ制御装置,×,,,E,https://chatgpt.com/share/68eb71a3-92ec-800b-99ad-c97d58192635,製品は見つかったが全て出願前から販売,,1,7335532
+NTT,特許07318720,高橋,奥野,シミュレーション装置,〇,PTV Viswalk / Vissim(0.3億円),,D,https://chatgpt.com/share/68eb7c7b-9574-800b-b2c3-4624f02af3f5,,,1,7318720
+NTT,特許07276432,高橋,奥野,通信システム及び端末,×,,,,https://chatgpt.com/share/68eb80b5-d9bc-800b-8c21-4c65c2b0b192,,,1,7276432
+NTT,特許07268736,高橋,奥野,同期制御装置,〇,"Mini Synchronizer 3 (Dantec Dynamics)(0.01億円未満)
+Femtoシリーズ（Femto Bolt/Mega）(0.04億円)",,D,https://chatgpt.com/share/68ec1d48-8fac-800b-9f8f-8c6a74cdcd9c,,,1,7268736
+NTT,特許07247878,高橋,奥野,回答学習装置,〇,"Bingの「Yes/No」回答機能 （Microsoft）(3億円)
+Amazon Kendra （Amazon Web Services(5億円)",,C,https://chatgpt.com/share/68ec4725-8380-800b-88b8-8be8f09495f5,,,1,7247878
+NTT,特許07231807,高橋,奥野,通信装置及び情報処理方法,〇,Samsung Galaxy S25(数百億円),,Ａ,https://chatgpt.com/share/68ec573d-31d8-800b-92d8-a03b1239fe40,"Cisco SG350XG / SG550XG
+Fortinet FortiGateシリーズ
+Huawei iBMC搭載サーバ通信装置",,1,7231807
+NTT,特許07226581,高橋,奥野,制御装置、制御方法及びプログラム,×,,,E,https://chatgpt.com/share/68ec8f91-096c-800b-b2b5-b03a3e74909b,製品は見つかったが全て出願前から販売,,1,7226581
+NTT,特許07218816,高橋,奥野,対話方法、対話システム,×,,,E,https://chatgpt.com/share/68eca179-f670-800b-ad3b-5aca52459fc0,製品は見つかったが全て出願前から販売,,1,7218816
+NTT,特許07216888,高橋,奥野,,,,,,,,,1,7216888
+NTT,特許07215572,高橋,,,,,,,,,,1,7215572
+NTT,特許07208564,高橋,,,,,,,,,,1,7208564
+NTT,特許07181490,高橋,,,,,,,,,,1,7181490
+NTT,特許07180686,高橋,,,,,,,,,,1,7180686
+NTT,特許07151606,高橋,,,,,,,,,,1,7151606
+NTT,特許07135824,高橋,,,,,,,,,,1,7135824
+NTT,特許07135659,高橋,,,,,,,,,,1,7135659
+NTT,特許07131428,高橋,,,,,,,,,,1,7131428
+NTT,特許07131414,高橋,,,,,,,,,,1,7131414
+NTT,特許07127570,高橋,,,,,,,,,,1,7127570
+NTT,特許07108213,高橋,青井,,,,,,,,,1,7108213
+NTT,特許07106997,高橋,青井,,,,,,,,,1,7106997
+NTT,特許07098272,高橋,青井,,,,,,,,,1,7098272
+NTT,特許07095581,高橋,青井,,,,,,,,,1,7095581
+NTT,特許07087938,高橋,青井,,,,,,,,,1,7087938
+NTT,特許07081455,高橋,青井,,,,,,,,,1,7081455
+NTT,特許07081454,高橋,青井,,,,,,,,,1,7081454
+NTT,特許07059825,高橋,青井,,,,,,,,,1,7059825
+NTT,特許07056752,高橋,青井,,,,,,,,,1,7056752
+NTT,特許07048898,高橋,青井,,,,,,,,,1,7048898
+NTT,特許07037097,高橋,,,,,,,,,,1,7037097
+NTT,特許07037059,高橋,,,,,,,,,,1,7037059
+NTT,特許07031736,高橋,,,,,,,,,,1,7031736
+NTT,特許07031569,高橋,,,,,,,,,,1,7031569
+NTT,特許07031527,高橋,,,,,,,,,,1,7031527
+NTT,特許07020345,高橋,,,,,,,,,,1,7020345
+NTT,特許07001920,高橋,,,,,,,,,,1,7001920
+NTT,特許06996472,高橋,,,,,,,,,,1,6996472
+NTT,特許06992896,高橋,,,,,,,,,,1,6992896
+NTT,特許06984576,高橋,,,,,,,,,,1,6984576
+NTT,特許06977664,高橋,,,,,,,,,,1,6977664
+NTT,特許06974751,高橋,,,,,,,,,,1,6974751
+NTT,特許06939998,高橋,,,,,,,,,,1,6939998
+NTT,特許06920614,高橋,,,,,,,,,,1,6920614
+NTT,特許06904426,高橋,,,,,,,,,,1,6904426
+NTT,特許06901005,高橋,,,,,,,,,,1,6901005
+NTT,特許06885884,高橋,,,,,,,,,,1,6885884
+NTT,特許06857757,高橋,,,,,,,,,,1,6857757
+NTT,特許06852161,高橋,,,,,,,,,,1,6852161
+NTT,特許06850740,高橋,,,,,,,,,,1,6850740
+NTT,特許06848091,高橋,,,,,,,,,,1,6848091
+NTT,特許06830161,高橋,,,,,,,,,,1,6830161
+NTT,特許06818706,高橋,,,,,,,,,,1,6818706
+NTT,特許06814178,高橋,,,,,,,,,,1,6814178
+NTT,特許06805109,高橋,,,,,,,,,,1,6805109
+NTT,特許06805096,高橋,,,,,,,,,,1,6805096
+NTT,特許06789307,高橋,,,,,,,,,,1,6789307
+NTT,特許06778712,高橋,,,,,,,,,,1,6778712
+NTT,特許06777582,高橋,,,,,,,,,,1,6777582
+NTT,特許06770922,高橋,,,,,,,,,,1,6770922
+NTT,特許06767852,高橋,,,,,,,,,,1,6767852
+NTT,特許06762906,高橋,,,,,,,,,,1,6762906
+NTT,特許06751168,高橋,,,,,,,,,,1,6751168
+NTT,特許06749865,高橋,,,,,,,,,,1,6749865
+NTT,特許06723188,高橋,,,,,,,,,,1,6723188
+NTT,特許06721548,高橋,,,,,,,,,,1,6721548
+NTT,特許06712642,高橋,,,,,,,,,,1,6712642
+NTT,特許06710711,高橋,,,,,,,,,,1,6710711
+NTT,特許06707716,高橋,,,,,,,,,,1,6707716
+NTT,特許06702899,高橋,,,,,,,,,,1,6702899
+NTT,特許06689412,高橋,,,,,,,,,,1,6689412
+NTT,特許06681516,高橋,,,,,,,,,,1,6681516
+NTT,特許06649536,高橋,,,,,,,,,,1,6649536
+NTT,特許06632564,高橋,,,,,,,,,,1,6632564
+NTT,特許06629259,高橋,,,,,,,,,,1,6629259
+NTT,特許06629172,高橋,,,,,,,,,,1,6629172
+NTT,特許06626810,高橋,,,,,,,,,,1,6626810
+NTT,特許06611355,高橋,,,,,,,,,,1,6611355
+NTT,特許06611268,高橋,,,,,,,,,,1,6611268
+NTT,特許06595952,高橋,,,,,,,,,,1,6595952
+NTT,特許06590861,高橋,,,,,,,,,,1,6590861
+NTT,特許06581155,高橋,,,,,,,,,,1,6581155
+NTT,特許06574156,高橋,,,,,,,,,,1,6574156
+NTT,特許06564349,高橋,,,,,,,,,,1,6564349
+NTT,特許06543219,高橋,,,,,,,,,,1,6543219
+NTT,特許06542721,高橋,,,,,,,,,,1,6542721
+NTT,特許06535130,高橋,,,,,,,,,,1,6535130
+NTT,特許06533542,高橋,,,,,,,,,,1,6533542
+NTT,特許06533475,高橋,,,,,,,,,,1,6533475
+NTT,特許06517773,高橋,,,,,,,,,,1,6517773
+NTT,特許06514084,高橋,,,,,,,,,,1,6514084
+NTT,特許06495845,高橋,,,,,,,,,,1,6495845
+NTT,特許06495212,高橋,,,,,,,,,,1,6495212
+NTT,特許06479723,高橋,,,,,,,,,,1,6479723
+NTT,特許06476148,高橋,,,,,,,,,,1,6476148
+NTT,特許06467374,高橋,,,,,,,,,,1,6467374
+NTT,特許06456869,高橋,,,,,,,,,,1,6456869
+NTT,特許06438901,高橋,,,,,,,,,,1,6438901
+NTT,特許06434435,高橋,,,,,,,,,,1,6434435
+NTT,特許06417075,高橋,,,,,,,,,,1,6417075
+NTT,特許06411274,高橋,,,,,,,,,,1,6411274
+NTT,特許06397385,高橋,,,,,,,,,,1,6397385
+NTT,特許06387330,高橋,,,,,,,,,,1,6387330
+NTT,特許06377566,高橋,,,,,,,,,,1,6377566
+NTT,特許06373245,高橋,,,,,,,,,,1,6373245
+NTT,特許06367771,高橋,奥野,位置推定装置,×,,あり（出願日以前に他社製品発売）,,https://chatgpt.com/share/68be0a80-50c8-800b-98ac-01a29e754ccf,Google マップ出願前に発売,,1,6367771
+NTT,特許06348882,高橋,奥野,サービス推定装置,×,,,,https://chatgpt.com/share/68be1d23-0d0c-800b-9665-81185bb6bc4c,,,1,6348882
+NTT,特許06339981,高橋,奥野,検索システム,△,"Amazon Echo Auto(約30億円)
+Alexa搭載 輸入車(約2.3兆円)
+Android Automotive OS搭載車(約3000億円)",,A,https://chatgpt.com/share/68bec4d2-0d88-800b-9395-efa6f996c3e5,侵害確認が難しい可能性あり,,1,6339981
+NTT,特許06294145,高橋,奥野,監視方法,◯,"
+Microsoft Azure Monitor",あり（出願日以前に他社製品発売）,E,https://chatgpt.com/share/68c163ed-92b0-800b-9dc3-506f08a9d914,"Amazon CloudWatch
+Datadog
+New Relicは出願前に発売",,1,6294145
+NTT,特許06285877,高橋,奥野,オーバレイトンネル制御システム,◯,"Cisco SD-WAN(200億円)
+VMware HCX(20億円)",,B,https://chatgpt.com/share/68c1f56f-b86c-800b-b75e-a9655c945b0c,,,1,6285877
+NTT,特許06282970,高橋,奥野,データ収集方法,◯,"
+TikTok広告",あり（出願日以前に他社製品発売）,E,https://chatgpt.com/share/68c4c1f7-bdd8-800b-a3c6-fc52de7e3f65,"Google Ads
+Meta広告
+X広告 (旧称 Twitter広告)発売前に開始",,1,6282970
+NTT,特許06277069,高橋,奥野,仮想機器管理装置,×,なし,あり（出願日以前に他社製品発売）,E,https://chatgpt.com/share/68c501ed-e15c-800b-8388-ae2752831389,"AWS EC2
+Microsoft Azure
+Google Cloud Compute
+VMware vSphereが出願前に発売",,1,6277069
+NTT,特許06247182,高橋,奥野,操作手順記録装置,◯,Nintex RPA(2億円),,D,https://chatgpt.com/share/68c53590-3cf0-800b-b1d1-7038ac0fdd10,,,1,6247182
+NTT,特許06235973,高橋,奥野,サーバ,◯,"Google Kubernetes Engine (GKE)
+Amazon Elastic Kubernetes Service (EKS)",あり（出願日以前に他社製品発売）,E,https://chatgpt.com/share/68c53525-7cb4-800b-b27f-c45e288db6b3,"Microsoft System Center VMM
+VMware vSphereが出願前に発売",,1,6235973
+NTT,特許06234408,高橋,奥野,コンテンツ情報提供装置,◯,"Amazon Web Services Rekognition（50億円）
+Google Cloud Video Intelligence API（50億円）
+Microsoft Azure Video Indexer（30億円）",,,https://chatgpt.com/share/68c64537-3888-800b-a345-0268b1aebfa8,Amazon Prime Video（X-Ray機能）は出願日前,,1,6234408
+NTT,特許06231944,高橋,奥野,学習モデル作成装置,◯,Gboard,,C,https://chatgpt.com/share/68c7a0fc-15d4-800b-97db-a9d993173b51,,,1,6231944
+NTT,特許06174826,高橋,奥野,マルウェア解析システム,×,,,E,https://chatgpt.com/share/68c7a0a5-2b38-800b-aa65-c647eb6d4852,,,1,6174826
+NTT,特許06174796,高橋,奥野,セキュリティシステム,△,igloohome Smart Lock(0.3～0.5億円程度),,E,https://chatgpt.com/share/68c7ef18-5f7c-800b-b2d4-3c0fe3975b84,"RemoteLOCK
+Teslaスマートキーは出願日前",,1,6174796
+NTT,特許06114172,高橋,奥野,サーバ室に設置される機器の位置を決定する方法,×,,,E,https://chatgpt.com/share/68cb34be-9664-800b-8809-61d61780ebc6,"Schneider Electric：EcoStruxure IT
+Vertiv：Trellis
+CommScope：iTRACSは出願前",,1,6114172
+NTT,特許06088714,高橋,奥野,特定装置,◯,"Microsoft Defender for Endpoint
+Cortex XDR
+SentinelOne Singularity",,A,https://chatgpt.com/share/68cb3d83-0894-800b-b7a8-3ba7d652d8a8,"Cybereason EDR
+CrowdStrike Falconは出願前",,1,6088714
+NTT,特許06086955,高橋,奥野,サーバ装置、アノテーション方法,◯,Whatfix(1億円),,D,https://chatgpt.com/share/68e240e2-b7cc-800b-8425-34064449f246,,,1,6086955
+NTT,特許06059682,高橋,奥野,データ移行方法,×,,,E,https://chatgpt.com/share/68e24a78-511c-800b-ac66-76bb68b463e5,,,1,6059682
+NTT,特許06043687,高橋,奥野,サーバ／クライアントシステム,×,,,E,https://chatgpt.com/share/68e99a21-6a7c-800b-b4b9-5ef15cf4c66e,対象製品は見つかったがいずれも出願日前から販売,,1,6043687
+NTT,特許06030272,高橋,草野,,,,,,,,,1,6030272
+NTT,特許06025788,高橋,草野,,,,,,,,,1,6025788
+NTT,特許05990215,高橋,草野,,,,,,,,,1,5990215
+NTT,特許05988505,高橋,草野,,,,,,,,,1,5988505
+NTT,特許05956392,高橋,草野,,,,,,,,,1,5956392
+NTT,特許05938009,高橋,草野,,,,,,,,,1,5938009
+NTT,特許05883960,高橋,草野,,,,,,,,,1,5883960
+NTT,特許05868881,高橋,草野,,,,,,,,,1,5868881
+NTT,特許05856104,高橋,草野,,,,,,,,,1,5856104
+NTT,特許05855724,高橋,草野,,,,,,,,,1,5855724
+NTT,特許05812507,高橋,岩瀬,,,,,,,,,1,5812507
+NTT,特許05798983,高橋,岩瀬,,,,,,,,,1,5798983
+NTT,特許05781652,高橋,岩瀬,,,,,,,,,1,5781652
+NTT,特許05767177,高橋,岩瀬,,,,,,,,,1,5767177
+NTT,特許05758449,高橋,岩瀬,,,,,,,,,1,5758449
+NTT,特許05752773,高橋,岩瀬,,,,,,,,,1,5752773
+NTT,特許05732082,高橋,岩瀬,,,,,,,,,1,5732082
+NTT,特許05730969,高橋,岩瀬,,,,,,,,,1,5730969
+NTT,特許05721264,高橋,岩瀬,,,,,,,,,1,5721264
+NTT,特許05694890,高橋,岩瀬,,,,,,,,,1,5694890
+NTT,特許05685213,高橋,幸谷,,,,,,,,https://www.j-platpat.inpit.go.jp/c1801/PU/JP-2012-035828/10/ja,1,5685213
+NTT,特許05661594,高橋,幸谷,,,,,,,,,1,5661594
+NTT,特許05559825,高橋,幸谷,,,,,,,,,1,5559825
+NTT,特許05547706,高橋,幸谷,,,,,,,,,1,5547706
+NTT,特許05545877,高橋,幸谷,,,,,,,,,1,5545877
+NTT,特許05529105,高橋,幸谷,,,,,,,,,1,5529105
+NTT,特許05520330,高橋,幸谷,,,,,,,,,1,5520330
+NTT,特許05519565,高橋,幸谷,,,,,,,,,1,5519565
+NTT,特許05519431,高橋,幸谷,,,,,,,,,1,5519431
+NTT,特許05483784,高橋,幸谷,,,,,,,,,1,5483784
+NTT,特許05478530,高橋,幸谷,,,,,,,,,1,5478530
+NTT,特許05465651,高橋,幸谷,,,,,,,,,1,5465651
+NTT,特許05449485,高橋,幸谷,,,,,,,,,1,5449485
+NTT,特許05437977,高橋,幸谷,,,,,,,,,1,5437977
+NTT,特許05437928,高橋,幸谷,,,,,,,,,1,5437928
+NTT,特許05432963,高橋,幸谷,,,,,,,,,1,5432963
+NTT,特許05420477,高橋,幸谷,,,,,,,,,1,5420477
+NTT,特許05419953,高橋,幸谷,,,,,,,,,1,5419953
+NTT,特許05405382,高橋,幸谷,,,,,,,,,1,5405382
+NTT,特許05377616,高橋,幸谷,,,,,,,,,1,5377616
+NTT,特許05374444,高橋,幸谷,,,,,,,,,1,5374444
+NTT,特許05357923,高橋,幸谷,,,,,,,,,1,5357923
+NTT,特許05354747,高橋,幸谷,,,,,,,,,1,5354747
+NTT,特許05331084,高橋,幸谷,,,,,,,,,1,5331084
+NTT,特許05292219,高橋,幸谷,,,,,,,,,1,5292219
+NTT,特許05225942,高橋,幸谷,,,,,,,,,1,5225942
+NTT,特許05211091,高橋,幸谷,,,,,,,,,1,5211091
+NTT,特許05068785,高橋,幸谷,,,,,,,,,1,5068785
+NTT,特許04852634,高橋,幸谷,,,,,,,,,1,4852634
+NTT,特許04809916,高橋,幸谷,,,,,,,,,1,4809916
+IBM,特許07679143,柿崎,小田,３次元印刷対象物のコンピュータ制御された選択的硬化,×,,,,https://chatgpt.com/share/68cdf3f1-662c-800b-b179-87a0ab75b45b,,,1,7679143
+IBM,特許07679138,柿崎,小田,地震検出の為のコンピューティング・デバイス、コンピュータ・プログラム、及びコンピュータ実装方法,×,,,,https://chatgpt.com/share/68cdf40b-b808-800b-901f-c07b1b099014,,,1,7679138
+IBM,特許07643819,柿崎,小田,センサイベントカバレッジ及びエネルギー節約,〇,"テスラ車「Sentry Mode」（米Tesla社）
+Axis社「Radar Autotracking for PTZ」",,E,https://chatgpt.com/share/68cdf55e-e920-800b-a69b-91ac34f964f1,"テスラ車両売り上げ、日本で二千億円強→テスラは、LOT参加
+AXISは、キヤノンのグループ会社だが、どうか？https://chatgpt.com/share/68ce1f9a-33bc-800b-b9bc-94330470cfd5
+
+",,1,7643819
+IBM,特許07438609,柿崎,小田,自然言語で書かれたテキスト記述からの実行可能プロセスの作成方法、システム、プログラム,×,,,,https://chatgpt.com/share/68cdf686-bddc-800b-b120-4b970b17fc5c,,,1,7438609
+IBM,特許07263672,柿崎,小田,インテリジェントな車内空気品質制御,〇,新型レンジローバー「キャビンエアピュリフィケーションプロ」,,https://chatgpt.com/share/68ce1e42-d190-800b-ac9c-5a51838543bc,https://chatgpt.com/share/68cdf498-be90-800b-b44d-b565e1a1f7c6,"日本での売り上げ６００億～８００億
+LOTではない。",,1,7263672
+IBM,特許07249716,柿崎,小田,モバイル・デバイス用のマイクロレンズ・アダプタ,〇,"YO Home Sperm Test（Medical Electronic Systems社）
+DIPLE（SmartMicroOptics社）",,D,https://chatgpt.com/share/68cdf726-e47c-800b-888f-977cecc0f6b1,YOは、日本で売っていない。DIPLEは、マクアケなので、売り上げ少ない。,,1,7249716
+IBM,特許07102499,柿崎,小田,匿名の暗号化データ,〇,"Google（コミュニティモビリティレポート 等）
+Apple（位置情報サービス／マップ）
+Meta（Facebook 「データフォーグッド」移動マップ 等）",,E,https://chatgpt.com/share/68cdf7fd-3088-800b-b0dc-56414dbc0347,いずれもLOT,,1,7102499
+IBM,特許07100815,柿崎,小田,位置決定,◎,"Google マップ Live View
+Niantic Lightship VPS（Niantic社）
+",,B,https://chatgpt.com/share/68ce167f-46ec-800b-87d6-8ab3c0fab732,"米国中国でも特許。サービス自体が無償なので、損害額が認定しにくい。
+NianticがLOTではないので、ねらい目。Pokémon GO関連の日本国内年間収益は推定約300億円前後",,1,7100815
+IBM,特許07055200,柿崎,小田,ゲートウェイ管理コンソールにアクセスするためのコンピュータ処理方法、装置、システム、およびプログラム,〇,"Cradlepoint NetCloud Manager（米国・日本国内サービス有）＋Cradlepointルータ
+Milesight IoT Cloud ＆ DeviceHub（中国・日本国内サービス有）＋ Milesight UG65 LoRaWANゲートウェイ",,,https://chatgpt.com/share/68ce0482-7324-800b-b9c1-80e9365dd895,,,1,7055200
+IBM,特許07011374,柿崎,小田,コンピュータ実施方法、システム、コンピュータ・プログラム製品、およびコンピュータ・プログラム（サプライ・チェーンの整合性を管理するための原材料のスペクトル署名のブロックチェーン台帳）,△,TruTag TechnologiesとTag-it Tech→日本で非実施,,D,https://chatgpt.com/share/68ce16ff-bda4-800b-8e3c-4090bf94a386,,,1,7011374
+IBM,特許06998385,柿崎,小田,電気デバイスにおける電力消費を最適化する方法、システム、およびコンピュータ・プログラム,〇,"AMD社 – AMD Start Nowテクノロジー（Smart Sleep 搭載）
+Samsung社 – Galaxyスマートフォン（Adaptive Power Saving機能）",,E,https://chatgpt.com/share/68ce05ee-44c4-800b-8486-847d451c54b7,AMD、SamsungいずれもLOT,,1,6998385
+IBM,特許06964383,柿崎,小田,文書デジタル化における意味正規化のための方法、コンピュータ・プログラム及びシステム,×,,,,https://chatgpt.com/share/68ce062d-5b70-800b-8073-101e7ad8c8a4,,,1,6964383
+IBM,特許06817430,柿崎,小田,非接触血圧モニタリング,×,,,,https://chatgpt.com/share/68ce066f-d21c-800b-a4ed-ab8bdf9c0b9e,,,1,6817430
+IBM,特許06688388,柿崎,小田,ＤＣマイクログリッドのための電力分担,×,,,,https://chatgpt.com/share/68ce06a1-6fd8-800b-a5b6-1e6d411dee72,,,1,6688388
+IBM,特許06647713,柿崎,小田,請求項中のキーワードの抽出,〇,"WIPS Global（韓国WIPS社）
+PatSnap（シンガポール発）
+Orbit Intelligence（Questel社）",,D,https://chatgpt.com/share/68ce070e-719c-800b-b9ba-08805b75e9da,"どちらかというと、宣伝効果狙い。
+知財担当者は、注目する可能性が高い。",,1,6647713
+IBM,特許06628742,柿崎,小田,ハードウェア・マルチスレッディング・パラメータを用いて仮想マシンのためのホストを選択するための方法及び装置,〇,"Amazon EC2（AWS）
+Microsoft Azure
+Google Cloud Platform",,E,https://chatgpt.com/share/68ce0795-86f8-800b-9570-602e683f9511,いずれもLOT,,1,6628742
+IBM,特許06537598,柿崎,小田,複数のカウンタのためのサービス命令を実施する方法、システム及びコンピュータ・プログラム,〇,"IBM z15メインフレーム
+Apple Metal GPUパフォーマンスモニタ機能",,E,https://chatgpt.com/share/68ce1768-7164-800b-a143-af5bf4f58994,いずれもLOT,,1,6537598
+IBM,特許06501789,柿崎,小田,マルチスレッディングの動的有効化のためのコンピュータ・システム、コンピュータ実装方法およびコンピュータ・プログラム製品,×,,,,https://chatgpt.com/share/68ce17b1-1f74-800b-bab7-4393fb84901f,,,1,6501789
+IBM,特許06468842,柿崎,小田,会議通話全体の会話を視覚化する方法、システム、およびコンピュータ・プログラム製品,〇,"Microsoft Teams
+Zoom
+Google Meet",,E,https://chatgpt.com/share/68ce1854-4ba4-800b-a869-2be0b2e24741,いずれもLOT,,1,6468842
+NTT,特許06992713,滝波,岩瀬,連続発話推定装置,〇,Amazon Alexa（Echoスマートスピーカー）,,,,,,1,6992713
+NTT,特許06891843,滝波,岩瀬,,,,,,,,,1,6891843
+NTT,特許06891842,滝波,岩瀬,,,,,,,,,1,6891842
+NTT,特許06839053,滝波,岩瀬,,,,,,,,,1,6839053
+NTT,特許06776406,滝波,岩瀬,,,,,,,,,1,6776406
+NTT,特許06683566,滝波、高橋,岩瀬,,,,,,,,,1,6683566
+東芝,特許06789741,徳田,小田,画像中の所定領域に対するボカシ処理を行う情報処理装置、方法およびプログラム,×,,,,https://chatgpt.com/share/68d9b446-9ae4-800b-bcef-1fef25b66b76,,,1,6789741
+東芝,特許06728123,徳田,小田,窒化物半導体構造と酸窒化アルミニウム膜によるゲート絶縁層設計,×,,,,https://chatgpt.com/share/68dafc20-ba90-800b-b06d-2771d9c2f934,,,1,6728123
+東芝,特許06678787,徳田,小田,リモートI/Oシステムにおける効率的なデータ転送と変化検出,〇,米国Rockwell Automation社のDeviceNetリモートI/Oシステム,,C,https://chatgpt.com/share/68dafcba-6704-800b-a09c-8a15c7ee85d3,全期間累計で数十億円程度,,1,6678787
+東芝,特許06677667,徳田,小田,ユーザ行動ログ接続による属性関係性抽出装置および方法,〇,Facebook（Meta社）の「類似オーディエンス」機能、Google社の「Similar Audiences（類似ユーザー）」機能、Adobe社の「Adobe Audience Manager」,,B,https://chatgpt.com/share/68daf459-4254-800b-9f62-4bf192093216,"Similar Audiences経由の年間売上高は数十億円規模
+Audience Manager単体の日本国内年間売上高は数十億円規模と推定",,1,6677667
+東芝,特許06623189,徳田,小田,発電素子の開放電圧に基づく起動制御を備えた電源回路および電源装置,×,,,,https://chatgpt.com/share/68dbc131-948c-800b-8deb-e7a39e4fa2ff,,,1,6623189
+東芝,特許06567468,徳田,小田,高濃度元素含有酸化物絶縁層を備えた窒化物半導体装置,×,,,,https://chatgpt.com/share/68dbc150-ed1c-800b-bdb6-7e9f6c73acc4,,,1,6567468
+東芝,特許06538633,徳田,小田,設計情報の履歴管理と変更影響分析を備えた設計情報管理装置,〇,Dassault Systèmes社のENOVIA（3DEXPERIENCEプラットフォーム）,,C,https://chatgpt.com/share/68daf6d9-cc9c-800b-b3f4-d93eec0d3cac,約80億円前後,,1,6538633
+東芝,特許06535123,徳田,小田,眼球運動と頭部動作の同期性に基づくAR表示制御装置および方法,×,,,,https://chatgpt.com/share/68daf459-4254-800b-9f62-4bf192093216,,,1,6535123
+東芝,特許06517666,徳田,小田,画像認識によるラベル照合と設置状態判定機能を備えた物品管理装置,〇,GeoVisionの品切れ検知ソリューション,,D,https://chatgpt.com/g/g-p-68a1ab8bd59c8191a6ab1e97ca7e4fd2-xiao-tian/c/68d9b7a3-11b4-8324-948e-48652ca43b36,総計でも1億円には達していない,,1,6517666
+東芝,特許06367166,徳田,小田,危険度推定型ウェアラブル安全管理システム,〇,IBMの「Maximo Worker Insights」(MWI)を用いたGuardhat社製スマートヘルメットの安全管理プラットフォーム,,C,https://chatgpt.com/share/68daf621-2904-800b-a4d8-d1edb373a301,約18～20億円,,1,6367166
+東芝,特許06342440,徳田,小田,眼電位補正型 眼球運動検出アイウエア,×,,,,https://chatgpt.com/share/68daf9b8-5b5c-800b-ab44-174a5955110b,,,1,6342440
+東芝,特許06334862,徳田,小田,構造区間ベースのプログラム情報表示技術,〇,"Google Chrome DevTools（Flame Chart）
+Amazon CodeGuru Profiler
+Microsoft Visual Studio Profiler（Flame Graph）",,S,https://chatgpt.com/share/68dafa7c-8f88-800b-9b62-fc91494f4c2f,"Googleの世界全体の広告収入は2024年時点で約2,650億ドル（約40兆円）",,1,6334862
+東芝,特許06329469,徳田,小田,身体動作認識・操作支援装置／方法／プログラム,〇,"ReWalk Personal Exoskeleton
+Ekso/Parker Indego Exoskeleton 
+German Bionic Cray X ",,D,https://chatgpt.com/share/68db0a84-4d1c-800b-98d5-0bf741c67ad8,"約5,000万～6,000万円程度（～60百万円）",,1,6329469
+東芝,特許06305483,徳田,小田,画像認識ベースのサービス提供システム,〇,"SenseVideo SDK／スマートリテールソリューション（SenseTime, 中国）
+DataCaptor™ / VisionCaptor™（VSBLTY, カナダ）",,E,https://chatgpt.com/share/68dafbb5-4ca4-800b-a62a-96abbddd6c49,ほぼ０,,1,6305483
+東芝,特許06253619,徳田,小田,視線上に像を表示し個体識別・情報共有を可能にする眼鏡型電子機器,×,,,,https://chatgpt.com/share/68db0794-b488-800b-9cc4-b1e06684d6a8,,,1,6253619
+東芝,特許06242773,徳田,小田,議事録作成支援型 会議情報蓄積装置,〇,"Cisco Webex Meetings（Webex Assistant 機能付き）
+Otter.ai（Otter Meeting Notes）
+Fireflies.ai（AI Meeting Assistant）
+Video Notebook（ビデオノートブック）
+tl;dv（Too Long; Didn’t View）",,B,https://chatgpt.com/share/68db0871-02a4-800b-b475-ec1ae850ed47,Cisco Webex Meetings（Webex Assistant 機能付き推定年間売上（日本）: 約20億円,,1,6242773
+東芝,特許06215096,徳田,小田,グラフェン×銀ナノワイヤーによる透明導電体の製造技術,〇,ACS Material社の当該透明導電膜製品,,D,https://chatgpt.com/share/68db08ca-8278-800b-8e43-2a86e46fe2d8,数百万～一千万円台程度,,1,6215096
+東芝,特許06106052,徳田,小田,負荷シフト判定付きエネルギー管理システム,〇,"エネルエックス・ジャパンのデマンドレスポンスサービス（Enel X Japan）
+AutoGrid社の需要応答プラットフォーム（EneresとのVPP事業 等）",,Ｂ,https://chatgpt.com/share/68db093c-575c-800b-ba02-97afaa601d8b,数十億～数百億レベル,,1,6106052
+東芝,特許06067819,徳田,小田,重複排除＋統計ベース再配置による階層化ストレージ,〇だけど権利満了,,,,https://chatgpt.com/share/68db096d-9a1c-800b-832a-5103e42c5859,,,1,6067819
+東芝,特許05971568,徳田,小田,人の状態と位置に応じた分割エリア単位の電気機器制御システム,×,,,,https://chatgpt.com/share/68db09ca-6254-800b-8f63-2a955d4ea82b,,,1,5971568
+東芝,特許05872306,徳田,小田,画像センサ連携型デマンド制御・属性管理システム,〇,"PointGrab社（イスラエル）：「CogniPoint」スマートセンサーシステ
+VergeSense社（米国）：「VergeSense」オフィス占有センサーシステム",,D,https://chatgpt.com/share/68db09f8-a2ac-800b-88ca-0937bf243ddd,"PointGrab社の日本国内における累計売上金額は数億円未満（おそらく1億円前後以下）
+VergeSense社の日本国内累計売上金額はおおよそ数億円規模（数百万ドル程度、例えば2～5億円のレンジ）",,1,5872306
+東芝,特許05747133,徳田,小田,リビジョン整合性に基づく共有ストレージアクセス制御システム,〇,"Dell EMC PowerFlex (ScaleIO)
+Red Hat Ceph Storage (Ceph)",,B,https://chatgpt.com/share/68dbc26c-5df0-800b-b866-f5400edb08b7,"PowerFlexの国内売上累計は正式な数字こそ不明なものの、導入開始から現在までで数十億円規模（おそらく100億円弱程度）に上る
+ed Hatの売上シェアは一桁台と見られ、累計売上は数十億円規模",,1,5747133
+東芝,特許05675542,徳田,小田,光透過型金属電極およびその応用構造,×,,,,https://chatgpt.com/share/68dbc2aa-6854-800b-a951-26408093abc5,,,1,5675542
+東芝,特許05487180,徳田,小田,テストケース生成プログラム及びテストケース生成装置,〇,Tricentis ToscaおよびIBM Rhapsody TestConductor/ATG、Smartesting CertifyIt,,D,https://chatgpt.com/share/68dbc30f-7864-800b-91dd-93050c1a24f0,各社数千万円程度,,1,5487180
+東芝,特許05426617,徳田,小田,電源遮断時のデータ移動動作を検証可能なストレージ装置およびその制御方法,〇→権利満了,,,,https://chatgpt.com/share/68dbc33c-83e4-800b-8561-cf746765afee,,,1,5426617
+東芝,特許05289642,徳田,小田,逆増分付き世代管理型バックアップストレージシステム,〇,"Veeam Backup & Replication
+Acronis Cyber Protect（旧称 True Image 等）",,Ｃ,https://chatgpt.com/share/68dbc3b2-bdcc-800b-875a-ec3cfb1315f6,各社数十億円,,1,5289642
+東芝,特許05259541,徳田,小田,活性化状態からの一時中断処理に対応する携帯可能電子装置とその制御方法,〇,"SORACOM Air SIM（plan01s）→日本企業だったので、再調査
+アップル、グーグル等のスマホ端末が該当するとのこと",,S,https://chatgpt.com/share/68deffac-ecfc-800b-9b73-a935d6b8de6b,数百億レベル,,1,5259541
+東芝,特許05232319,徳田,小田,YCrCb(4:2:0)映像を3チャネルで分割送信する通信装置・方法,〇,"Apple TV 4K（Apple社）
+Xbox One X（Microsoft社）",,D,https://chatgpt.com/share/68dbc450-f23c-800b-b031-07c520aba80e,ＡｐｐｌｅＴＶは数十億レベル,,1,5232319
+東芝,特許04940322,徳田,小田,RAID構成と誤り訂正を備えた半導体メモリ映像蓄積再生装置,〇,"IBM FlashSystem（米IBM社）フラッシュモジュール内
+Seagate SandForce SF3700コントローラ搭載SSD",,Ｂ,https://chatgpt.com/share/68dbc4a1-8914-800b-9603-be36b43437fe,約５００億円,,1,4940322
+スタンレー,特許07722951,高橋,,,,,,,,,,1,7722951
+スタンレー,特許07633028,高橋,,,,,,,,,,1,7633028
+スタンレー,特許07515244,高橋,,,,,,,,,,1,7515244
+スタンレー,特許07454440,高橋,,,,,,,,,,1,7454440
+スタンレー,特許07406913,高橋,,,,,,,,,,1,7406913
+スタンレー,特許07379284,高橋,,,,,,,,,,1,7379284
+スタンレー,特許07297538,高橋,,,,,,,,,,1,7297538
+スタンレー,特許07252017,高橋,,,,,,,,,,1,7252017
+スタンレー,特許07081934,高橋,,,,,,,,,,1,7081934
+スタンレー,特許07048331,高橋,,,,,,,,,,1,7048331
+スタンレー,特許07002963,高橋,,,,,,,,,,1,7002963
+スタンレー,特許06990613,高橋,,,,,,,,,,1,6990613
+スタンレー,特許06966933,高橋,,,,,,,,,,1,6966933
+スタンレー,特許06956534,高橋,,,,,,,,,,1,6956534
+スタンレー,特許06955416,高橋,,,,,,,,,,1,6955416
+スタンレー,特許06935536,高橋,,,,,,,,,,1,6935536
+スタンレー,特許06923295,高橋,,,,,,,,,,1,6923295
+スタンレー,特許06910341,高橋,,,,,,,,,,1,6910341
+スタンレー,特許06887321,高橋,,,,,,,,,,1,6887321
+スタンレー,特許06854179,高橋,,,,,,,,,,1,6854179
+スタンレー,特許06846294,高橋,,,,,,,,,,1,6846294
+スタンレー,特許06696759,高橋,,,,,,,,,,1,6696759
+スタンレー,特許06684609,高橋,,,,,,,,,,1,6684609
+スタンレー,特許06576761,高橋,,,,,,,,,,1,6576761
+ミックウェア,特許5046055,小田,小田,Googleに売り込みに行ったけど売れなかったチャンク列操作に基づく地図操作処理,〇キーワード”の定義次第で結論が割れる。深堀調査→×,,,,https://chatgpt.com/share/68e58523-fd84-800b-bff0-aae144a6c90f,,,1,5046055
+ミックウェア,特許5357966,小田,小田,撮影画像内のオブジェクト（建物）のうち近いもの順で見えているものだけ検査 AR技術,×,,,,https://chatgpt.com/share/68e5838c-e130-800b-aedf-b6e22759f8e2,,,1,5357966
+ミックウェア,特許5371480,小田,小田,地域のトレンド情報抽出,〇 Xの提供する「トレンド」機能,X　ツイッター,,,https://chatgpt.com/share/68e5843e-5b94-800b-bf2c-3f472ab0b730,,,1,5371480
+ミックウェア,特許5403690,小田,小田,GPS受信不可だと「アプリの起動中止」,〇 DJIFLYアプリ→ △ GPS受信不可だと「アプリの起動中止」はしていないが「アプリ」を広い概念で捉えると、いける可能性あり,DJI,,,https://chatgpt.com/share/68e8395f-5b0c-800b-a123-ebca8fec3c6a,,,1,5403690
+ミックウェア,特許5404234,小田,小田,,×,,,,https://chatgpt.com/share/68e595dc-ac24-800b-bf56-34cd642cf0d5,,,1,5404234
+ミックウェア,特許5414284,小田,小田,,×,,,,https://chatgpt.com/share/68e59623-5968-800b-8591-a1f7b68242ba,,,1,5414284
+ミックウェア,特許5478242,小田,小田,,×,,,,https://chatgpt.com/s/dr_68e58dfb89048191acd96fcdb1986dba,,,1,5478242
+ミックウェア,特許5478418,小田,小田,,×,,,,https://chatgpt.com/share/68e59677-5188-800b-a337-434426362683,,,1,5478418
+ミックウェア,特許5494642,小田,小田,Navicon →結果的には侵害品ないが、譲渡できるのかどうか確認,×,,,,https://chatgpt.com/share/68e65b99-bf4c-800b-ab65-46e4aeb0e31b,,,1,5494642
+ミックウェア,特許5513806,小田,小田,,〇→× 最初グーグルストリートビューが合致すると分析したが、ストリートビューの方が先,,,,https://chatgpt.com/share/68e661ed-991c-800b-a97e-c40bd90561bd,,,1,5513806
+ミックウェア,特許5514038,小田,小田,,〇→× 最初グーグルストリートビューが合致すると分析したが、ストリートビューの方が先。操作列（チャンク）がポイント,,,,https://chatgpt.com/share/68e6d8a7-b548-800b-a3d4-c1f5d4f7b63b,,,1,5514038
+ミックウェア,特許5554972,小田,小田,第一の地図表示部、第二の地図表示部があって、第一地図表示部の操作に連動して、第二地図の表示変更,最初〇だが、,,,,,,,1,5554972
+ミックウェア,特許5578719,小田,小田,,,,,,,,,1,5578719
+ミックウェア,特許5584581,小田,小田,,,,,,,,,1,5584581
+ミックウェア,特許5607419,小田,小田,,,,,,,,,1,5607419
+ミックウェア,特許5612456,小田,小田,,,,,,,,,1,5612456
+ミックウェア,特許5629178,小田,小田,,,,,,,,,1,5629178
+ミックウェア,特許5674418,小田,小田,,,,,,,,,1,5674418
+ミックウェア,特許5674512,小田,小田,,,,,,,,,1,5674512
+ミックウェア,特許5680986,小田,小田,,,,,,,,,1,5680986
+ミックウェア,特許5693188,小田,小田,,,,,,,,,1,5693188
+ミックウェア,特許5717618,小田,小田,,,,,,,,,1,5717618
+ミックウェア,特許5734035,小田,小田,,,,,,,,,1,5734035
+ミックウェア,特許5765290,小田,小田,,,,,,,,,1,5765290
+ミックウェア,特許5797419,小田,小田,,,,,,,,,1,5797419
+ミックウェア,特許5798472,小田,小田,,,,,,,,,1,5798472
+ミックウェア,特許5800386,小田,小田,,,,,,,,,1,5800386
+ミックウェア,特許5811987,小田,小田,,,,,,,,,1,5811987
+ミックウェア,特許5814682,小田,小田,,,,,,,,,1,5814682
+ミックウェア,特許5851226,小田,小田,,,,,,,,,1,5851226
+ミックウェア,特許5855412,小田,小田,,,,,,,,,1,5855412
+ミックウェア,特許5869774,小田,小田,,,,,,,,,1,5869774
+ミックウェア,特許5893238,小田,小田,,,,,,,,,1,5893238
+ミックウェア,特許5893481,小田,小田,,,,,,,,,1,5893481
+ミックウェア,特許5893525,小田,小田,,,,,,,,,1,5893525
+ミックウェア,特許5897965,小田,小田,,,,,,,,,1,5897965
+ミックウェア,特許5907794,小田,小田,,,,,,,,,1,5907794
+ミックウェア,特許5912328,小田,小田,,,,,,,,,1,5912328
+ミックウェア,特許5912329,小田,小田,,,,,,,,,1,5912329
+ミックウェア,特許5912344,小田,小田,,,,,,,,,1,5912344
+ミックウェア,特許5912918,小田,小田,,,,,,,,,1,5912918
+ミックウェア,特許5913449,小田,小田,,,,,,,,,1,5913449
+ミックウェア,特許5955493,小田,小田,,,,,,,,,1,5955493
+ミックウェア,特許5955742,小田,小田,,,,,,,,,1,5955742
+ミックウェア,特許5955743,小田,小田,,,,,,,,,1,5955743
+ミックウェア,特許5956005,小田,小田,,,,,,,,,1,5956005
+ミックウェア,特許5977576,小田,小田,,,,,,,,,1,5977576
+ミックウェア,特許5986742,小田,小田,,,,,,,,,1,5986742
+ミックウェア,特許5986755,小田,小田,,,,,,,,,1,5986755
+ミックウェア,特許6005474,小田,小田,,,,,,,,,1,6005474
+ミックウェア,特許6005475,小田,小田,,,,,,,,,1,6005475
+ミックウェア,特許6025420,小田,小田,,,,,,,,,1,6025420
+ミックウェア,特許6025462,小田,小田,,,,,,,,,1,6025462
+ミックウェア,特許6076078,小田,小田,,,,,,,,,1,6076078
+ミックウェア,特許6081702,小田,小田,,,,,,,,,1,6081702
+ミックウェア,特許6086577,小田,小田,,,,,,,,,1,6086577
+ミックウェア,特許6110594,小田,小田,,,,,,,,,1,6110594
+ミックウェア,特許6130670,小田,小田,,,,,,,,,1,6130670
+ミックウェア,特許6150683,小田,小田,,,,,,,,,1,6150683
+ミックウェア,特許6174936,小田,小田,,,,,,,,,1,6174936
+ミックウェア,特許6174951,小田,小田,,,,,,,,,1,6174951
+ミックウェア,特許6178578,小田,小田,,,,,,,,,1,6178578
+ミックウェア,特許6178890,小田,小田,,,,,,,,,1,6178890
+ミックウェア,特許6186165,小田,小田,,,,,,,,,1,6186165
+ミックウェア,特許6210628,小田,小田,,,,,,,,,1,6210628
+ミックウェア,特許6224946,小田,小田,,,,,,,,,1,6224946
+ミックウェア,特許6224947,小田,小田,,,,,,,,,1,6224947
+ミックウェア,特許6228358,小田,小田,,,,,,,,,1,6228358
+ミックウェア,特許6231315,小田,小田,,,,,,,,,1,6231315
+ミックウェア,特許6247504,小田,小田,,,,,,,,,1,6247504
+ミックウェア,特許6254378,小田,小田,,,,,,,,,1,6254378
+ミックウェア,特許6259216,小田,小田,,,,,,,,,1,6259216
+ミックウェア,特許6263347,小田,小田,,,,,,,,,1,6263347
+ミックウェア,特許6265524,小田,小田,,,,,,,,,1,6265524
+ミックウェア,特許6276533,小田,小田,,,,,,,,,1,6276533
+ミックウェア,特許6288967,小田,小田,,,,,,,,,1,6288967
+ミックウェア,特許6289116,小田,小田,,,,,,,,,1,6289116
+ミックウェア,特許6289560,小田,小田,,,,,,,,,1,6289560
+ミックウェア,特許6298320,小田,小田,,,,,,,,,1,6298320
+ミックウェア,特許6306287,小田,小田,,,,,,,,,1,6306287
+ミックウェア,特許6306333,小田,小田,,,,,,,,,1,6306333
+ミックウェア,特許6313059,小田,小田,,,,,,,,,1,6313059
+ミックウェア,特許6325785,小田,小田,,,,,,,,,1,6325785
+ミックウェア,特許6332156,小田,小田,,,,,,,,,1,6332156
+ミックウェア,特許6347943,小田,小田,,,,,,,,,1,6347943
+ミックウェア,特許6353190,小田,小田,,,,,,,,,1,6353190
+ミックウェア,特許6353199,小田,小田,,,,,,,,,1,6353199
+ミックウェア,特許6353235,小田,小田,,,,,,,,,1,6353235
+ミックウェア,特許6353238,小田,小田,,,,,,,,,1,6353238
+ミックウェア,特許6358072,小田,小田,,,,,,,,,1,6358072
+ミックウェア,特許6358791,小田,小田,,,,,,,,,1,6358791
+ミックウェア,特許6366246,小田,小田,,,,,,,,,1,6366246
+ミックウェア,特許6366286,小田,小田,,,,,,,,,1,6366286
+ミックウェア,特許6366409,小田,小田,,,,,,,,,1,6366409
+ミックウェア,特許6370440,小田,小田,,,,,,,,,1,6370440
+ミックウェア,特許6377672,小田,小田,,,,,,,,,1,6377672
+ミックウェア,特許6392065,小田,小田,,,,,,,,,1,6392065
+ミックウェア,特許6403306,小田,小田,,,,,,,,,1,6403306
+ミックウェア,特許6403482,小田,小田,,,,,,,,,1,6403482
+ミックウェア,特許6415157,小田,小田,,,,,,,,,1,6415157
+ミックウェア,特許6426638,小田,小田,,,,,,,,,1,6426638
+ミックウェア,特許6430105,小田,小田,,,,,,,,,1,6430105
+ミックウェア,特許6430111,小田,小田,,,,,,,,,1,6430111
+ミックウェア,特許6433044,小田,小田,,,,,,,,,1,6433044
+ミックウェア,特許6441638,小田,小田,,,,,,,,,1,6441638
+ミックウェア,特許6441646,小田,小田,,,,,,,,,1,6441646
+ミックウェア,特許6457973,小田,小田,,,,,,,,,1,6457973
+ミックウェア,特許6462413,小田,小田,,,,,,,,,1,6462413
+ミックウェア,特許6464986,小田,小田,,,,,,,,,1,6464986
+ミックウェア,特許6466662,小田,小田,,,,,,,,,1,6466662
+ミックウェア,特許6475413,小田,小田,,,,,,,,,1,6475413
+ミックウェア,特許6482198,小田,小田,,,,,,,,,1,6482198
+ミックウェア,特許6484424,小田,小田,,,,,,,,,1,6484424
+ミックウェア,特許6497928,小田,小田,,,,,,,,,1,6497928
+ミックウェア,特許6499438,小田,小田,,,,,,,,,1,6499438
+ミックウェア,特許6512679,小田,小田,,,,,,,,,1,6512679
+ミックウェア,特許6516657,小田,小田,,,,,,,,,1,6516657
+ミックウェア,特許6533055,小田,小田,,,,,,,,,1,6533055
+ミックウェア,特許6533072,小田,小田,,,,,,,,,1,6533072
+ミックウェア,特許6533640,小田,小田,,,,,,,,,1,6533640
+ミックウェア,特許6546760,小田,小田,,,,,,,,,1,6546760
+ミックウェア,特許6553874,小田,小田,,,,,,,,,1,6553874
+ミックウェア,特許6553949,小田,小田,,,,,,,,,1,6553949
+ミックウェア,特許6557392,小田,小田,,,,,,,,,1,6557392
+ミックウェア,特許6564190,小田,小田,,,,,,,,,1,6564190
+ミックウェア,特許6571102,小田,小田,,,,,,,,,1,6571102
+ミックウェア,特許6578776,小田,小田,,,,,,,,,1,6578776
+ミックウェア,特許6582915,小田,小田,,,,,,,,,1,6582915
+ミックウェア,特許6586146,小田,小田,,,,,,,,,1,6586146
+ミックウェア,特許6600581,小田,小田,,,,,,,,,1,6600581
+ミックウェア,特許6604758,小田,小田,,,,,,,,,1,6604758
+ミックウェア,特許6605052,小田,小田,,,,,,,,,1,6605052
+ミックウェア,特許6607685,小田,小田,,,,,,,,,1,6607685
+ミックウェア,特許6615501,小田,小田,,,,,,,,,1,6615501
+ミックウェア,特許6616355,小田,小田,,,,,,,,,1,6616355
+ミックウェア,特許6625341,小田,小田,,,,,,,,,1,6625341
+ミックウェア,特許6633827,小田,小田,,,,,,,,,1,6633827
+ミックウェア,特許6633839,小田,小田,,,,,,,,,1,6633839
+ミックウェア,特許6633840,小田,小田,,,,,,,,,1,6633840
+ミックウェア,特許6634056,小田,小田,,,,,,,,,1,6634056
+ミックウェア,特許6646090,小田,小田,,,,,,,,,1,6646090
+ミックウェア,特許6646354,小田,小田,,,,,,,,,1,6646354
+ミックウェア,特許6646364,小田,小田,,,,,,,,,1,6646364
+ミックウェア,特許6646472,小田,小田,,,,,,,,,1,6646472
+ミックウェア,特許6650845,小田,小田,,,,,,,,,1,6650845
+ミックウェア,特許6651293,小田,小田,,,,,,,,,1,6651293
+ミックウェア,特許6655871,小田,小田,,,,,,,,,1,6655871
+ミックウェア,特許6663824,小田,小田,,,,,,,,,1,6663824
+ミックウェア,特許6670547,小田,小田,,,,,,,,,1,6670547
+ミックウェア,特許6676538,小田,小田,,,,,,,,,1,6676538
+ミックウェア,特許6677438,小田,小田,,,,,,,,,1,6677438
+ミックウェア,特許6677527,小田,小田,,,,,,,,,1,6677527
+ミックウェア,特許6684109,小田,小田,,,,,,,,,1,6684109
+ミックウェア,特許6684194,小田,小田,,,,,,,,,1,6684194
+ミックウェア,特許6688773,小田,小田,,,,,,,,,1,6688773
+ミックウェア,特許6689240,小田,小田,,,,,,,,,1,6689240
+ミックウェア,特許6694242,小田,小田,,,,,,,,,1,6694242
+ミックウェア,特許6694421,小田,小田,,,,,,,,,1,6694421
+ミックウェア,特許6700058,小田,小田,,,,,,,,,1,6700058
+ミックウェア,特許6707491,小田,小田,,,,,,,,,1,6707491
+ミックウェア,特許6708359,小田,小田,,,,,,,,,1,6708359
+ミックウェア,特許6710182,小田,小田,,,,,,,,,1,6710182
+ミックウェア,特許6711785,小田,小田,,,,,,,,,1,6711785
+ミックウェア,特許6712102,小田,小田,,,,,,,,,1,6712102
+ミックウェア,特許6712753,小田,小田,,,,,,,,,1,6712753
+ミックウェア,特許6714944,小田,小田,,,,,,,,,1,6714944
+ミックウェア,特許6715075,小田,小田,,,,,,,,,1,6715075
+ミックウェア,特許6718418,小田,小田,,,,,,,,,1,6718418
+ミックウェア,特許6718962,小田,小田,,,,,,,,,1,6718962
+ミックウェア,特許6723760,小田,小田,,,,,,,,,1,6723760
+ミックウェア,特許6723761,小田,小田,,,,,,,,,1,6723761
+ミックウェア,特許6730129,小田,小田,,,,,,,,,1,6730129
+ミックウェア,特許6732819,小田,小田,,,,,,,,,1,6732819
+ミックウェア,特許6736520,小田,小田,,,,,,,,,1,6736520
+ミックウェア,特許6744055,小田,小田,,,,,,,,,1,6744055
+ミックウェア,特許6746191,小田,小田,,,,,,,,,1,6746191
+ミックウェア,特許6754626,小田,小田,,,,,,,,,1,6754626
+ミックウェア,特許6757292,小田,小田,,,,,,,,,1,6757292
+ミックウェア,特許6761222,小田,小田,,,,,,,,,1,6761222
+ミックウェア,特許6766234,小田,小田,,,,,,,,,1,6766234
+ミックウェア,特許6779597,小田,小田,,,,,,,,,1,6779597
+ミックウェア,特許6788637,小田,小田,,,,,,,,,1,6788637
+ミックウェア,特許6789738,小田,小田,,,,,,,,,1,6789738
+ミックウェア,特許6811753,小田,小田,,,,,,,,,1,6811753
+ミックウェア,特許6816924,小田,小田,,,,,,,,,1,6816924
+ミックウェア,特許6817753,小田,小田,,,,,,,,,1,6817753
+ミックウェア,特許6823895,小田,小田,,,,,,,,,1,6823895
+ミックウェア,特許6823896,小田,小田,,,,,,,,,1,6823896
+ミックウェア,特許6825766,小田,小田,,,,,,,,,1,6825766
+ミックウェア,特許6832966,小田,小田,,,,,,,,,1,6832966
+ミックウェア,特許6833007,小田,小田,,,,,,,,,1,6833007
+ミックウェア,特許6837087,小田,小田,,,,,,,,,1,6837087
+ミックウェア,特許6845603,小田,小田,,,,,,,,,1,6845603
+ミックウェア,特許6845604,小田,小田,,,,,,,,,1,6845604
+ミックウェア,特許6858643,小田,小田,,,,,,,,,1,6858643
+ミックウェア,特許6867098,小田,小田,,,,,,,,,1,6867098
+ミックウェア,特許6870827,小田,小田,,,,,,,,,1,6870827
+ミックウェア,特許6873595,小田,小田,,,,,,,,,1,6873595
+ミックウェア,特許6875068,小田,小田,,,,,,,,,1,6875068
+ミックウェア,特許6884744,小田,小田,,,,,,,,,1,6884744
+ミックウェア,特許6888881,小田,小田,,,,,,,,,1,6888881
+ミックウェア,特許6891160,小田,小田,,,,,,,,,1,6891160
+ミックウェア,特許6892220,小田,小田,,,,,,,,,1,6892220
+ミックウェア,特許6903630,小田,小田,,,,,,,,,1,6903630
+ミックウェア,特許6908335,小田,小田,,,,,,,,,1,6908335
+ミックウェア,特許6909834,小田,小田,,,,,,,,,1,6909834
+ミックウェア,特許6924552,小田,小田,,,,,,,,,1,6924552
+ミックウェア,特許6928022,小田,小田,,,,,,,,,1,6928022
+ミックウェア,特許6955605,小田,小田,,,,,,,,,1,6955605
+ミックウェア,特許6956232,小田,小田,,,,,,,,,1,6956232
+ミックウェア,特許6957811,小田,小田,,,,,,,,,1,6957811
+ミックウェア,特許6967417,小田,小田,,,,,,,,,1,6967417
+ミックウェア,特許6976378,小田,小田,,,,,,,,,1,6976378
+ミックウェア,特許6979141,小田,小田,,,,,,,,,1,6979141
+ミックウェア,特許6986055,小田,小田,,,,,,,,,1,6986055
+ミックウェア,特許6987199,小田,小田,,,,,,,,,1,6987199
+ミックウェア,特許6989641,小田,小田,,,,,,,,,1,6989641
+ミックウェア,特許6998914,小田,小田,,,,,,,,,1,6998914
+ミックウェア,特許7023821,小田,小田,,,,,,,,,1,7023821
+ミックウェア,特許7033112,小田,小田,,,,,,,,,1,7033112
+ミックウェア,特許7035289,小田,小田,,,,,,,,,1,7035289
+ミックウェア,特許7036783,小田,小田,,,,,,,,,1,7036783
+ミックウェア,特許7036870,小田,小田,,,,,,,,,1,7036870
+ミックウェア,特許7039536,小田,小田,,,,,,,,,1,7039536
+ミックウェア,特許7050114,小田,小田,,,,,,,,,1,7050114
+ミックウェア,特許7051497,小田,小田,,,,,,,,,1,7051497
+ミックウェア,特許7060568,小田,小田,,,,,,,,,1,7060568
+ミックウェア,特許7090779,小田,小田,,,,,,,,,1,7090779
+ミックウェア,特許7096201,小田,小田,,,,,,,,,1,7096201
+ミックウェア,特許7096228,小田,小田,,,,,,,,,1,7096228
+ミックウェア,特許7121629,小田,小田,,,,,,,,,1,7121629
+ミックウェア,特許7131471,小田,小田,,,,,,,,,1,7131471
+ミックウェア,特許7138758,小田,小田,,,,,,,,,1,7138758
+ミックウェア,特許7145807,小田,小田,,,,,,,,,1,7145807
+ミックウェア,特許7149327,小田,小田,,,,,,,,,1,7149327
+ミックウェア,特許7160971,小田,小田,,,,,,,,,1,7160971
+ミックウェア,特許7181674,小田,小田,,,,,,,,,1,7181674
+ミックウェア,特許7182585,小田,小田,,,,,,,,,1,7182585
+ミックウェア,特許7194668,小田,小田,,,,,,,,,1,7194668
+ミックウェア,特許7194775,小田,小田,,,,,,,,,1,7194775
+ミックウェア,特許7204386,小田,小田,,,,,,,,,1,7204386
+ミックウェア,特許7206010,小田,小田,,,,,,,,,1,7206010
+ミックウェア,特許7232793,小田,小田,,,,,,,,,1,7232793
+ミックウェア,特許7240358,小田,小田,,,,,,,,,1,7240358
+ミックウェア,特許7242724,小田,小田,,,,,,,,,1,7242724
+ミックウェア,特許7384846,小田,小田,,,,,,,,,1,7384846
+ミックウェア,特許7390253,小田,小田,,,,,,,,,1,7390253
+ミックウェア,特許7407774,小田,小田,,,,,,,,,1,7407774
+ミックウェア,特許7426176,小田,小田,,,,,,,,,1,7426176
+ミックウェア,特許7467672,小田,小田,,,,,,,,,1,7467672
+ミックウェア,特許7488745,小田,小田,,,,,,,,,1,7488745
+ミックウェア,特許7502490,小田,小田,,,,,,,,,1,7502490
+ミックウェア,特許7503669,小田,小田,,,,,,,,,1,7503669
+ミックウェア,特許7513542,小田,小田,,,,,,,,,1,7513542
+ミックウェア,特許7551547,小田,小田,,,,,,,,,1,7551547
+ミックウェア,特許7564395,小田,小田,,,,,,,,,1,7564395
+ミックウェア,特許7573595,小田,小田,,,,,,,,,1,7573595
+ミックウェア,特許7584207,小田,小田,,,,,,,,,1,7584207
+ミックウェア,特許7587336,小田,小田,,,,,,,,,1,7587336
+ミックウェア,特許7606651,小田,小田,,,,,,,,,1,7606651
+ミックウェア,特許7610733,小田,小田,,,,,,,,,1,7610733
+ミックウェア,特許7611634,小田,小田,,,,,,,,,1,7611634
+ミックウェア,特許7612287,小田,小田,,,,,,,,,1,7612287
+ミックウェア,特許7614440,小田,小田,,,,,,,,,1,7614440
+ミックウェア,特許7617810,小田,小田,,,,,,,,,1,7617810
+ミックウェア,特許7624088,小田,小田,,,,,,,,,1,7624088
+ミックウェア,特許7624284,小田,小田,,,,,,,,,1,7624284
+ミックウェア,特許7627163,小田,小田,,,,,,,,,1,7627163
+ミックウェア,特許7627906,小田,小田,,,,,,,,,1,7627906
+ミックウェア,特許7629785,小田,小田,,,,,,,,,1,7629785
+ミックウェア,特許7654174,小田,小田,,,,,,,,,1,7654174
+ミックウェア,特許7657000,小田,小田,,,,,,,,,1,7657000
+ミックウェア,特許7660417,小田,小田,,,,,,,,,1,7660417
+ミックウェア,特許7660465,小田,小田,,,,,,,,,1,7660465
+ミックウェア,特許7660992,小田,小田,,,,,,,,,1,7660992
+ミックウェア,特許7667380,小田,小田,,,,,,,,,1,7667380
+ミックウェア,特許7667921,小田,小田,,,,,,,,,1,7667921
+ミックウェア,特許7670937,小田,小田,,,,,,,,,1,7670937
+ミックウェア,特許7681812,小田,小田,,,,,,,,,1,7681812
+ミックウェア,特許7685928,小田,小田,,,,,,,,,1,7685928
+ミックウェア,特許7688473,小田,小田,,,,,,,,,1,7688473
+ミックウェア,特許7689802,小田,小田,,,,,,,,,1,7689802
+ミックウェア,特許7692891,小田,小田,,,,,,,,,1,7692891
+ミックウェア,特許7694920,小田,小田,,,,,,,,,1,7694920
+ミックウェア,特許7696859,小田,小田,,,,,,,,,1,7696859
+ミックウェア,特許7703294,小田,小田,,,,,,,,,1,7703294
+ミックウェア,特許7706035,小田,小田,,,,,,,,,1,7706035
+ミックウェア,特許7709256,小田,小田,,,,,,,,,1,7709256
+ミックウェア,特許7717434,小田,小田,,,,,,,,,1,7717434
+ミックウェア,特許7725183,小田,小田,,,,,,,,,1,7725183
+ミックウェア,特許7727364,小田,小田,,,,,,,,,1,7727364
+ミックウェア,特許7733427,小田,小田,,,,,,,,,1,7733427
+ミックウェア,特許7733619,小田,小田,,,,,,,,,1,7733619
+ミックウェア,特許7738782,小田,小田,,,,,,,,,1,7738782
+ミックウェア,特許7738793,小田,小田,,,,,,,,,1,7738793
+ミックウェア,特許7738794,小田,小田,,,,,,,,,1,7738794
+ミックウェア,特許7738795,小田,小田,,,,,,,,,1,7738795
+ミックウェア,特許7742970,小田,小田,,,,,,,,,1,7742970
+ミックウェア,特許7746610,小田,小田,,,,,,,,,1,7746610
+日本電気株式会社,特許05353193,滝波,,,,,,,,,,1,5353193
+日本電気株式会社,特許05217922,滝波,,,,,,,,,,1,5217922
+日本無線株式会社,特許05028215,滝波,,,,,,,,,,1,5028215
+日本無線株式会社,特許04950752,滝波,,,,,,,,,,1,4950752
+日本無線株式会社,特許04920483,滝波,,,,,,,,,,1,4920483
+新日本無線株式会社,特許05052215,滝波,,,,,,,,,,1,5052215
+日本無線株式会社,特許05208005,滝波,,,,,,,,,,1,5208005
+新日本無線株式会社,特許05513813,滝波,,,,,,,,,,1,5513813
+日本電気株式会社,特許06819692,徳田,,,,,,,,,,1,6819692
+日本電気株式会社,特許06816591,徳田,,,,,,,,,,1,6816591
+日本電気株式会社,特許06787649,徳田,,,,,,,,,,1,6787649
+日本電気株式会社,特許06753115,徳田,,,,,,,,,,1,6753115
+日本電気株式会社,特許06724568,徳田,,,,,,,,,,1,6724568
+日本電気株式会社,特許06716919,徳田,,,,,,,,,,1,6716919
+日本電気株式会社,特許06708204,徳田,,,,,,,,,,1,6708204
+日本電気株式会社,特許06662298,徳田,,,,,,,,,,1,6662298
+日本電気株式会社,特許06642159,徳田,,,,,,,,,,1,6642159
+日本電気株式会社,特許06620887,徳田,,,,,,,,,,1,6620887
+日本電気株式会社,特許06607310,徳田,,,,,,,,,,1,6607310
+日本電気株式会社,特許06569532,徳田,,,,,,,,,,1,6569532
+日本電気株式会社,特許06544453,徳田,,,,,,,,,,1,6544453
+日本電気株式会社,特許06531821,徳田,,,,,,,,,,1,6531821
+日本電気株式会社,特許06520029,徳田,,,,,,,,,,1,6520029
+日本電気株式会社,特許06399235,徳田,,,,,,,,,,1,6399235
+日本電気株式会社,特許06399096,徳田,,,,,,,,,,1,6399096
+日本電気株式会社,特許06315301,徳田,,,,,,,,,,1,6315301
+日本電気株式会社,特許06296251,徳田,,,,,,,,,,1,6296251
+日本電気株式会社,特許06127774,徳田,,,,,,,,,,1,6127774
+日本電気株式会社,特許06106955,徳田,,,,,,,,,,1,6106955
+日本電気株式会社,特許06070689,徳田,,,,,,,,,,1,6070689
+日本電気株式会社,特許06041124,徳田,,,,,,,,,,1,6041124
+日本電気株式会社,特許05942404,徳田,,,,,,,,,,1,5942404
+日本電気株式会社,特許05870633,徳田,,,,,,,,,,1,5870633
+日本電気株式会社,特許05794603,徳田,,,,,,,,,,1,5794603
+日本電気株式会社,特許05769039,徳田,,,,,,,,,,1,5769039
+日本電気株式会社,特許05716753,徳田,,,,,,,,,,1,5716753
+日本電気株式会社,特許05673804,徳田,,,,,,,,,,1,5673804
+日本電気株式会社,特許05560704,徳田,,,,,,,,,,1,5560704
+日本電気株式会社,特許05534077,徳田,,,,,,,,,,1,5534077
+日本電気株式会社,特許05338954,徳田,,,,,,,,,,1,5338954
+日本電気株式会社,特許05234441,徳田,,,,,,,,,,1,5234441
+日本電気株式会社,特許04941080,徳田,,,,,,,,,,1,4941080
+日本電気株式会社,特許04873133,徳田,,,,,,,,,,1,4873133
+日本電気株式会社,特許04525556,徳田,,,,,,,,,,1,4525556
