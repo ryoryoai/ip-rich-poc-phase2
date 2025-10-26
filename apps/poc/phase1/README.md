@@ -1,0 +1,137 @@
+# Phase 1: 特許侵害調査自動化システム (PoC)
+
+## 概要
+
+特許の構成要件を抽出し、指定された製品の侵害可能性を自動判定するシステムのPoC実装です。
+
+## 機能
+
+- 📝 特許請求項から構成要件を自動抽出（Claude 3.5 Sonnet）
+- 🔍 Web検索による製品仕様の自動収集（Tavily API）
+- ⚖️ 各構成要件の充足性を自動判定
+- 📊 侵害可能性の総合評価とレポート生成
+- 💾 結果のJSON形式エクスポート
+
+## 技術スタック
+
+- **フロントエンド**: Next.js 14, TypeScript, TailwindCSS, shadcn/ui
+- **LLM**: Claude 3.5 Sonnet（Anthropic）または OpenAI GPT
+- **Web検索**: Tavily API（無料枠: 1000検索/月）
+- **アーキテクチャ**: 依存性注入によるプロバイダー切り替え可能
+
+## セットアップ
+
+### 1. 依存関係のインストール
+
+```bash
+npm install
+```
+
+### 2. 環境変数の設定
+
+`.env.local.example` を `.env.local` にコピーして、必要なAPIキーを設定します。
+
+```bash
+cp .env.local.example .env.local
+```
+
+### 必要なAPIキー
+
+#### Claude API（推奨）
+- **取得先**: https://console.anthropic.com/
+- **無料枠**: 新規アカウントで$5クレジット
+- **設定**:
+  ```
+  LLM_PROVIDER=claude
+  ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
+  ```
+
+#### または OpenAI API
+- **取得先**: https://platform.openai.com/
+- **設定**:
+  ```
+  LLM_PROVIDER=openai
+  OPENAI_API_KEY=sk-xxxxx
+  ```
+
+#### Tavily API（Web検索）
+- **取得先**: https://tavily.com/
+- **無料枠**: 1000検索/月
+- **設定**:
+  ```
+  SEARCH_PROVIDER=tavily
+  TAVILY_API_KEY=tvly-xxxxx
+  ```
+
+### 3. 開発サーバーの起動
+
+```bash
+npm run dev
+```
+
+http://localhost:3001 でアクセス可能
+
+## 使い方
+
+1. トップページの「分析を開始」ボタンをクリック
+2. 以下の情報を入力:
+   - **特許番号**: 例: 06195960
+   - **請求項1**: 特許の請求項1の全文
+   - **企業名**: 調査対象の企業名（例: TeamViewer）
+   - **製品名**: 調査対象の製品名（例: TeamViewer Assist AR）
+3. 「分析開始」ボタンをクリック
+4. 分析結果が表示されます（約30秒〜1分）
+5. 結果をJSONでダウンロード可能
+
+## プロバイダーの切り替え
+
+環境変数でプロバイダーを切り替え可能:
+
+- `LLM_PROVIDER`: openai | claude
+- `SEARCH_PROVIDER`: dummy | tavily
+- `STORAGE_PROVIDER`: local
+
+## 開発コマンド
+
+```bash
+npm run dev        # 開発サーバー起動
+npm run build      # プロダクションビルド
+npm run start      # プロダクションサーバー起動
+npm run lint       # Lintチェック
+npm run type-check # 型チェック
+```
+
+## コスト見積もり
+
+### Claude API（無料枠$5）
+- 構成要件抽出: 約1,000トークン/件
+- 充足性判定: 約2,000トークン/件
+- **特許10件分析可能**（無料枠内）
+
+### Tavily API（無料枠1000検索/月）
+- 製品検索: 3-5検索/分析
+- **月200-300件の分析可能**
+
+## トラブルシューティング
+
+### API Keyエラー
+- `.env.local`ファイルが正しく設定されているか確認
+- APIキーが有効か確認
+
+### 検索結果が空
+- Tavily APIキーが設定されているか確認
+- 無料枠の制限（1000検索/月）を超えていないか確認
+
+### 分析が遅い
+- Claude APIの応答に時間がかかる場合があります（通常30秒〜1分）
+- ネットワーク接続を確認
+
+## 注意事項
+
+- このシステムは概念実証（PoC）版です
+- 分析結果は参考情報として利用してください
+- 実際の特許侵害判定には専門家の確認が必要です
+
+## ライセンス
+
+Private
