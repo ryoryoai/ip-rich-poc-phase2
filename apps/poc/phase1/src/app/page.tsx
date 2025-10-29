@@ -98,7 +98,8 @@ export default function Home() {
                   </tbody>
                 </table>
                 <p className="mt-2 text-xs">
-                  <span className="font-semibold">※ 1件の特許調査には約30,000〜50,000トークンが必要</span><br/>
+                  <span className="font-semibold">TPM (Tokens Per Minute):</span> 1分間に処理できるトークンの上限<br/>
+                  <span className="font-semibold">RPM (Requests Per Minute):</span> 1分間に送信できるリクエストの上限<br/>
                   参考: <a href="https://platform.openai.com/docs/models/o4-mini-deep-research"
                     className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
                     O4 Mini Deep Research Rate Limits
