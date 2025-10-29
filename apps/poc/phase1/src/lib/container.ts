@@ -1,11 +1,13 @@
 import type { ILLMProvider } from '@/interfaces/ILLMProvider';
 import type { ISearchProvider } from '@/interfaces/ISearchProvider';
 import type { IStorageProvider } from '@/interfaces/IStorageProvider';
+import type { IPatentProvider } from '@/interfaces/IPatentProvider';
 import { OpenAIProvider } from './providers/OpenAIProvider';
 import { ClaudeProvider } from './providers/ClaudeProvider';
 import { DummySearchProvider } from './providers/DummySearchProvider';
 import { TavilySearchProvider } from './providers/TavilySearchProvider';
 import { LocalStorageProvider } from './providers/LocalStorageProvider';
+import { OpenAIDeepResearchProvider } from './providers/OpenAIDeepResearchProvider';
 
 /**
  * 依存性注入コンテナ
@@ -20,6 +22,7 @@ import { LocalStorageProvider } from './providers/LocalStorageProvider';
 let llmProviderInstance: ILLMProvider | null = null;
 let searchProviderInstance: ISearchProvider | null = null;
 let storageProviderInstance: IStorageProvider | null = null;
+let patentProviderInstance: IPatentProvider | null = null;
 
 /**
  * LLMプロバイダーを取得（シングルトン）
@@ -110,10 +113,24 @@ export function getStorageProvider(): IStorageProvider {
 }
 
 /**
+ * 特許プロバイダーを取得（シングルトン）
+ */
+export function getPatentProvider(): IPatentProvider {
+  if (!patentProviderInstance) {
+    // 現在はOpenAI Deep Researchプロバイダーのみサポート
+    patentProviderInstance = new OpenAIDeepResearchProvider();
+    console.log(`[Container] Using Patent Provider: ${patentProviderInstance.getProviderName()}`);
+  }
+
+  return patentProviderInstance;
+}
+
+/**
  * テスト用: プロバイダーインスタンスをリセット
  */
 export function resetProviders() {
   llmProviderInstance = null;
   searchProviderInstance = null;
   storageProviderInstance = null;
+  patentProviderInstance = null;
 }
