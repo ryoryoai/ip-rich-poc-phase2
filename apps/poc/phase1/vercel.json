@@ -1,0 +1,15 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "regions": ["hnd1"],
+  "functions": {
+    "src/app/api/analyze-deep/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/analyze-simple/route.ts": {
+      "maxDuration": 300
+    }
+  }
+}
