@@ -43,7 +43,8 @@ export class PatentInfringementAnalyzer {
     );
 
     // Step 3: LLMによる侵害分析
-    const analysisResult = await this.llmProvider.generate(analysisPrompt);
+    const systemPrompt = '特許侵害調査の専門家として、構成要件の充足性を詳細に分析してください。';
+    const analysisResult = await this.llmProvider.generate(systemPrompt, analysisPrompt);
 
     // Step 4: 結果の構造化
     return this.parseAnalysisResult(analysisResult, patentInfo);
@@ -123,7 +124,8 @@ ${claim1}
 2. [構成要件2]
 ...`;
 
-    const result = await this.llmProvider.generate(prompt);
+    const systemPrompt = '特許請求項から構成要件を正確に抽出してください。';
+    const result = await this.llmProvider.generate(systemPrompt, prompt);
 
     // 番号付きリストをパース
     const requirements = result

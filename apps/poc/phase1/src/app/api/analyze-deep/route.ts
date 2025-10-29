@@ -31,10 +31,10 @@ export async function POST(request: NextRequest) {
 
     // Step 2: Deep Searchで侵害可能性のある製品を自動検出
     const llmProvider = getLLMProvider();
-    const deepSearchPrompt = buildDeepSearchPrompt(patentNumber, patentInfo.claims[0], mode);
+    const { systemPrompt, userPrompt } = buildDeepSearchPrompts(patentNumber, patentInfo.claims[0], mode);
 
     console.log(`[API] Executing deep search with O4 Mini model...`);
-    const analysisResult = await llmProvider.generate(deepSearchPrompt);
+    const analysisResult = await llmProvider.generate(systemPrompt, userPrompt);
 
     // Step 3: 結果を構造化
     const structuredResult = {
@@ -67,10 +67,14 @@ export async function POST(request: NextRequest) {
 /**
  * Deep Search用のプロンプト構築
  */
-function buildDeepSearchPrompt(patentNumber: string, claim1: string, mode: string): string {
+function buildDeepSearchPrompts(patentNumber: string, claim1: string, mode: string): { systemPrompt: string; userPrompt: string } {
+  const systemPrompt = '特許侵害調査の専門家として、Web検索機能を活用して包括的な調査を実施してください。';
+
+  let userPrompt: string;
+
   if (mode === 'auto') {
     // 完全自動モード：侵害可能性のある製品を自動検出
-    return `
+    userPrompt = `
 特許${patentNumber}の請求項１について、侵害可能性のある製品・サービスを調査せよ。
 
 ▼請求項１：
@@ -99,11 +103,11 @@ ${claim1}
 - 最も侵害可能性が高い製品: [製品名]
 - 推奨される詳細調査対象: [1-2製品]
 
-注意：250,000 TPMの制限内で効率的に分析すること。
+注意：150,000 TPMの制限内で効率的に分析すること。
 `;
   } else {
     // セミオートモード：技術分野のみ特定して調査
-    return `
+    userPrompt = `
 特許${patentNumber}の技術分野における主要プレイヤーと製品を調査せよ。
 
 ▼請求項１（要約）：
@@ -118,6 +122,8 @@ ${claim1.substring(0, 500)}...
 効率的にまとめ、トークン使用を最小限に抑えること。
 `;
   }
+
+  return { systemPrompt, userPrompt };
 }
 
 /**
