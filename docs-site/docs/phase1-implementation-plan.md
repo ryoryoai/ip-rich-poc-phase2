@@ -76,15 +76,20 @@ ip-rich-tools/
 ### Day 1-2: プロジェクト初期化とプロンプト設計
 
 **作業内容**:
-1. プロジェクト構造の作成
-2. 依存関係の定義（requirements.txt）
-3. 環境変数の設定（.env.example）
-4. プロンプトテンプレートの設計
+1. Next.jsプロジェクト構造の作成
+2. 依存関係の定義（package.json）
+3. TypeScript設定（tsconfig.json）
+4. 環境変数の設定（.env.local.example）
+5. プロンプトテンプレートの設計（TypeScript）
+6. テスト環境のセットアップ（Jest + Playwright）
 
 **成果物**:
-- プロジェクト骨格
-- requirements.txt
-- プロンプト設計ドキュメント
+- apps/poc/phase1/ プロジェクト骨格
+- package.json（依存関係とスクリプト）
+- tsconfig.json, next.config.js
+- .env.local.example
+- src/lib/prompts.ts
+- テスト設定（jest.config.js, playwright.config.ts）
 
 **package.json**:
 ```json
@@ -93,11 +98,15 @@ ip-rich-tools/
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3001",
     "lint": "next lint",
-    "test": "jest"
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "next": "14.1.0",
@@ -117,33 +126,99 @@ ip-rich-tools/
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "autoprefixer": "^10.0.1",
-    "postcss": "^8",
-    "tailwindcss": "^3.3.0",
-    "typescript": "^5"
+    "@types/jest": "^29.5.11",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/jest-dom": "^6.2.0",
+    "@playwright/test": "^1.41.0",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0"
   }
 }
 ```
 
+**jest.config.js**:
+```javascript
+const nextJest = require('next/jest')
+
+const createJestConfig = nextJest({
+  dir: './',
+})
+
+const customJestConfig = {
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testEnvironment: 'jest-environment-jsdom',
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  testMatch: [
+    '**/__tests__/**/*.ts?(x)',
+    '**/?(*.)+(spec|test).ts?(x)',
+  ],
+}
+
+module.exports = createJestConfig(customJestConfig)
+```
+
+**playwright.config.ts**:
+```typescript
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
+  use: {
+    baseURL: 'http://localhost:3001',
+    trace: 'on-first-retry',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3001',
+    reuseExistingServer: !process.env.CI,
+  },
+});
+```
+
 **.env.local.example**:
 ```bash
-# OpenAI API
+# OpenAI API (サーバー側のみ、NEXT_PUBLIC_接頭辞禁止)
 OPENAI_API_KEY=your_openai_api_key_here
 
-# Perplexity API (Optional)
+# Perplexity API (Optional - 無料枠100req/日)
 PERPLEXITY_API_KEY=your_perplexity_api_key_here
 
-# SerpAPI (Optional)
+# SerpAPI (Optional - 無料枠100検索/月)
 SERPAPI_KEY=your_serpapi_key_here
 
 # Settings
+# モデル選択: gpt-3.5-turbo（低コスト）| gpt-4o-mini（精度重視・低コスト）| gpt-4（最高精度）
 MODEL_NAME=gpt-3.5-turbo
 MAX_TOKENS=2000
 TEMPERATURE=0.3
 
 # Next.js
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3001
 ```
+
+**モデル選択の指針**:
+- **gpt-3.5-turbo**: 最低コスト（$0.0015/1K tokens）、PoC検証に推奨
+- **gpt-4o-mini**: バランス型（$0.15/1M tokens input）、精度とコストの中間
+- **gpt-4**: 最高精度（$30/1M tokens input）、本番環境で検討
 
 **プロンプトテンプレート（src/lib/prompts.ts）**:
 ```typescript
@@ -188,184 +263,282 @@ ${requirement}
 } as const;
 ```
 
-### Day 3-4: コアモジュールの実装
+### Day 3-4: コアライブラリの実装（TypeScript）
 
 **作業内容**:
 1. OpenAI APIクライアントの実装
-2. 構成要件抽出モジュールの実装
-3. データストレージモジュールの実装
+2. 構成要件抽出・パースモジュールの実装
+3. 型定義の作成
+4. ユニットテスト（Jest）の作成
 
 **成果物**:
-- `utils/openai_client.py`
-- `modules/requirement_extractor.py`
-- `utils/data_storage.py`
+- `src/lib/openai.ts` - OpenAI APIクライアント
+- `src/lib/requirements.ts` - 構成要件抽出とパース
+- `src/lib/storage.ts` - データ保存
+- `src/types/patent.ts` - 特許関連の型定義
+- `src/types/analysis.ts` - 分析結果の型定義
+- `__tests__/lib/requirements.test.ts` - ユニットテスト
 
-**サンプルコード（utils/openai_client.py）**:
-```python
-import os
-from openai import OpenAI
-from typing import Optional
+**型定義（src/types/patent.ts）**:
+```typescript
+export interface Requirement {
+  id: string;
+  description: string;
+}
 
-class OpenAIClient:
-    def __init__(self):
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        self.model = os.getenv("MODEL_NAME", "gpt-3.5-turbo")
-        self.max_tokens = int(os.getenv("MAX_TOKENS", "2000"))
-        self.temperature = float(os.getenv("TEMPERATURE", "0.3"))
-
-    def generate(
-        self,
-        system_prompt: str,
-        user_prompt: str,
-        temperature: Optional[float] = None
-    ) -> str:
-        """OpenAI APIを呼び出してテキストを生成"""
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                max_tokens=self.max_tokens,
-                temperature=temperature or self.temperature
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            raise Exception(f"OpenAI API Error: {str(e)}")
+export interface PatentData {
+  patentNumber: string;
+  claimText: string;
+}
 ```
 
-**サンプルコード（modules/requirement_extractor.py）**:
-```python
-import yaml
-from typing import List, Dict
-from utils.openai_client import OpenAIClient
+**型定義（src/types/analysis.ts）**:
+```typescript
+import { Requirement } from './patent';
 
-class RequirementExtractor:
-    def __init__(self, prompt_config_path: str = "config/prompts.yaml"):
-        self.client = OpenAIClient()
-        with open(prompt_config_path, 'r', encoding='utf-8') as f:
-            self.prompts = yaml.safe_load(f)
+export interface ComplianceResult {
+  requirementId: string;
+  requirement: string;
+  compliance: '○' | '×';
+  reason: string;
+  evidence: string;
+  urls: string[];
+}
 
-    def extract_requirements(
-        self,
-        patent_number: str,
-        claim_text: str
-    ) -> List[Dict[str, str]]:
-        """請求項1から構成要件を抽出"""
-        system_prompt = self.prompts['extract_requirements']['system']
-        user_prompt = self.prompts['extract_requirements']['user'].format(
-            patent_number=patent_number,
-            claim_text=claim_text
-        )
-
-        response = self.client.generate(system_prompt, user_prompt)
-
-        # レスポンスをパースして構成要件リストに変換
-        requirements = self._parse_requirements(response)
-        return requirements
-
-    def _parse_requirements(self, response: str) -> List[Dict[str, str]]:
-        """構成要件のパース処理"""
-        requirements = []
-        lines = response.strip().split('\n')
-
-        for line in lines:
-            line = line.strip()
-            if line and (line[0].isdigit() or line.startswith('-')):
-                # "1. 構成要件A: 説明" のような形式をパース
-                parts = line.split(':', 1)
-                if len(parts) == 2:
-                    requirement_id = parts[0].strip()
-                    description = parts[1].strip()
-                    requirements.append({
-                        'id': requirement_id,
-                        'description': description
-                    })
-
-        return requirements
+export interface AnalysisResult {
+  patentNumber: string;
+  companyName: string;
+  productName: string;
+  timestamp: string;
+  requirements: Requirement[];
+  complianceResults: ComplianceResult[];
+  summary: {
+    totalRequirements: number;
+    compliantRequirements: number;
+    complianceRate: number;
+    infringementPossibility: '○' | '×';
+  };
+}
 ```
 
-### Day 5: Web検索モジュールとテスト
+**サンプルコード（src/lib/openai.ts）**:
+```typescript
+import OpenAI from 'openai';
+
+export class OpenAIClient {
+  private client: OpenAI;
+  private model: string;
+  private maxTokens: number;
+  private temperature: number;
+
+  constructor() {
+    this.client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    this.model = process.env.MODEL_NAME || 'gpt-3.5-turbo';
+    this.maxTokens = parseInt(process.env.MAX_TOKENS || '2000', 10);
+    this.temperature = parseFloat(process.env.TEMPERATURE || '0.3');
+  }
+
+  async generate(
+    systemPrompt: string,
+    userPrompt: string,
+    temperature?: number
+  ): Promise<string> {
+    try {
+      const response = await this.client.chat.completions.create({
+        model: this.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        max_tokens: this.maxTokens,
+        temperature: temperature ?? this.temperature,
+      });
+
+      return response.choices[0]?.message?.content || '';
+    } catch (error) {
+      throw new Error(`OpenAI API Error: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+}
+
+// シングルトンインスタンス
+export const openaiClient = new OpenAIClient();
+```
+
+**サンプルコード（src/lib/requirements.ts）**:
+```typescript
+import { openaiClient } from './openai';
+import { PROMPTS } from './prompts';
+import { Requirement } from '@/types/patent';
+
+export async function extractRequirements(
+  patentNumber: string,
+  claimText: string
+): Promise<Requirement[]> {
+  const systemPrompt = PROMPTS.extractRequirements.system;
+  const userPrompt = PROMPTS.extractRequirements.user(patentNumber, claimText);
+
+  const response = await openaiClient.generate(systemPrompt, userPrompt);
+
+  return parseRequirements(response);
+}
+
+export function parseRequirements(response: string): Requirement[] {
+  const requirements: Requirement[] = [];
+  const lines = response.trim().split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // "1. 構成要件A: 説明" 形式をパース
+    const match = trimmed.match(/^(\d+\.?\s*|[-•]\s*)(.+?):\s*(.+)$/);
+    if (match) {
+      const [, , id, description] = match;
+      requirements.push({
+        id: id.trim(),
+        description: description.trim(),
+      });
+    }
+  }
+
+  return requirements;
+}
+```
+
+**ユニットテスト（__tests__/lib/requirements.test.ts）**:
+```typescript
+import { parseRequirements } from '@/lib/requirements';
+
+describe('parseRequirements', () => {
+  it('should parse requirements from GPT response', () => {
+    const response = `
+1. 構成要件A: サーバーとクライアント端末を含むシステム
+2. 構成要件B: 遠隔制御機能を有すること
+3. 構成要件C: AR表示機能を備えること
+`;
+
+    const result = parseRequirements(response);
+
+    expect(result).toHaveLength(3);
+    expect(result[0]).toEqual({
+      id: '構成要件A',
+      description: 'サーバーとクライアント端末を含むシステム',
+    });
+    expect(result[2].id).toBe('構成要件C');
+  });
+
+  it('should handle empty response', () => {
+    const result = parseRequirements('');
+    expect(result).toEqual([]);
+  });
+
+  it('should handle bullet points', () => {
+    const response = `
+- 構成要件1: 第一の機能
+- 構成要件2: 第二の機能
+`;
+    const result = parseRequirements(response);
+    expect(result).toHaveLength(2);
+  });
+});
+```
+
+### Day 5: Web検索モジュールとテスト戦略
 
 **作業内容**:
-1. Web検索モジュールの実装（Perplexity/SerpAPI + フォールバック）
-2. 単体テストの作成
-3. 初期テスト実行
+1. Web検索モジュールの実装（TypeScript）
+2. 単体テスト（Jest）の作成と実行
+3. E2Eテスト（Playwright）のセットアップ
+4. 初期テスト実行とCI設定
 
 **成果物**:
-- `modules/web_search.py`
-- `tests/test_requirement_extractor.py`
+- `src/lib/search.ts` - Web検索クライアント
+- `__tests__/lib/search.test.ts` - 検索モジュールのユニットテスト
+- `__tests__/lib/openai.test.ts` - OpenAIクライアントのテスト
+- `e2e/` - E2Eテストディレクトリ
+- `jest.setup.js` - Jestセットアップ
+- `.github/workflows/test.yml` - CI設定（オプション）
 
-**サンプルコード（modules/web_search.py）**:
-```python
-import os
-import requests
-from typing import List, Dict, Optional
+**テスト戦略**:
+- **ユニットテスト（Jest）**: ライブラリ関数（parse系、ユーティリティ）
+- **E2Eテスト（Playwright）**: UI操作、API統合、画面遷移
 
-class WebSearchClient:
-    def __init__(self):
-        self.perplexity_key = os.getenv("PERPLEXITY_API_KEY")
-        self.serpapi_key = os.getenv("SERPAPI_KEY")
+**サンプルコード（src/lib/search.ts）**:
+```typescript
+import axios from 'axios';
 
-    def search(
-        self,
-        query: str,
-        num_results: int = 5
-    ) -> List[Dict[str, str]]:
-        """Web検索を実行（Perplexity → SerpAPI → フォールバック）"""
+export interface SearchResult {
+  title: string;
+  url: string;
+  snippet: string;
+}
 
-        # Perplexity APIを試す
-        if self.perplexity_key:
-            try:
-                return self._search_perplexity(query, num_results)
-            except Exception as e:
-                print(f"Perplexity API failed: {e}")
+export class WebSearchClient {
+  private perplexityKey: string | undefined;
+  private serpapiKey: string | undefined;
 
-        # SerpAPIを試す
-        if self.serpapi_key:
-            try:
-                return self._search_serpapi(query, num_results)
-            except Exception as e:
-                print(f"SerpAPI failed: {e}")
+  constructor() {
+    this.perplexityKey = process.env.PERPLEXITY_API_KEY;
+    this.serpapiKey = process.env.SERPAPI_KEY;
+  }
 
-        # フォールバック: 基本的なスクレイピング
-        return self._search_fallback(query, num_results)
+  async search(query: string, numResults: number = 5): Promise<SearchResult[]> {
+    // Perplexity APIを試す
+    if (this.perplexityKey) {
+      try {
+        return await this.searchPerplexity(query, numResults);
+      } catch (error) {
+        console.error('Perplexity API failed:', error);
+      }
+    }
 
-    def _search_perplexity(self, query: str, num_results: int) -> List[Dict[str, str]]:
-        """Perplexity API検索"""
-        # TODO: Perplexity API実装
-        pass
+    // SerpAPIを試す
+    if (this.serpapiKey) {
+      try {
+        return await this.searchSerpAPI(query, numResults);
+      } catch (error) {
+        console.error('SerpAPI failed:', error);
+      }
+    }
 
-    def _search_serpapi(self, query: str, num_results: int) -> List[Dict[str, str]]:
-        """SerpAPI検索"""
-        url = "https://serpapi.com/search"
-        params = {
-            "q": query,
-            "api_key": self.serpapi_key,
-            "num": num_results
-        }
+    // フォールバック: 基本的なスクレイピング
+    return this.searchFallback(query, numResults);
+  }
 
-        response = requests.get(url, params=params)
-        response.raise_for_status()
+  private async searchPerplexity(query: string, numResults: number): Promise<SearchResult[]> {
+    // TODO: Perplexity API実装
+    throw new Error('Perplexity API not implemented');
+  }
 
-        data = response.json()
-        results = []
+  private async searchSerpAPI(query: string, numResults: number): Promise<SearchResult[]> {
+    const response = await axios.get('https://serpapi.com/search', {
+      params: {
+        q: query,
+        api_key: this.serpapiKey,
+        num: numResults,
+      },
+    });
 
-        for item in data.get("organic_results", []):
-            results.append({
-                "title": item.get("title", ""),
-                "url": item.get("link", ""),
-                "snippet": item.get("snippet", "")
-            })
+    const results: SearchResult[] = [];
+    for (const item of response.data.organic_results || []) {
+      results.push({
+        title: item.title || '',
+        url: item.link || '',
+        snippet: item.snippet || '',
+      });
+    }
 
-        return results
+    return results;
+  }
 
-    def _search_fallback(self, query: str, num_results: int) -> List[Dict[str, str]]:
-        """フォールバック検索（基本的なスクレイピング）"""
-        # 簡易実装: 実際にはより高度なスクレイピングが必要
-        print(f"Warning: Using fallback search for query: {query}")
-        return []
+  private searchFallback(query: string, numResults: number): SearchResult[] {
+    console.warn(`Using fallback search for query: ${query}`);
+    return [];
+  }
+}
 ```
 
 ---
@@ -380,257 +553,369 @@ class WebSearchClient:
 3. データ保存機能の実装
 
 **成果物**:
-- `modules/compliance_checker.py`
-- `modules/report_generator.py`
+- `src/lib/compliance.ts` - 充足性判定モジュール
+- `src/lib/storage.ts` - データ保存モジュール
 
-**サンプルコード（modules/compliance_checker.py）**:
-```python
-import yaml
-from typing import Dict, List
-from utils.openai_client import OpenAIClient
-from modules.web_search import WebSearchClient
+**サンプルコード（src/lib/compliance.ts）**:
+```typescript
+import { OpenAIClient } from './openai';
+import { WebSearchClient, SearchResult } from './search';
+import { PROMPTS } from './prompts';
+import type { Requirement } from '@/types/patent';
+import type { ComplianceResult } from '@/types/analysis';
 
-class ComplianceChecker:
-    def __init__(self, prompt_config_path: str = "config/prompts.yaml"):
-        self.client = OpenAIClient()
-        self.search_client = WebSearchClient()
-        with open(prompt_config_path, 'r', encoding='utf-8') as f:
-            self.prompts = yaml.safe_load(f)
+export class ComplianceChecker {
+  private openaiClient: OpenAIClient;
+  private searchClient: WebSearchClient;
 
-    def check_compliance(
-        self,
-        requirement: Dict[str, str],
-        product_name: str,
-        company_name: str
-    ) -> Dict[str, any]:
-        """構成要件の充足性を判定"""
+  constructor() {
+    this.openaiClient = new OpenAIClient();
+    this.searchClient = new WebSearchClient();
+  }
 
-        # 製品情報を検索
-        search_query = f"{company_name} {product_name} specifications features"
-        search_results = self.search_client.search(search_query, num_results=3)
+  async checkCompliance(
+    requirement: Requirement,
+    productName: string,
+    companyName: string
+  ): Promise<ComplianceResult> {
+    // 製品情報を検索
+    const searchQuery = `${companyName} ${productName} specifications features`;
+    const searchResults = await this.searchClient.search(searchQuery, 3);
 
-        # 検索結果を製品仕様として整理
-        product_spec = self._format_search_results(search_results)
+    // 検索結果を製品仕様として整理
+    const productSpec = this.formatSearchResults(searchResults);
 
-        # GPTで充足性を判定
-        system_prompt = self.prompts['check_compliance']['system']
-        user_prompt = self.prompts['check_compliance']['user'].format(
-            requirement=requirement['description'],
-            product_name=product_name,
-            company_name=company_name,
-            product_spec=product_spec
-        )
+    // GPTで充足性を判定
+    const systemPrompt = PROMPTS.checkCompliance.system;
+    const userPrompt = PROMPTS.checkCompliance.user(
+      requirement.description,
+      productName,
+      companyName,
+      productSpec
+    );
 
-        response = self.client.generate(system_prompt, user_prompt)
+    const response = await this.openaiClient.generate(systemPrompt, userPrompt);
 
-        # レスポンスをパース
-        judgment = self._parse_judgment(response, search_results)
+    // レスポンスをパース
+    const judgment = this.parseJudgment(response);
 
-        return {
-            'requirement_id': requirement['id'],
-            'requirement': requirement['description'],
-            'compliance': judgment['compliance'],
-            'reason': judgment['reason'],
-            'evidence': judgment['evidence'],
-            'urls': [r['url'] for r in search_results]
+    return {
+      requirementId: requirement.id,
+      requirement: requirement.description,
+      compliance: judgment.compliance,
+      reason: judgment.reason,
+      evidence: judgment.evidence,
+      urls: searchResults.map((r) => r.url),
+    };
+  }
+
+  private formatSearchResults(results: SearchResult[]): string {
+    return results
+      .map((result, i) => `${i + 1}. ${result.title}\n${result.snippet}`)
+      .join('\n\n');
+  }
+
+  private parseJudgment(response: string): {
+    compliance: '○' | '×';
+    reason: string;
+    evidence: string;
+  } {
+    const lines = response.trim().split('\n');
+    const judgment = {
+      compliance: '×' as '○' | '×',
+      reason: '',
+      evidence: '',
+    };
+
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (trimmedLine.includes('充足判断') || trimmedLine.toLowerCase().includes('compliance')) {
+        if (trimmedLine.includes('○')) {
+          judgment.compliance = '○';
+        } else if (trimmedLine.includes('×')) {
+          judgment.compliance = '×';
         }
+      } else if (trimmedLine.includes('理由') || trimmedLine.toLowerCase().includes('reason')) {
+        judgment.reason = trimmedLine.includes(':') ? trimmedLine.split(':', 2)[1].trim() : trimmedLine;
+      } else if (trimmedLine.includes('根拠') || trimmedLine.toLowerCase().includes('evidence')) {
+        judgment.evidence = trimmedLine.includes(':') ? trimmedLine.split(':', 2)[1].trim() : trimmedLine;
+      }
+    }
 
-    def _format_search_results(self, results: List[Dict[str, str]]) -> str:
-        """検索結果を整形"""
-        formatted = []
-        for i, result in enumerate(results, 1):
-            formatted.append(f"{i}. {result['title']}\n{result['snippet']}")
-        return "\n\n".join(formatted)
+    return judgment;
+  }
+}
 
-    def _parse_judgment(
-        self,
-        response: str,
-        search_results: List[Dict[str, str]]
-    ) -> Dict[str, str]:
-        """判定結果をパース"""
-        lines = response.strip().split('\n')
-        judgment = {
-            'compliance': '×',
-            'reason': '',
-            'evidence': ''
-        }
-
-        for line in lines:
-            line = line.strip()
-            if '充足判断' in line or 'compliance' in line.lower():
-                if '○' in line:
-                    judgment['compliance'] = '○'
-                elif '×' in line:
-                    judgment['compliance'] = '×'
-            elif '理由' in line or 'reason' in line.lower():
-                judgment['reason'] = line.split(':', 1)[1].strip() if ':' in line else line
-            elif '根拠' in line or 'evidence' in line.lower():
-                judgment['evidence'] = line.split(':', 1)[1].strip() if ':' in line else line
-
-        return judgment
+// ヘルパー関数
+export async function checkCompliance(
+  requirement: Requirement,
+  productName: string,
+  companyName: string
+): Promise<ComplianceResult> {
+  const checker = new ComplianceChecker();
+  return checker.checkCompliance(requirement, productName, companyName);
+}
 ```
 
-### Day 8-9: Streamlit UIの開発
+### Day 8-9: Next.js UIの開発
 
 **作業内容**:
-1. Streamlitメインアプリの実装
-2. UI/UXの調整
-3. 入力フォームとレポート表示の実装
+1. Next.jsページとレイアウトの実装
+2. shadcn/uiコンポーネントの統合
+3. 分析ページとフォームの実装
+4. Playwrightで動作確認
 
 **成果物**:
-- `src/main.py`
+- `src/app/layout.tsx` - ルートレイアウト
+- `src/app/page.tsx` - トップページ
+- `src/app/analyze/page.tsx` - 分析ページ
+- `src/components/PatentInputForm.tsx` - 特許情報入力フォーム
+- `src/components/RequirementsList.tsx` - 構成要件リスト
+- `src/components/ComplianceResults.tsx` - 充足性判定結果
+- `e2e/analyze.spec.ts` - E2Eテスト
 
-**サンプルコード（src/main.py）**:
-```python
-import streamlit as st
-import json
-from datetime import datetime
-from modules.requirement_extractor import RequirementExtractor
-from modules.compliance_checker import ComplianceChecker
-from utils.data_storage import DataStorage
+**実装方針**:
+1. **shadcn/ui導入**: `npx shadcn-ui@latest init`でセットアップ
+2. **必要なコンポーネント**: Button, Card, Input, Textarea, Badge, Dialog
+3. **Tailwind CSS**: レスポンシブデザイン対応
+4. **状態管理**: React hooks（useState, useEffect）
+5. **API呼び出し**: fetch APIでNext.js API Routesを呼び出し
 
-# ページ設定
-st.set_page_config(
-    page_title="特許侵害調査システム - Phase 1 PoC",
-    page_icon="🔍",
-    layout="wide"
-)
+**主要ページの概要**:
 
-# タイトル
-st.title("🔍 特許侵害調査システム - Phase 1 PoC")
-st.markdown("特許の構成要件抽出と侵害可能性の自動判定")
+**トップページ（src/app/page.tsx）**:
+- プロジェクト概要の表示
+- `/analyze`への導線
 
-# サイドバー: 入力フォーム
-with st.sidebar:
-    st.header("📝 特許情報入力")
+**分析ページ（src/app/analyze/page.tsx）**:
+- 特許情報入力フォーム
+- リアルタイム分析実行
+- 結果表示エリア
+- JSONダウンロード機能
 
-    patent_number = st.text_input("特許番号", placeholder="例: 06195960")
-    claim_text = st.text_area(
-        "請求項1",
-        height=200,
-        placeholder="請求項1の全文を入力してください"
-    )
+**分析ページ（src/app/analyze/page.tsx）**:
+```typescript
+'use client';
 
-    st.header("🏢 対象企業・製品")
-    company_name = st.text_input("企業名", placeholder="例: TeamViewer")
-    product_name = st.text_input("製品名", placeholder="例: TeamViewer Assist AR")
+import { useState } from 'react';
+import { PatentInputForm } from '@/components/PatentInputForm';
+import { RequirementsList } from '@/components/RequirementsList';
+import { ComplianceResults } from '@/components/ComplianceResults';
+import type { AnalysisResult } from '@/types/analysis';
 
-    analyze_button = st.button("🚀 分析開始", type="primary", use_container_width=True)
+export default function AnalyzePage() {
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-# メインエリア
-if analyze_button:
-    if not patent_number or not claim_text:
-        st.error("特許番号と請求項1を入力してください")
-    elif not company_name or not product_name:
-        st.error("企業名と製品名を入力してください")
-    else:
-        with st.spinner("分析中..."):
-            # 構成要件抽出
-            st.subheader("📋 構成要件抽出")
-            extractor = RequirementExtractor()
-            requirements = extractor.extract_requirements(patent_number, claim_text)
+  const handleAnalyze = async (data: {
+    patentNumber: string;
+    claimText: string;
+    companyName: string;
+    productName: string;
+  }) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const analysisResult = await response.json();
+      setResult(analysisResult);
+    } catch (error) {
+      console.error('Analysis failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            # 構成要件を表示
-            for req in requirements:
-                st.markdown(f"**{req['id']}**: {req['description']}")
+  return (
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-8">特許侵害調査システム</h1>
+      <PatentInputForm onSubmit={handleAnalyze} isLoading={isLoading} />
+      {result && (
+        <div className="mt-8 space-y-6">
+          <RequirementsList requirements={result.requirements} />
+          <ComplianceResults results={result.complianceResults} />
+        </div>
+      )}
+    </div>
+  );
+}
+```
 
-            st.divider()
+**入力フォームコンポーネント（src/components/PatentInputForm.tsx）**:
+```typescript
+'use client';
 
-            # 充足性判定
-            st.subheader("✅ 充足性判定")
-            checker = ComplianceChecker()
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
-            results = []
-            for req in requirements:
-                with st.expander(f"{req['id']} の判定結果", expanded=True):
-                    result = checker.check_compliance(req, product_name, company_name)
-                    results.append(result)
+interface PatentInputFormProps {
+  onSubmit: (data: {
+    patentNumber: string;
+    claimText: string;
+    companyName: string;
+    productName: string;
+  }) => void;
+  isLoading: boolean;
+}
 
-                    # 判定結果を表示
-                    col1, col2 = st.columns([1, 4])
-                    with col1:
-                        if result['compliance'] == '○':
-                            st.success(result['compliance'])
-                        else:
-                            st.error(result['compliance'])
-                    with col2:
-                        st.markdown(f"**理由**: {result['reason']}")
-                        st.markdown(f"**根拠**: {result['evidence']}")
-                        if result['urls']:
-                            st.markdown("**参考URL**:")
-                            for url in result['urls'][:3]:
-                                st.markdown(f"- {url}")
+export function PatentInputForm({ onSubmit, isLoading }: PatentInputFormProps) {
+  const [formData, setFormData] = useState({
+    patentNumber: '',
+    claimText: '',
+    companyName: '',
+    productName: '',
+  });
 
-            # 総合判定
-            st.divider()
-            st.subheader("📊 総合判定")
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
-            compliant_count = sum(1 for r in results if r['compliance'] == '○')
-            total_count = len(results)
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="patentNumber">特許番号</label>
+        <Input
+          id="patentNumber"
+          value={formData.patentNumber}
+          onChange={(e) => setFormData({ ...formData, patentNumber: e.target.value })}
+          placeholder="例: 06195960"
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="claimText">請求項1</label>
+        <Textarea
+          id="claimText"
+          value={formData.claimText}
+          onChange={(e) => setFormData({ ...formData, claimText: e.target.value })}
+          rows={8}
+          required
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="companyName">企業名</label>
+          <Input
+            id="companyName"
+            value={formData.companyName}
+            onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+            placeholder="例: TeamViewer"
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="productName">製品名</label>
+          <Input
+            id="productName"
+            value={formData.productName}
+            onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
+            placeholder="例: TeamViewer Assist AR"
+            required
+          />
+        </div>
+      </div>
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? '分析中...' : '分析開始'}
+      </Button>
+    </form>
+  );
+}
+```
 
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("総構成要件数", total_count)
-            with col2:
-                st.metric("充足要件数", compliant_count)
-            with col3:
-                compliance_rate = (compliant_count / total_count * 100) if total_count > 0 else 0
-                st.metric("充足率", f"{compliance_rate:.1f}%")
+**APIルート（src/app/api/analyze/route.ts）**:
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { extractRequirements } from '@/lib/requirements';
+import { checkCompliance } from '@/lib/compliance';
 
-            # 侵害可能性判定
-            if compliant_count == total_count:
-                st.success("✅ 侵害可能性: ○（すべての構成要件を充足）")
-            else:
-                st.warning(f"❌ 侵害可能性: ×（{total_count - compliant_count}件の構成要件が不充足）")
+export async function POST(request: NextRequest) {
+  try {
+    const { patentNumber, claimText, companyName, productName } = await request.json();
 
-            # 結果を保存
-            storage = DataStorage()
-            analysis_data = {
-                'patent_number': patent_number,
-                'company_name': company_name,
-                'product_name': product_name,
-                'timestamp': datetime.now().isoformat(),
-                'requirements': requirements,
-                'compliance_results': results,
-                'summary': {
-                    'total_requirements': total_count,
-                    'compliant_requirements': compliant_count,
-                    'compliance_rate': compliance_rate,
-                    'infringement_possibility': '○' if compliant_count == total_count else '×'
-                }
-            }
+    // 構成要件抽出
+    const requirements = await extractRequirements(patentNumber, claimText);
 
-            file_path = storage.save_analysis(analysis_data)
+    // 充足性判定
+    const complianceResults = await Promise.all(
+      requirements.map((req) => checkCompliance(req, productName, companyName))
+    );
 
-            # ダウンロードボタン
-            st.download_button(
-                label="📥 結果をJSONでダウンロード",
-                data=json.dumps(analysis_data, ensure_ascii=False, indent=2),
-                file_name=f"analysis_{patent_number}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                mime="application/json"
-            )
+    // 総合判定
+    const compliantCount = complianceResults.filter((r) => r.compliance === '○').length;
+    const totalCount = requirements.length;
 
-            st.success(f"✅ 分析完了！結果を保存しました: {file_path}")
-else:
-    # 初期画面
-    st.info("👈 サイドバーから特許情報を入力して、分析を開始してください")
+    return NextResponse.json({
+      patentNumber,
+      companyName,
+      productName,
+      timestamp: new Date().toISOString(),
+      requirements,
+      complianceResults,
+      summary: {
+        totalRequirements: totalCount,
+        compliantRequirements: compliantCount,
+        complianceRate: (compliantCount / totalCount) * 100,
+        infringementPossibility: compliantCount === totalCount ? '○' : '×',
+      },
+    });
+  } catch (error) {
+    console.error('Analysis error:', error);
+    return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
+  }
+}
+```
 
-    st.markdown("""
-    ### 使い方
+**E2Eテスト（e2e/analyze.spec.ts）**:
+```typescript
+import { test, expect } from '@playwright/test';
 
-    1. **特許情報入力**: サイドバーに特許番号と請求項1を入力
-    2. **企業・製品情報**: 分析対象の企業名と製品名を入力
-    3. **分析開始**: ボタンをクリックして自動分析を実行
-    4. **結果確認**: 構成要件の充足性と総合判定を確認
-    5. **保存**: 結果をJSONファイルでダウンロード
+test.describe('Patent Analysis Flow', () => {
+  test('should complete full analysis workflow', async ({ page }) => {
+    // ページに移動
+    await page.goto('/analyze');
 
-    ### 機能
+    // タイトルを確認
+    await expect(page.locator('h1')).toContainText('特許侵害調査システム');
 
-    - ✅ 請求項1から構成要件を自動抽出
-    - ✅ Web検索で製品仕様を自動収集
-    - ✅ GPT-3.5-turboで充足性を自動判定
-    - ✅ 結果をJSON形式で保存
-    """)
+    // フォームに入力
+    await page.fill('#patentNumber', '06195960');
+    await page.fill('#claimText', 'サーバーと、クライアント端末と、を含むシステムであって...');
+    await page.fill('#companyName', 'TeamViewer');
+    await page.fill('#productName', 'TeamViewer Assist AR');
+
+    // 分析開始
+    await page.click('button[type="submit"]');
+
+    // ローディング状態を確認
+    await expect(page.locator('button[type="submit"]')).toContainText('分析中');
+
+    // 結果が表示されるまで待機
+    await expect(page.locator('text=構成要件')).toBeVisible({ timeout: 30000 });
+
+    // 構成要件が表示されることを確認
+    await expect(page.locator('text=構成要件A')).toBeVisible();
+
+    // 充足性判定結果が表示されることを確認
+    await expect(page.locator('text=充足性判定')).toBeVisible();
+  });
+
+  test('should validate required fields', async ({ page }) => {
+    await page.goto('/analyze');
+
+    // 空のまま送信
+    await page.click('button[type="submit"]');
+
+    // HTML5のバリデーションが動作することを確認
+    const patentNumberInput = page.locator('#patentNumber');
+    await expect(patentNumberInput).toHaveAttribute('required', '');
+  });
+});
 ```
 
 ### Day 10: テストと修正
@@ -698,26 +983,26 @@ else:
 **Web検索**:
 - 優先順位1: Perplexity API（無料枠: 100req/日）
 - 優先順位2: SerpAPI（無料枠: 100検索/月）
-- フォールバック: requests + BeautifulSoup
+- フォールバック: axios + Cheerio（Node.js用スクレイピング）
 
 ### データ形式
 
 **入力データ**:
 ```json
 {
-  "patent_number": "06195960",
-  "claim_text": "請求項1の全文...",
-  "company_name": "TeamViewer",
-  "product_name": "TeamViewer Assist AR"
+  "patentNumber": "06195960",
+  "claimText": "請求項1の全文...",
+  "companyName": "TeamViewer",
+  "productName": "TeamViewer Assist AR"
 }
 ```
 
 **出力データ**:
 ```json
 {
-  "patent_number": "06195960",
-  "company_name": "TeamViewer",
-  "product_name": "TeamViewer Assist AR",
+  "patentNumber": "06195960",
+  "companyName": "TeamViewer",
+  "productName": "TeamViewer Assist AR",
   "timestamp": "2025-10-13T12:00:00",
   "requirements": [
     {
@@ -725,9 +1010,9 @@ else:
       "description": "構成要件A: ..."
     }
   ],
-  "compliance_results": [
+  "complianceResults": [
     {
-      "requirement_id": "1",
+      "requirementId": "1",
       "requirement": "構成要件A: ...",
       "compliance": "○",
       "reason": "製品は該当機能を実装している",
@@ -736,10 +1021,10 @@ else:
     }
   ],
   "summary": {
-    "total_requirements": 5,
-    "compliant_requirements": 5,
-    "compliance_rate": 100.0,
-    "infringement_possibility": "○"
+    "totalRequirements": 5,
+    "compliantRequirements": 5,
+    "complianceRate": 100.0,
+    "infringementPossibility": "○"
   }
 }
 ```
@@ -753,7 +1038,7 @@ else:
 | **M1: プロジェクト初期化完了** | Day 2 | プロジェクト構造、プロンプト設計 |
 | **M2: コアモジュール完成** | Day 5 | 構成要件抽出、Web検索機能 |
 | **M3: 充足性判定機能完成** | Day 7 | 充足性判定モジュール |
-| **M4: UI完成** | Day 9 | Streamlitアプリ |
+| **M4: UI完成** | Day 9 | Next.jsアプリ |
 | **M5: 検証完了** | Day 12 | 精度検証レポート |
 | **M6: Phase 1完成** | Day 13 | 完成システム + ドキュメント |
 
