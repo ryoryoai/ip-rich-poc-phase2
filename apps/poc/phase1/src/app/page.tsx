@@ -91,15 +91,15 @@ export default function Home() {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="border p-2 text-left">Tier</th>
-                      <th className="border p-2 text-left">TPM制限</th>
+                      <th className="border p-2 text-left">O4 Mini Deep Research<br/>TPM制限</th>
                       <th className="border p-2 text-left">必要条件</th>
-                      <th className="border p-2 text-left">状態</th>
+                      <th className="border p-2 text-left">推奨度</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
+                    <tr className="bg-red-50">
                       <td className="border p-2">Tier 1（現在）</td>
-                      <td className="border p-2">200,000</td>
+                      <td className="border p-2 text-red-700 font-semibold">200,000</td>
                       <td className="border p-2">$5支払い済み</td>
                       <td className="border p-2">❌ 不足</td>
                     </tr>
@@ -115,12 +115,29 @@ export default function Home() {
                       <td className="border p-2 font-bold">$100支払い + 7日経過</td>
                       <td className="border p-2 font-bold">⭐ 推奨</td>
                     </tr>
+                    <tr>
+                      <td className="border p-2">Tier 4</td>
+                      <td className="border p-2">10,000,000</td>
+                      <td className="border p-2">$250支払い + 14日経過</td>
+                      <td className="border p-2">◎ 大規模</td>
+                    </tr>
+                    <tr>
+                      <td className="border p-2">Tier 5</td>
+                      <td className="border p-2">30,000,000</td>
+                      <td className="border p-2">$1,000支払い + 30日経過</td>
+                      <td className="border p-2">◎ エンタープライズ</td>
+                    </tr>
                   </tbody>
                 </table>
                 <p className="mt-2 text-xs">
-                  参考: <a href="https://platform.openai.com/docs/guides/rate-limits#usage-tiers"
+                  <span className="font-semibold">※ 1件の特許調査には約30,000〜50,000トークンが必要</span><br/>
+                  参考: <a href="https://platform.openai.com/docs/models/o4-mini-deep-research"
                     className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
-                    OpenAI Usage Tiers Documentation
+                    O4 Mini Deep Research Rate Limits
+                  </a> |
+                  <a href="https://platform.openai.com/docs/guides/rate-limits#usage-tiers"
+                    className="text-blue-600 underline ml-1" target="_blank" rel="noopener noreferrer">
+                    Usage Tiers
                   </a>
                 </p>
               </div>
