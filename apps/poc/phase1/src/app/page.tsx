@@ -10,45 +10,7 @@ export default function Home() {
         <p className="text-center mb-8">
           特許の構成要件抽出と侵害可能性を自動判定するシステムです
         </p>
-        <div className="flex justify-center gap-4">
-          <Link
-            href="/analyze"
-            className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium"
-          >
-            🚀 侵害調査を開始
-          </Link>
-        </div>
-        <div className="mt-16">
-          <h2 className="text-xl font-bold mb-4 text-center">システムの特徴</h2>
-          <div className="max-w-2xl mx-auto space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-bold mb-2">🔍 Step 1: 特許情報取得</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>特許番号のみ入力でOK</li>
-                <li>O4 Mini Deep Researchが特許情報を自動取得</li>
-                <li>J-PlatPat、USPTO、Google Patentsから情報収集</li>
-                <li>請求項1と特許権者を自動抽出</li>
-              </ul>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="font-bold mb-2">🎯 Step 2: 潜在的侵害製品の検出</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Deep Researchが関連製品を自動検出</li>
-                <li>日本国内でサービス展開している外国企業を重点調査</li>
-                <li>侵害可能性の高い製品をリストアップ</li>
-              </ul>
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <h3 className="font-bold mb-2">⚖️ Step 3: 侵害調査分析</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>各構成要件の充足性を判定</li>
-                <li>製品の仕様と特許請求項を詳細比較</li>
-                <li>根拠となる公開情報を提示</li>
-                <li>結果をJSON形式でエクスポート</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        
 
         {/* 現状と課題を追加 */}
         <div className="mt-16 space-y-8">
@@ -151,11 +113,10 @@ export default function Home() {
               <div>
                 <h3 className="font-semibold mb-2">2. OpenAI DeepResearch API の検証</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>特許侵害調査1回あたりの実際のトークン使用量とコスト測定</li>
+                  <li>特許侵害調査1回あたりのコスト算出（実際のトークン使用量測定）</li>
                   <li>Tier 2（TPM 2,000,000）での実用性検証</li>
-                  <li>Tier 3（TPM 4,000,000）での処理能力検証</li>
-                  <li>処理時間、精度、エラーレートの評価</li>
-                  <li>最適なTierレベルの判定（コストパフォーマンス分析）</li>
+                  <li>処理時間と精度のバランス評価</li>
+                  <li>エラーレートと再試行戦略の検証</li>
                 </ul>
               </div>
 
@@ -183,6 +144,46 @@ export default function Home() {
 
         </div>
       </div>
+      
+        <div className="mt-16">
+          <h2 className="text-xl font-bold mb-4 text-center">システムの特徴</h2>
+          <div className="max-w-2xl mx-auto space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-bold mb-2">🔍 Step 1: 特許情報取得</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>特許番号のみ入力でOK</li>
+                <li>O4 Mini Deep Researchが特許情報を自動取得</li>
+                <li>J-PlatPat、USPTO、Google Patentsから情報収集</li>
+                <li>請求項1と特許権者を自動抽出</li>
+              </ul>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-bold mb-2">🎯 Step 2: 潜在的侵害製品の検出</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Deep Researchが関連製品を自動検出</li>
+                <li>日本国内でサービス展開している外国企業を重点調査</li>
+                <li>侵害可能性の高い製品をリストアップ</li>
+              </ul>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <h3 className="font-bold mb-2">⚖️ Step 3: 侵害調査分析</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>各構成要件の充足性を判定</li>
+                <li>製品の仕様と特許請求項を詳細比較</li>
+                <li>根拠となる公開情報を提示</li>
+                <li>結果をJSON形式でエクスポート</li>
+              </ul>
+            </div>
+          </div>
+      </div>
+      <div className="flex justify-center gap-4">
+          <Link
+            href="/analyze"
+            className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium"
+          >
+            🚀 侵害調査を開始
+          </Link>
+        </div>
     </main>
   );
 }
