@@ -105,25 +105,25 @@ export default function Home() {
                     </tr>
                     <tr>
                       <td className="border p-2">Tier 2</td>
-                      <td className="border p-2">450,000</td>
+                      <td className="border p-2">300,000</td>
                       <td className="border p-2">$50支払い + 7日経過</td>
                       <td className="border p-2">△ 最低限</td>
                     </tr>
                     <tr className="bg-green-100">
                       <td className="border p-2 font-bold">Tier 3（推奨）</td>
-                      <td className="border p-2 font-bold">2,000,000</td>
+                      <td className="border p-2 font-bold">500,000</td>
                       <td className="border p-2 font-bold">$100支払い + 7日経過</td>
                       <td className="border p-2 font-bold">⭐ 推奨</td>
                     </tr>
                     <tr>
                       <td className="border p-2">Tier 4</td>
-                      <td className="border p-2">10,000,000</td>
+                      <td className="border p-2">2,000,000</td>
                       <td className="border p-2">$250支払い + 14日経過</td>
                       <td className="border p-2">◎ 大規模</td>
                     </tr>
                     <tr>
                       <td className="border p-2">Tier 5</td>
-                      <td className="border p-2">30,000,000</td>
+                      <td className="border p-2">10,000,000</td>
                       <td className="border p-2">$1,000支払い + 30日経過</td>
                       <td className="border p-2">◎ エンタープライズ</td>
                     </tr>
