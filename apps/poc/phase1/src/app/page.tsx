@@ -113,11 +113,11 @@ export default function Home() {
                       <td className="border p-2">△ 要検証</td>
                     </tr>
                     <tr className="bg-green-100">
-                      <td className="border p-2 font-bold">Tier 3（推奨）</td>
+                      <td className="border p-2 font-bold">Tier 3</td>
                       <td className="border p-2">5,000</td>
                       <td className="border p-2 font-bold">4,000,000</td>
                       <td className="border p-2 font-bold">$100支払い + 7日経過</td>
-                      <td className="border p-2 font-bold">⭐ 推奨</td>
+                      <td className="border p-2 font-bold">○ 要検証</td>
                     </tr>
                     <tr>
                       <td className="border p-2">Tier 4</td>
@@ -151,10 +151,11 @@ export default function Home() {
               <div>
                 <h3 className="font-semibold mb-2">2. OpenAI DeepResearch API の検証</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>特許侵害調査1回あたりのコスト算出（実際のトークン使用量測定）</li>
+                  <li>特許侵害調査1回あたりの実際のトークン使用量とコスト測定</li>
                   <li>Tier 2（TPM 2,000,000）での実用性検証</li>
-                  <li>処理時間と精度のバランス評価</li>
-                  <li>エラーレートと再試行戦略の検証</li>
+                  <li>Tier 3（TPM 4,000,000）での処理能力検証</li>
+                  <li>処理時間、精度、エラーレートの評価</li>
+                  <li>最適なTierレベルの判定（コストパフォーマンス分析）</li>
                 </ul>
               </div>
 
