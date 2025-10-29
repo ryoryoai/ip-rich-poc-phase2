@@ -49,6 +49,110 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* 現状と課題を追加 */}
+        <div className="mt-16 space-y-8">
+          <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-6">
+            <h2 className="text-xl font-bold mb-4 text-orange-900">⚠️ 現在の実装状況と課題</h2>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold mb-2">✅ 実装済み機能</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>OpenAI O4 Mini Deep Research APIとの統合</li>
+                  <li>特許番号のみでの自動分析機能</li>
+                  <li>非同期処理とポーリングメカニズム（最大3分）</li>
+                  <li>詳細な進行状況のログ出力</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2 text-red-700">🚨 現在の課題</h3>
+                <div className="bg-red-100 p-3 rounded-lg">
+                  <p className="font-medium text-red-900">OpenAI Tier 1のレート制限エラー</p>
+                  <code className="block mt-2 text-xs bg-white p-2 rounded text-red-800">
+                    Rate limit reached for o4-mini-deep-research<br />
+                    Limit: 200,000 TPM (Tier 1)<br />
+                    Required: ~31,000 tokens per request
+                  </code>
+                  <p className="mt-2 text-sm text-gray-700">
+                    特許調査には大量のトークンが必要なため、現在のTier 1では処理できません
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6">
+            <h2 className="text-xl font-bold mb-4 text-green-900">📈 Next Steps</h2>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold mb-2">1. OpenAI Tierアップグレード（最優先）</h3>
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border p-2 text-left">Tier</th>
+                      <th className="border p-2 text-left">TPM制限</th>
+                      <th className="border p-2 text-left">必要条件</th>
+                      <th className="border p-2 text-left">状態</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border p-2">Tier 1（現在）</td>
+                      <td className="border p-2">200,000</td>
+                      <td className="border p-2">$5支払い済み</td>
+                      <td className="border p-2">❌ 不足</td>
+                    </tr>
+                    <tr>
+                      <td className="border p-2">Tier 2</td>
+                      <td className="border p-2">450,000</td>
+                      <td className="border p-2">$50支払い + 7日経過</td>
+                      <td className="border p-2">△ 最低限</td>
+                    </tr>
+                    <tr className="bg-green-100">
+                      <td className="border p-2 font-bold">Tier 3（推奨）</td>
+                      <td className="border p-2 font-bold">2,000,000</td>
+                      <td className="border p-2 font-bold">$100支払い + 7日経過</td>
+                      <td className="border p-2 font-bold">⭐ 推奨</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p className="mt-2 text-xs">
+                  参考: <a href="https://platform.openai.com/docs/guides/rate-limits#usage-tiers"
+                    className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
+                    OpenAI Usage Tiers Documentation
+                  </a>
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">2. 短期的な回避策</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>通常のGPT-4oモデルへの一時的な切り替え</li>
+                  <li>プロンプトの最適化によるトークン使用量の削減</li>
+                  <li>キャッシュ機能の実装（同じ特許の再検索防止）</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">3. 中長期的な改善</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>バッチ処理対応（複数特許の並列処理）</li>
+                  <li>段階的な情報取得（必要最小限から開始）</li>
+                  <li>Claude APIとの併用による負荷分散</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center text-sm text-gray-500 mt-8">
+            <p>詳細については以下をご確認ください:</p>
+            <a href="https://github.com/fshmng09/ip-rich-tools/pull/3"
+              className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
+              GitHub PR #3 - OpenAI O4 Mini Deep Research統合
+            </a>
+          </div>
+        </div>
       </div>
     </main>
   );
