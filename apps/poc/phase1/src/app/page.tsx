@@ -110,7 +110,7 @@ export default function Home() {
                       <td className="border p-2">2,000</td>
                       <td className="border p-2 font-semibold">2,000,000</td>
                       <td className="border p-2">$50支払い + 7日経過</td>
-                      <td className="border p-2">○ 実用可能</td>
+                      <td className="border p-2">△ 要検証</td>
                     </tr>
                     <tr className="bg-green-100">
                       <td className="border p-2 font-bold">Tier 3（推奨）</td>
@@ -149,20 +149,32 @@ export default function Home() {
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">2. 短期的な回避策</h3>
+                <h3 className="font-semibold mb-2">2. OpenAI DeepResearch API の検証</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>通常のGPT-4oモデルへの一時的な切り替え</li>
-                  <li>プロンプトの最適化によるトークン使用量の削減</li>
-                  <li>キャッシュ機能の実装（同じ特許の再検索防止）</li>
+                  <li>特許侵害調査1回あたりのコスト算出（実際のトークン使用量測定）</li>
+                  <li>Tier 2（TPM 2,000,000）での実用性検証</li>
+                  <li>処理時間と精度のバランス評価</li>
+                  <li>エラーレートと再試行戦略の検証</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">3. 中長期的な改善</h3>
+                <h3 className="font-semibold mb-2">3. 特許侵害製品の売上推定機能</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>バッチ処理対応（複数特許の並列処理）</li>
-                  <li>段階的な情報取得（必要最小限から開始）</li>
-                  <li>Claude APIとの併用による負荷分散</li>
+                  <li>検出された侵害製品の市場規模調査</li>
+                  <li>企業の財務情報からの売上推定ロジック構築</li>
+                  <li>損害賠償額の概算計算機能</li>
+                  <li>リスク評価レポートの自動生成</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">4. 自動化とスケール対応</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>バッチ処理による複数特許の一括分析</li>
+                  <li>定期監視機能（新製品リリースの自動検出）</li>
+                  <li>APIエンドポイント化とワークフロー統合</li>
+                  <li>分析結果のダッシュボード化</li>
                 </ul>
               </div>
             </div>
