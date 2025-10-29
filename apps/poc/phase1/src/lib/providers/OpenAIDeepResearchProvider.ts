@@ -144,12 +144,12 @@ export class OpenAIDeepResearchProvider implements IPatentProvider {
             const responseId = data.id;
             console.log('[OpenAI Deep Research] Response is queued/in_progress. Polling for completion...');
 
-            // ポーリングして結果を待つ（最大3分）
+            // ポーリングして結果を待つ（最大15分）
             let attempts = 0;
-            const maxAttempts = 180; // 3分に延長
+            const maxAttempts = 90; // 15分（10秒間隔で90回）
 
             while (attempts < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, 1000)); // 1秒待機
+              await new Promise(resolve => setTimeout(resolve, 10000)); // 10秒待機
 
               const pollResponse = await fetch(`https://api.openai.com/v1/responses/${responseId}`, {
                 method: 'GET',

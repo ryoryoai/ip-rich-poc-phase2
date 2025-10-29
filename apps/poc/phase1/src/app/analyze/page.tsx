@@ -113,7 +113,7 @@ export default function AnalyzePage() {
 
   return (
     <main className="container mx-auto p-8 max-w-5xl">
-      <h1 className="text-3xl font-bold mb-8">特許侵害調査分析（詳細版）</h1>
+      <h1 className="text-3xl font-bold mb-8">特許侵害調査分析</h1>
 
       {/* Step 1: 特許番号入力 */}
       <Card className="mb-8">

@@ -22,7 +22,7 @@ export default function Home() {
                 <ul className="list-disc list-inside space-y-1 text-sm">
                   <li>OpenAI O4 Mini Deep Research APIとの統合</li>
                   <li>特許番号のみでの自動分析機能</li>
-                  <li>非同期処理とポーリングメカニズム（最大3分）</li>
+                  <li>非同期処理とポーリングメカニズム（最大15分、10秒間隔）</li>
                   <li>詳細な進行状況のログ出力</li>
                 </ul>
               </div>
