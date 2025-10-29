@@ -10,45 +10,7 @@ export default function Home() {
         <p className="text-center mb-8">
           特許の構成要件抽出と侵害可能性を自動判定するシステムです
         </p>
-        <div className="flex justify-center gap-4">
-          <Link
-            href="/analyze"
-            className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium"
-          >
-            🚀 侵害調査を開始
-          </Link>
-        </div>
-        <div className="mt-16">
-          <h2 className="text-xl font-bold mb-4 text-center">システムの特徴</h2>
-          <div className="max-w-2xl mx-auto space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-bold mb-2">🔍 Step 1: 特許情報取得</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>特許番号のみ入力でOK</li>
-                <li>O4 Mini Deep Researchが特許情報を自動取得</li>
-                <li>J-PlatPat、USPTO、Google Patentsから情報収集</li>
-                <li>請求項1と特許権者を自動抽出</li>
-              </ul>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="font-bold mb-2">🎯 Step 2: 潜在的侵害製品の検出</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Deep Researchが関連製品を自動検出</li>
-                <li>日本国内でサービス展開している外国企業を重点調査</li>
-                <li>侵害可能性の高い製品をリストアップ</li>
-              </ul>
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <h3 className="font-bold mb-2">⚖️ Step 3: 侵害調査分析</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>各構成要件の充足性を判定</li>
-                <li>製品の仕様と特許請求項を詳細比較</li>
-                <li>根拠となる公開情報を提示</li>
-                <li>結果をJSON形式でエクスポート</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        
 
         {/* 現状と課題を追加 */}
         <div className="mt-16 space-y-8">
@@ -91,69 +53,137 @@ export default function Home() {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="border p-2 text-left">Tier</th>
-                      <th className="border p-2 text-left">TPM制限</th>
+                      <th className="border p-2 text-left">RPM</th>
+                      <th className="border p-2 text-left">TPM</th>
                       <th className="border p-2 text-left">必要条件</th>
-                      <th className="border p-2 text-left">状態</th>
+                      <th className="border p-2 text-left">推奨度</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
+                    <tr className="bg-red-50">
                       <td className="border p-2">Tier 1（現在）</td>
-                      <td className="border p-2">200,000</td>
+                      <td className="border p-2">1,000</td>
+                      <td className="border p-2 text-red-700 font-semibold">200,000</td>
                       <td className="border p-2">$5支払い済み</td>
                       <td className="border p-2">❌ 不足</td>
                     </tr>
-                    <tr>
+                    <tr className="bg-yellow-50">
                       <td className="border p-2">Tier 2</td>
-                      <td className="border p-2">450,000</td>
+                      <td className="border p-2">2,000</td>
+                      <td className="border p-2 font-semibold">2,000,000</td>
                       <td className="border p-2">$50支払い + 7日経過</td>
-                      <td className="border p-2">△ 最低限</td>
+                      <td className="border p-2">△ 要検証</td>
                     </tr>
                     <tr className="bg-green-100">
-                      <td className="border p-2 font-bold">Tier 3（推奨）</td>
-                      <td className="border p-2 font-bold">2,000,000</td>
+                      <td className="border p-2 font-bold">Tier 3</td>
+                      <td className="border p-2">5,000</td>
+                      <td className="border p-2 font-bold">4,000,000</td>
                       <td className="border p-2 font-bold">$100支払い + 7日経過</td>
-                      <td className="border p-2 font-bold">⭐ 推奨</td>
+                      <td className="border p-2 font-bold">○ 要検証</td>
+                    </tr>
+                    <tr>
+                      <td className="border p-2">Tier 4</td>
+                      <td className="border p-2">10,000</td>
+                      <td className="border p-2">10,000,000</td>
+                      <td className="border p-2">$250支払い + 14日経過</td>
+                      <td className="border p-2">◎ 大規模</td>
+                    </tr>
+                    <tr>
+                      <td className="border p-2">Tier 5</td>
+                      <td className="border p-2">30,000</td>
+                      <td className="border p-2">150,000,000</td>
+                      <td className="border p-2">$1,000支払い + 30日経過</td>
+                      <td className="border p-2">◎ エンタープライズ</td>
                     </tr>
                   </tbody>
                 </table>
                 <p className="mt-2 text-xs">
-                  参考: <a href="https://platform.openai.com/docs/guides/rate-limits#usage-tiers"
+                  <span className="font-semibold">※ 1件の特許調査には約30,000〜50,000トークンが必要</span><br/>
+                  参考: <a href="https://platform.openai.com/docs/models/o4-mini-deep-research"
                     className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
-                    OpenAI Usage Tiers Documentation
+                    O4 Mini Deep Research Rate Limits
+                  </a> |
+                  <a href="https://platform.openai.com/docs/guides/rate-limits#usage-tiers"
+                    className="text-blue-600 underline ml-1" target="_blank" rel="noopener noreferrer">
+                    Usage Tiers
                   </a>
                 </p>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">2. 短期的な回避策</h3>
+                <h3 className="font-semibold mb-2">2. OpenAI DeepResearch API の検証</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>通常のGPT-4oモデルへの一時的な切り替え</li>
-                  <li>プロンプトの最適化によるトークン使用量の削減</li>
-                  <li>キャッシュ機能の実装（同じ特許の再検索防止）</li>
+                  <li>特許侵害調査1回あたりのコスト算出（実際のトークン使用量測定）</li>
+                  <li>Tier 2（TPM 2,000,000）での実用性検証</li>
+                  <li>処理時間と精度のバランス評価</li>
+                  <li>エラーレートと再試行戦略の検証</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">3. 中長期的な改善</h3>
+                <h3 className="font-semibold mb-2">3. 特許侵害製品の売上推定機能</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>バッチ処理対応（複数特許の並列処理）</li>
-                  <li>段階的な情報取得（必要最小限から開始）</li>
-                  <li>Claude APIとの併用による負荷分散</li>
+                  <li>検出された侵害製品の市場規模調査</li>
+                  <li>企業の財務情報からの売上推定ロジック構築</li>
+                  <li>損害賠償額の概算計算機能</li>
+                  <li>リスク評価レポートの自動生成</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">4. 自動化とスケール対応</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>バッチ処理による複数特許の一括分析</li>
+                  <li>定期監視機能（新製品リリースの自動検出）</li>
+                  <li>APIエンドポイント化とワークフロー統合</li>
+                  <li>分析結果のダッシュボード化</li>
                 </ul>
               </div>
             </div>
           </div>
 
-          <div className="text-center text-sm text-gray-500 mt-8">
-            <p>詳細については以下をご確認ください:</p>
-            <a href="https://github.com/fshmng09/ip-rich-tools/pull/3"
-              className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
-              GitHub PR #3 - OpenAI O4 Mini Deep Research統合
-            </a>
-          </div>
         </div>
       </div>
+      
+        <div className="mt-16">
+          <h2 className="text-xl font-bold mb-4 text-center">システムの特徴</h2>
+          <div className="max-w-2xl mx-auto space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-bold mb-2">🔍 Step 1: 特許情報取得</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>特許番号のみ入力でOK</li>
+                <li>O4 Mini Deep Researchが特許情報を自動取得</li>
+                <li>J-PlatPat、USPTO、Google Patentsから情報収集</li>
+                <li>請求項1と特許権者を自動抽出</li>
+              </ul>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-bold mb-2">🎯 Step 2: 潜在的侵害製品の検出</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Deep Researchが関連製品を自動検出</li>
+                <li>日本国内でサービス展開している外国企業を重点調査</li>
+                <li>侵害可能性の高い製品をリストアップ</li>
+              </ul>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <h3 className="font-bold mb-2">⚖️ Step 3: 侵害調査分析</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>各構成要件の充足性を判定</li>
+                <li>製品の仕様と特許請求項を詳細比較</li>
+                <li>根拠となる公開情報を提示</li>
+                <li>結果をJSON形式でエクスポート</li>
+              </ul>
+            </div>
+          </div>
+      </div>
+      <div className="flex justify-center gap-4">
+          <Link
+            href="/analyze"
+            className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium"
+          >
+            🚀 侵害調査を開始
+          </Link>
+        </div>
     </main>
   );
 }
