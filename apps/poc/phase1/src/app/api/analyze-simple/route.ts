@@ -67,7 +67,8 @@ J-PlatPat（日本特許情報プラットフォーム）から特許情報を�
 
     console.log(`[API] Step 1: Fetching claim 1 from J-PlatPat...`);
 
-    const patentInfoResponse = await llmProvider.generate(fetchClaimPrompt);
+    const systemPrompt = 'あなたは特許調査の専門家です。J-PlatPatから正確な特許情報を取得してください。';
+    const patentInfoResponse = await llmProvider.generate(systemPrompt, fetchClaimPrompt);
 
     // JSONをパース
     let patentInfo;
@@ -118,7 +119,8 @@ ${patentInfo.claim1}
 
     console.log(`[API] Step 2: Executing infringement analysis with Deep Search...`);
 
-    const analysisResult = await llmProvider.generate(infringementPrompt);
+    const analysisSystemPrompt = '特許侵害調査の専門家として、構成要件の充足性を詳細に分析してください。';
+    const analysisResult = await llmProvider.generate(analysisSystemPrompt, infringementPrompt);
 
     // 結果を構造化して返す
     const result = {
