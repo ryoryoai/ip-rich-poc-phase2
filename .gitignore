@@ -58,3 +58,4 @@ NGROK_SETUP.md
 **/migrate.js
 **/update_job.js
 .claude/
+.vercel

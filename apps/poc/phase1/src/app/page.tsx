@@ -14,131 +14,75 @@ export default function Home() {
 
         {/* 現状と課題を追加 */}
         <div className="mt-16 space-y-8">
-          <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-4 text-orange-900">⚠️ 現在の実装状況と課題</h2>
+          <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6">
+            <h2 className="text-xl font-bold mb-4 text-green-900">✅ 実装完了</h2>
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold mb-2">✅ 実装済み機能</h3>
+                <h3 className="font-semibold mb-2">🎉 Phase 1 PoC 完成</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>OpenAI O4 Mini Deep Research APIとの統合</li>
-                  <li>特許番号のみでの自動分析機能</li>
-                  <li>非同期処理とポーリングメカニズム（最大15分、10秒間隔）</li>
-                  <li>詳細な進行状況のログ出力</li>
+                  <li>OpenAI O4 Mini Deep Research APIによる特許情報の自動取得</li>
+                  <li>特許番号入力のみで侵害可能性のある製品を自動検出</li>
+                  <li>非同期処理による長時間分析のサポート（最大15分）</li>
+                  <li>Supabase + Prismaによるジョブ管理とデータ永続化</li>
+                  <li>Webhook + ポーリングによる確実な結果取得</li>
+                  <li>マークダウン形式での分析結果表示</li>
+                  <li>Vercelへのデプロイ完了（productionスキーマ）</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2 text-red-700">🚨 現在の課題</h3>
-                <div className="bg-red-100 p-3 rounded-lg">
-                  <p className="font-medium text-red-900">OpenAI Tier 1のレート制限エラー</p>
-                  <code className="block mt-2 text-xs bg-white p-2 rounded text-red-800">
-                    Rate limit reached for o4-mini-deep-research<br />
-                    Limit: 200,000 TPM (Tier 1)<br />
-                    Required: ~31,000 tokens per request
-                  </code>
-                  <p className="mt-2 text-sm text-gray-700">
-                    特許調査には大量のトークンが必要なため、現在のTier 1では処理できません
-                  </p>
+                <h3 className="font-semibold mb-2 text-blue-700">📊 動作確認済み項目</h3>
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li>Basic認証（patent:data1234）の動作確認</li>
+                    <li>データベース接続とスキーマ分離（local/production）</li>
+                    <li>環境変数の正しい設定と管理</li>
+                    <li>ビルドとデプロイの成功</li>
+                  </ul>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-4 text-green-900">📈 Next Steps</h2>
+          <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
+            <h2 className="text-xl font-bold mb-4 text-blue-900">🚀 Phase 2に向けて</h2>
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold mb-2">1. OpenAI Tierアップグレード（最優先）</h3>
-                <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border p-2 text-left">Tier</th>
-                      <th className="border p-2 text-left">RPM</th>
-                      <th className="border p-2 text-left">TPM</th>
-                      <th className="border p-2 text-left">必要条件</th>
-                      <th className="border p-2 text-left">推奨度</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="bg-red-50">
-                      <td className="border p-2">Tier 1（現在）</td>
-                      <td className="border p-2">1,000</td>
-                      <td className="border p-2 text-red-700 font-semibold">200,000</td>
-                      <td className="border p-2">$5支払い済み</td>
-                      <td className="border p-2">❌ 不足</td>
-                    </tr>
-                    <tr className="bg-yellow-50">
-                      <td className="border p-2">Tier 2</td>
-                      <td className="border p-2">2,000</td>
-                      <td className="border p-2 font-semibold">2,000,000</td>
-                      <td className="border p-2">$50支払い + 7日経過</td>
-                      <td className="border p-2">△ 要検証</td>
-                    </tr>
-                    <tr className="bg-green-100">
-                      <td className="border p-2 font-bold">Tier 3</td>
-                      <td className="border p-2">5,000</td>
-                      <td className="border p-2 font-bold">4,000,000</td>
-                      <td className="border p-2 font-bold">$100支払い + 7日経過</td>
-                      <td className="border p-2 font-bold">○ 要検証</td>
-                    </tr>
-                    <tr>
-                      <td className="border p-2">Tier 4</td>
-                      <td className="border p-2">10,000</td>
-                      <td className="border p-2">10,000,000</td>
-                      <td className="border p-2">$250支払い + 14日経過</td>
-                      <td className="border p-2">◎ 大規模</td>
-                    </tr>
-                    <tr>
-                      <td className="border p-2">Tier 5</td>
-                      <td className="border p-2">30,000</td>
-                      <td className="border p-2">150,000,000</td>
-                      <td className="border p-2">$1,000支払い + 30日経過</td>
-                      <td className="border p-2">◎ エンタープライズ</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <p className="mt-2 text-xs">
-                  <span className="font-semibold">TPM (Tokens Per Minute):</span> 1分間に処理できるトークンの上限<br/>
-                  <span className="font-semibold">RPM (Requests Per Minute):</span> 1分間に送信できるリクエストの上限<br/>
-                  参考: <a href="https://platform.openai.com/docs/models/o4-mini-deep-research"
-                    className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
-                    O4 Mini Deep Research Rate Limits
-                  </a> |
-                  <a href="https://platform.openai.com/docs/guides/rate-limits#usage-tiers"
-                    className="text-blue-600 underline ml-1" target="_blank" rel="noopener noreferrer">
-                    Usage Tiers
-                  </a>
+                <h3 className="font-semibold mb-2">1. 実用化に向けた課題</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li className="text-orange-700 font-semibold">OpenAI APIのレート制限対策（Tier 2以上へのアップグレード）</li>
+                  <li>分析精度の向上（プロンプトエンジニアリング）</li>
+                  <li>コスト最適化（キャッシュ戦略、必要最小限のトークン使用）</li>
+                  <li>エラーハンドリングとリトライ戦略の強化</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">2. 機能拡張計画</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>複数特許の一括分析機能</li>
+                  <li>侵害製品の売上規模推定</li>
+                  <li>損害賠償額の概算計算</li>
+                  <li>定期的な新製品監視とアラート機能</li>
+                  <li>分析結果のエクスポート機能（Excel、PDF）</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">3. システム改善</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>ユーザー管理とマルチテナント対応</li>
+                  <li>分析履歴の管理とダッシュボード</li>
+                  <li>APIエンドポイント化（外部システム連携）</li>
+                  <li>パフォーマンス最適化とスケーラビリティ向上</li>
+                </ul>
+              </div>
+
+              <div className="bg-yellow-50 p-3 rounded-lg mt-4">
+                <p className="text-sm text-yellow-900">
+                  <strong>💡 推奨事項:</strong> 本格運用前にOpenAI APIのTier 2以上へのアップグレードが必要です。
+                  現在のTier 1（200,000 TPM）では、Deep Research APIの実行に制限があります。
                 </p>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2">2. OpenAI DeepResearch API の検証</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>特許侵害調査1回あたりのコスト算出（実際のトークン使用量測定）</li>
-                  <li>Tier 2（TPM 2,000,000）での実用性検証</li>
-                  <li>処理時間と精度のバランス評価</li>
-                  <li>エラーレートと再試行戦略の検証</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2">3. 特許侵害製品の売上推定機能</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>検出された侵害製品の市場規模調査</li>
-                  <li>企業の財務情報からの売上推定ロジック構築</li>
-                  <li>損害賠償額の概算計算機能</li>
-                  <li>リスク評価レポートの自動生成</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2">4. 自動化とスケール対応</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>バッチ処理による複数特許の一括分析</li>
-                  <li>定期監視機能（新製品リリースの自動検出）</li>
-                  <li>APIエンドポイント化とワークフロー統合</li>
-                  <li>分析結果のダッシュボード化</li>
-                </ul>
               </div>
             </div>
           </div>
@@ -179,7 +123,7 @@ export default function Home() {
       </div>
       <div className="flex justify-center gap-4">
           <Link
-            href="/analyze"
+            href="/research"
             className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium"
           >
             🚀 侵害調査を開始

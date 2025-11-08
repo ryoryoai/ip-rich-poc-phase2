@@ -191,18 +191,6 @@ export default function ResultPage({ params }: { params: { job_id: string } }) {
 
         {result.research_results && (
           <>
-            {/* 入力プロンプト */}
-            {result.input_prompt && (
-              <div className="bg-white shadow rounded-lg p-8 mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  入力プロンプト
-                </h2>
-                <pre className="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 p-4 rounded border border-gray-200">
-                  {result.input_prompt}
-                </pre>
-              </div>
-            )}
-
             {/* Deep Research レポート */}
             {(() => {
               // 最後のmessageタイプのoutputを取得
