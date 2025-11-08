@@ -17,6 +17,8 @@
 - **フロントエンド**: Next.js 14, TypeScript, TailwindCSS, shadcn/ui
 - **LLM**: Claude 3.5 Sonnet（Anthropic）または OpenAI GPT
 - **Web検索**: Tavily API（無料枠: 1000検索/月）
+- **データベース**: Supabase（PostgreSQL）- 無料枠500MB
+- **ORM**: Prisma 6.19.0
 - **アーキテクチャ**: 依存性注入によるプロバイダー切り替え可能
 
 ## セットアップ
@@ -63,7 +65,59 @@ cp .env.local.example .env.local
   TAVILY_API_KEY=tvly-xxxxx
   ```
 
-### 3. 開発サーバーの起動
+#### Supabase（データベース） + Prisma ORM
+- **取得先**: https://supabase.com/
+- **無料枠**: 500MB データベース + 1GB ストレージ
+- **セットアップ手順**:
+  1. Supabaseアカウント作成（無料）
+  2. 新規プロジェクト作成（リージョン: Northeast Asia推奨）
+  3. **Project Settings** → **API** から以下を取得:
+     - Project URL
+     - anon public key
+     - service_role key
+  4. **Project Settings** → **Database** → **Connection string** から:
+     - Connection pooling URL (Transaction modeではなくSession mode)
+  5. `.env.local`に設定（パスワードはURLエンコード必須）:
+     ```bash
+     # Supabase API
+     NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+     SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+     # Prisma (特殊文字は%エンコード: / → %2F, @ → %40)
+     DATABASE_URL="postgresql://postgres.xxxxx:[PASSWORD]@aws-x-xx-xxxx-x.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+     ```
+  6. Prisma Clientを生成:
+     ```bash
+     npm run prisma:generate
+     ```
+
+### 3. データベース接続テスト
+
+#### オプション1: Supabase JS SDK（レガシー）
+
+```bash
+node scripts/test-supabase-connection.mjs
+```
+
+#### オプション2: Prisma ORM（推奨）
+
+開発サーバーを起動後:
+```bash
+# GET: ジョブ一覧・ステータス別集計
+curl http://localhost:3001/api/test-prisma
+
+# POST: テストジョブ作成
+curl -X POST http://localhost:3001/api/test-prisma
+```
+
+または、Prisma Studioでデータベースを視覚的に確認:
+```bash
+npm run prisma:studio
+# http://localhost:5555 で起動
+```
+
+### 4. 開発サーバーの起動
 
 ```bash
 npm run dev
@@ -94,11 +148,12 @@ http://localhost:3001 でアクセス可能
 ## 開発コマンド
 
 ```bash
-npm run dev        # 開発サーバー起動
-npm run build      # プロダクションビルド
-npm run start      # プロダクションサーバー起動
-npm run lint       # Lintチェック
-npm run type-check # 型チェック
+npm run dev                              # 開発サーバー起動
+npm run build                            # プロダクションビルド
+npm run start                            # プロダクションサーバー起動
+npm run lint                             # Lintチェック
+npm run type-check                       # 型チェック
+node scripts/test-supabase-connection.mjs  # Supabase接続テスト
 ```
 
 ## コスト見積もり
@@ -117,6 +172,17 @@ npm run type-check # 型チェック
 ### API Keyエラー
 - `.env.local`ファイルが正しく設定されているか確認
 - APIキーが有効か確認
+
+### データベース接続エラー
+
+**Supabase JS SDK**:
+- `node scripts/test-supabase-connection.mjs` でテスト実行
+- `.env.local`のSupabase API設定を確認
+
+**Prisma ORM**:
+- `npm run prisma:studio` でPrisma Studioが起動するか確認
+- `.env.local`の`DATABASE_URL`を確認（パスワードがURLエンコードされているか）
+- 特殊文字のエンコード例: `/` → `%2F`, `@` → `%40`
 
 ### 検索結果が空
 - Tavily APIキーが設定されているか確認

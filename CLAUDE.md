@@ -4,37 +4,50 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Docusaurus-based documentation site with AWS CloudFront distribution and flexible authentication options (none, basic, Cognito, IP restriction). Infrastructure is managed with Terraform modules.
+An automated patent infringement investigation system with two main components:
+1. **Documentation Site** (`docs-site/`): Docusaurus-based documentation with AWS CloudFront and flexible authentication (none, basic, Cognito, IP restriction)
+2. **Patent Analysis App** (`apps/poc/phase1/`): Next.js PoC that automates patent infringement analysis using AI (Claude/GPT) and web search (Tavily)
 
-## Development Commands
+## Key Commands
 
-### Docusaurus Site (docs-site/)
+### Documentation Site (`docs-site/`)
 
 ```bash
 cd docs-site
 npm install              # Install dependencies
-npm start                # Dev server on http://localhost:1919
+npm start                # Dev server on http://localhost:1919 (custom port!)
 npm run build            # Production build
 npm run serve            # Serve production build on http://localhost:1919
 npm run typecheck        # TypeScript type checking
 npm run format           # Format with Prettier
 npm run format:check     # Check Prettier formatting
-```
 
-### PlantUML Diagrams (docs-site/)
-
-```bash
+# PlantUML Diagrams
 npm run diagrams:generate  # Generate all diagrams
 npm run diagrams:current   # Generate current-workflow.svg
 npm run diagrams:automated # Generate automated-workflow.svg
 npm run diagrams:dataflow  # Generate data-flow.svg
 ```
 
-PlantUML diagrams are in `docs-site/docs/diagrams/*.puml` and generated to `*.svg`.
+### Patent Analysis App (`apps/poc/phase1/`)
 
-### Terraform Infrastructure (infra/)
+```bash
+cd apps/poc/phase1
+npm install              # Install dependencies
+npm run dev              # Dev server on http://localhost:3001 (custom port!)
+npm run build            # Production build
+npm start                # Production server (port 3001)
+npm run lint             # ESLint check
+npm run type-check       # TypeScript type check
+npm run test             # Jest unit tests
+npm run test:watch       # Jest watch mode
+npm run test:e2e         # Playwright E2E tests
+npm run test:e2e:ui      # Playwright UI mode
+```
 
-Use mise for consistent tooling (Terraform 1.9.8, Node.js 20):
+### Infrastructure (`infra/`)
+
+Use mise for consistent Terraform (1.9.8) and Node.js (20) versions:
 
 ```bash
 cd infra
@@ -46,99 +59,126 @@ mise run plan           # terraform plan
 mise run apply          # terraform apply
 mise run validate       # terraform validate
 mise run fmt            # terraform fmt
-mise run fmt-check      # terraform fmt -check
 ```
-
-**Without mise:**
-```bash
-cd infra/environments/dev
-terraform init
-terraform plan
-terraform apply
-```
-
-### Deployment
-
-GitHub Actions auto-deploys on workflow_dispatch. Manual deployment via `deploy.yml` workflow requires:
-- `AWS_ROLE_ARN`
-- `AWS_S3_BUCKET`
-- `AWS_CLOUDFRONT_DISTRIBUTION_ID`
 
 ## Architecture
 
-### Directory Structure
+### Patent Analysis App Architecture
+
+```
+apps/poc/phase1/
+├── src/
+│   ├── app/              # Next.js App Router pages
+│   │   ├── api/analyze   # Main analysis API endpoint
+│   │   └── analyze/      # Analysis UI page
+│   ├── services/         # Core business logic
+│   │   ├── PatentInfringementAnalyzer.ts    # Main orchestrator
+│   │   ├── RequirementExtractionService.ts  # Extract patent requirements
+│   │   └── ComplianceCheckService.ts        # Check product compliance
+│   └── interfaces/       # Provider interfaces (LLM, Search, Storage)
+└── .env.local.example    # Environment variables template
+```
+
+**Key Services Flow**:
+1. `PatentInfringementAnalyzer` orchestrates the entire analysis
+2. `RequirementExtractionService` extracts structured requirements from patent claims
+3. Search provider (Tavily/Dummy) finds product information
+4. `ComplianceCheckService` evaluates each requirement against product specs
+5. Results formatted as JSON with infringement probability score
+
+**Provider Pattern**: Dependency injection allows swapping LLM (Claude/OpenAI) and search (Tavily/Dummy) providers via environment variables.
+
+### Infrastructure Architecture
 
 ```
 infra/
-  environments/dev/       # Dev environment Terraform configs
-  modules/docusaurus/     # Reusable Docusaurus module
-    cloudfront.tf         # CloudFront + ACM + Route53
-    cloudfront_functions.tf # Basic auth
-    cognito.tf            # Cognito + Lambda@Edge OAuth2
-    waf.tf                # IP restriction
-    s3.tf                 # S3 static hosting
-    iam.tf                # GitHub Actions IAM
-    lambda/               # Lambda@Edge function for Cognito
-  tools/docs-site/        # Additional infrastructure tools
-  .mise.toml              # Terraform tooling config
-
-docs-site/
-  docs/                   # Markdown documentation
-  src/                    # React components and custom CSS
-  static/                 # Static assets
-  docusaurus.config.ts    # Docusaurus configuration
-  package.json            # Node dependencies and scripts
+├── environments/dev/       # Environment-specific configs
+│   └── main.tf            # Invokes docusaurus module
+├── modules/docusaurus/     # Reusable Terraform module
+│   ├── cloudfront.tf      # CDN + custom domain
+│   ├── s3.tf              # Private static hosting bucket
+│   ├── cognito.tf         # OAuth2 authentication (optional)
+│   ├── waf.tf             # IP restriction (optional)
+│   └── lambda/            # Lambda@Edge for Cognito auth
+└── .mise.toml             # Tool version management
 ```
 
-### Authentication Modes
-
-Configure via `infra/environments/dev/terraform.tfvars`:
-
-1. **none**: Public access
-2. **basic**: CloudFront Functions (single user)
-3. **cognito**: Lambda@Edge + AWS Cognito OAuth2 (multi-user)
-4. **ip**: AWS WAF IP allowlist
-
-### Docusaurus Configuration
-
-- **Port**: Dev server runs on 1919 (not default 3000)
-- **Route**: Docs at root path (`routeBasePath: "/"`)
-- **Plugins**: PlantUML (`@mstroppel/remark-local-plantuml`), Mermaid, rehype-raw
-- **Excludes**: `docs/diagrams/README.md` from routing
+**Authentication Modes** (set in `terraform.tfvars`):
+- `none`: Public access
+- `basic`: CloudFront Functions single-user auth
+- `cognito`: Lambda@Edge + Cognito OAuth2 multi-user
+- `ip`: AWS WAF IP allowlist
 
 ## Important Notes
 
-- Docusaurus dev/serve port is **1919**, not 3000
-- Lambda@Edge logs are in **us-east-1** CloudWatch, regardless of deployment region
-- PlantUML diagrams must be regenerated after editing `.puml` files
-- S3 bucket is private; access only via CloudFront OAC
-- When using Cognito auth, run `mise run lambda-install` before Terraform apply
-- Terraform state operations (rm/mv/import) require user approval per global CLAUDE.md
-
-## Common Tasks
-
-### Adding Documentation
-
-1. Create/edit `.md` files in `docs-site/docs/`
-2. Update `docs-site/sidebars.ts` if needed
-3. Run `npm start` to preview locally
-4. Run `npm run build` to verify production build
+### Port Configuration
+- **Docusaurus dev server**: Port **1919** (not 3000)
+- **Patent app dev server**: Port **3001** (not 3000)
 
 ### PlantUML Workflow
-
 1. Edit `.puml` files in `docs-site/docs/diagrams/`
-2. Run `npm run diagrams:generate` (or specific diagram command)
-3. Verify generated `.svg` files render correctly in Docusaurus
+2. Run `npm run diagrams:generate` to regenerate SVGs
+3. Verify generated SVGs render correctly in Docusaurus
+
+### Lambda@Edge Considerations
+- Logs always in **us-east-1** CloudWatch (CloudFront requirement)
+- Run `mise run lambda-install` before deploying Cognito auth
+- Lambda function located in `infra/modules/docusaurus/lambda/`
+
+### Environment Variables (Patent App)
+```bash
+# LLM Provider
+LLM_PROVIDER=claude          # or "openai"
+ANTHROPIC_API_KEY=sk-ant-xxx
+OPENAI_API_KEY=sk-xxx
+
+# Search Provider
+SEARCH_PROVIDER=tavily        # or "dummy"
+TAVILY_API_KEY=tvly-xxx
+
+# Optional Basic Auth (Vercel)
+BASIC_AUTH_USERNAME=admin
+BASIC_AUTH_PASSWORD=secure
+SKIP_AUTH=false              # true only for development
+```
+
+### API Cost Considerations
+- Claude API: ~$0.50 per 10 patent analyses (free tier: $5 credit)
+- Tavily API: 1000 searches/month free (~200-300 analyses)
+- OpenAI: Usage-based pricing as fallback
+
+### Terraform State Operations
+Per global CLAUDE.md: Avoid `terraform state rm/mv/import` without explicit user approval. Use standard Terraform workflow:
+1. Modify `.tf` files
+2. `mise run plan` to review changes
+3. `mise run apply` after approval
+
+### Deployment
+- **Documentation Site**: GitHub Actions workflow (`deploy.yml`) deploys to S3+CloudFront
+- **Patent App**: Vercel deployment via `vercel --prod` or GitHub integration
+
+## Common Development Tasks
+
+### Adding Documentation
+1. Create/edit `.md` files in `docs-site/docs/`
+2. Update `sidebars.ts` if adding new sections
+3. Run `npm start` to preview on localhost:1919
+4. Commit after verifying with `npm run build`
+
+### Modifying Patent Analysis Logic
+1. Core logic in `apps/poc/phase1/src/services/`
+2. Add/modify provider interfaces in `src/interfaces/`
+3. Test locally with `npm run dev` on localhost:3001
+4. Verify types with `npm run type-check`
 
 ### Updating Infrastructure
+1. Modify Terraform in `infra/modules/docusaurus/` or `infra/environments/dev/`
+2. Run `mise run fmt` to format
+3. Run `mise run plan` to preview changes
+4. Apply only after reviewing plan output
 
-1. Modify Terraform files in `infra/modules/docusaurus/` or `infra/environments/dev/`
-2. Run `mise run plan` to review changes
-3. Run `mise run apply` after approval
-4. Avoid destructive state operations without explicit user consent
-
-### Deploying to AWS
-
-1. Trigger GitHub Actions workflow (manual dispatch)
-2. Or push changes to main branch (when auto-deploy enabled in `deploy.yml`)
-3. Verify CloudFront cache invalidation completes
+### Running Analysis Locally
+1. Copy `.env.local.example` to `.env.local`
+2. Add API keys (Claude/OpenAI + Tavily)
+3. `npm run dev` in `apps/poc/phase1/`
+4. Access http://localhost:3001/analyze

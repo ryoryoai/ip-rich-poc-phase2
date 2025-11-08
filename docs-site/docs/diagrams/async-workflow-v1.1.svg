@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="93px" preserveAspectRatio="none" style="width:241px;height:93px;background:#000000;" version="1.1" viewBox="0 0 241 93" width="241px" zoomAndPan="magnify"><defs/><g><rect fill="#33FF02" height="21.4883" style="stroke: #33FF02; stroke-width: 1.0;" width="234" x="5" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="156" x="6" y="20">[From string (line 2) ]</text><text fill="#33FF02" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="0" x="10" y="40.4883"/><text fill="#33FF02" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="234" x="5" y="56.9766">@startuml async-workflow-v1.1</text><text fill="#33FF02" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="90" x="5" y="73.4648">!theme plain</text><text fill="#FF0000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="94" x="10" y="89.9531">Syntax Error?</text><!--
+@startuml async-workflow-v1.1
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Helvetica"
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam shadowing false
+
+title 特許侵害調査システム v1.1 - 非同期処理アーキテクチャ
+
+actor "ユーザー" as User
+participant "Next.js\nフロントエンド" as Frontend
+participant "Next.js API\n/api/analyze/start" as APIStart
+participant "Supabase/Neon\nPostgreSQL" as DB
+participant "Deep Research\nサービス\n(Tavily)" as DeepResearch
+participant "Webhook API\n/api/webhook/research" as WebhookAPI
+participant "LLM Provider\n(Claude/GPT)" as LLM
+
+== フェーズ1: 分析開始（同期処理・即座に完了） ==
+
+User -> Frontend: 特許情報を入力\n(特許番号、請求項、企業名、製品名)
+activate Frontend
+
+Frontend -> APIStart: POST /api/analyze/start\n(分析リクエスト)
+activate APIStart
+
+APIStart -> DB: ジョブ作成\nstatus: 'pending'\njob_id: UUID生成
+activate DB
+DB - -> APIStart: job_id返却
+deactivate DB
+
+APIStart - -> Frontend: 200 OK\n{ job_id, status: 'pending' }
+deactivate APIStart
+
+Frontend - -> User: 分析開始メッセージ表示\n(ジョブID表示)
+deactivate Frontend
+
+== フェーズ2: 非同期処理（バックグラウンド） ==
+
+note over APIStart, DeepResearch
+  Vercelのタイムアウト(300秒)を回避するため、
+  Deep Researchを外部サービス化してWebhook受信
+end note
+
+APIStart -> DeepResearch: POST /research/start\n(webhook_url, job_id, query)
+activate DeepResearch
+note right of DeepResearch
+  Tavily Deep Research APIを使用
+  または自前のDeep Researchサービス
+  (Render.com無料枠で15分まで実行可能)
+end note
+
+DeepResearch - -> APIStart: 202 Accepted\n(非同期処理開始)
+deactivate DeepResearch
+
+APIStart -> DB: ジョブステータス更新\nstatus: 'researching'
+activate DB
+DB - -> APIStart: 更新完了
+deactivate DB
+
+== フェーズ3: ポーリングによるステータス確認 ==
+
+User -> Frontend: ステータス確認\n(自動ポーリング)
+activate Frontend
+
+Frontend -> APIStart: GET /api/analyze/status/{job_id}
+activate APIStart
+
+APIStart -> DB: ジョブステータス取得
+activate DB
+DB - -> APIStart: { status: 'researching', progress: 30% }
+deactivate DB
+
+APIStart - -> Frontend: ステータス返却
+deactivate APIStart
+
+Frontend - -> User: 進捗表示\n"調査中... 30%"
+deactivate Frontend
+
+== フェーズ4: Deep Research完了とWebhook送信 ==
+
+DeepResearch -> DeepResearch: Web検索実行\n(5-15分)
+activate DeepResearch
+
+DeepResearch -> WebhookAPI: POST /api/webhook/research\n{ job_id, results }
+activate WebhookAPI
+
+WebhookAPI -> DB: 検索結果保存\nstatus: 'analyzing'
+activate DB
+DB - -> WebhookAPI: 保存完了
+deactivate DB
+deactivate DeepResearch
+
+== フェーズ5: LLM分析（構成要件抽出・充足性判定） ==
+
+WebhookAPI -> LLM: 構成要件抽出\n(請求項1を送信)
+activate LLM
+LLM - -> WebhookAPI: 構成要件リスト
+deactivate LLM
+
+WebhookAPI -> DB: 構成要件保存
+activate DB
+DB - -> WebhookAPI: 保存完了
+deactivate DB
+
+loop 各構成要件ごと
+  WebhookAPI -> LLM: 充足性判定\n(構成要件 + 製品仕様)
+  activate LLM
+  LLM - -> WebhookAPI: 判定結果 (○/×)
+  deactivate LLM
+
+  WebhookAPI -> DB: 判定結果保存
+  activate DB
+  DB - -> WebhookAPI: 保存完了
+  deactivate DB
+end
+
+WebhookAPI -> DB: 最終結果保存\nstatus: 'completed'
+activate DB
+DB - -> WebhookAPI: 保存完了
+deactivate DB
+
+WebhookAPI - -> DeepResearch: 200 OK (Webhook完了)
+
+== フェーズ6: 結果取得 ==
+
+User -> Frontend: ステータス確認\n(ポーリング継続)
+activate Frontend
+
+Frontend -> APIStart: GET /api/analyze/status/{job_id}
+activate APIStart
+
+APIStart -> DB: ジョブステータス取得
+activate DB
+DB - -> APIStart: { status: 'completed' }
+deactivate DB
+
+APIStart - -> Frontend: 完了通知
+deactivate APIStart
+
+Frontend -> APIStart: GET /api/analyze/result/{job_id}
+activate APIStart
+
+APIStart -> DB: 分析結果取得
+activate DB
+DB - -> APIStart: 完全な分析結果JSON
+deactivate DB
+
+APIStart - -> Frontend: 分析結果返却
+deactivate APIStart
+
+Frontend - -> User: 結果表示\n(侵害可能性、構成要件別判定)
+deactivate Frontend
+
+@enduml
+
+PlantUML version 1.2019.06(Sat May 25 02:10:25 JST 2019)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 25
+Operating System: Mac OS X
+OS Version: 15.6.1
+Default Encoding: UTF-8
+Language: ja
+Country: JP
+--></g></svg>
