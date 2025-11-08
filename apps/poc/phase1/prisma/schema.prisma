@@ -9,11 +9,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model analysis_jobs_local {
+model analysis_jobs {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -30,7 +31,9 @@ model analysis_jobs_local {
   productName  String @map("product_name") @db.Text
 
   // Deep Research結果
-  researchResults Json? @map("research_results") @db.JsonB
+  openaiResponseId String? @map("openai_response_id") @db.Text
+  inputPrompt      String? @map("input_prompt") @db.Text
+  researchResults  Json?   @map("research_results") @db.JsonB
 
   // 分析結果
   requirements      Json? @db.JsonB

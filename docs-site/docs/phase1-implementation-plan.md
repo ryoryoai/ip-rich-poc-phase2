@@ -76,6 +76,7 @@ ip-rich-tools/
 ### Day 1-2: プロジェクト初期化とプロンプト設計
 
 **作業内容**:
+
 1. Next.jsプロジェクト構造の作成
 2. 依存関係の定義（package.json）
 3. TypeScript設定（tsconfig.json）
@@ -84,6 +85,7 @@ ip-rich-tools/
 6. テスト環境のセットアップ（Jest + Playwright）
 
 **成果物**:
+
 - apps/poc/phase1/ プロジェクト骨格
 - package.json（依存関係とスクリプト）
 - tsconfig.json, next.config.js
@@ -92,6 +94,7 @@ ip-rich-tools/
 - テスト設定（jest.config.js, playwright.config.ts）
 
 **package.json**:
+
 ```json
 {
   "name": "phase1-infringement-analyzer",
@@ -143,58 +146,58 @@ ip-rich-tools/
 ```
 
 **jest.config.js**:
+
 ```javascript
-const nextJest = require('next/jest')
+const nextJest = require("next/jest");
 
 const createJestConfig = nextJest({
-  dir: './',
-})
+  dir: "./",
+});
 
 const customJestConfig = {
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testEnvironment: 'jest-environment-jsdom',
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
+  testEnvironment: "jest-environment-jsdom",
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
+    "^@/(.*)$": "<rootDir>/src/$1",
   },
-  testMatch: [
-    '**/__tests__/**/*.ts?(x)',
-    '**/?(*.)+(spec|test).ts?(x)',
-  ],
-}
+  testMatch: ["**/__tests__/**/*.ts?(x)", "**/?(*.)+(spec|test).ts?(x)"],
+};
 
-module.exports = createJestConfig(customJestConfig)
+module.exports = createJestConfig(customJestConfig);
 ```
 
 **playwright.config.ts**:
+
 ```typescript
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  reporter: "html",
   use: {
-    baseURL: 'http://localhost:3001',
-    trace: 'on-first-retry',
+    baseURL: "http://localhost:3001",
+    trace: "on-first-retry",
   },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3001',
+    command: "npm run dev",
+    url: "http://localhost:3001",
     reuseExistingServer: !process.env.CI,
   },
 });
 ```
 
 **.env.local.example**:
+
 ```bash
 # OpenAI API (サーバー側のみ、NEXT_PUBLIC_接頭辞禁止)
 OPENAI_API_KEY=your_openai_api_key_here
@@ -216,18 +219,23 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 ```
 
 **モデル選択の指針**:
+
 - **gpt-3.5-turbo**: 最低コスト（$0.0015/1K tokens）、PoC検証に推奨
 - **gpt-4o-mini**: バランス型（$0.15/1M tokens input）、精度とコストの中間
 - **gpt-4**: 最高精度（$30/1M tokens input）、本番環境で検討
 
 **プロンプトテンプレート（src/lib/prompts.ts）**:
+
 ```typescript
 export const PROMPTS = {
   extractRequirements: {
     system: `あなたは特許の構成要件を抽出する専門家です。
 請求項1を分析し、構成要件を個別に抽出してください。`,
 
-    user: (patentNumber: string, claimText: string) => `以下の特許請求項1から、構成要件を抽出してください。
+    user: (
+      patentNumber: string,
+      claimText: string
+    ) => `以下の特許請求項1から、構成要件を抽出してください。
 各構成要件を番号付きリストで出力してください。
 
 【特許番号】${patentNumber}
@@ -266,12 +274,14 @@ ${requirement}
 ### Day 3-4: コアライブラリの実装（TypeScript）
 
 **作業内容**:
+
 1. OpenAI APIクライアントの実装
 2. 構成要件抽出・パースモジュールの実装
 3. 型定義の作成
 4. ユニットテスト（Jest）の作成
 
 **成果物**:
+
 - `src/lib/openai.ts` - OpenAI APIクライアント
 - `src/lib/requirements.ts` - 構成要件抽出とパース
 - `src/lib/storage.ts` - データ保存
@@ -280,6 +290,7 @@ ${requirement}
 - `__tests__/lib/requirements.test.ts` - ユニットテスト
 
 **型定義（src/types/patent.ts）**:
+
 ```typescript
 export interface Requirement {
   id: string;
@@ -293,13 +304,14 @@ export interface PatentData {
 ```
 
 **型定義（src/types/analysis.ts）**:
+
 ```typescript
-import { Requirement } from './patent';
+import { Requirement } from "./patent";
 
 export interface ComplianceResult {
   requirementId: string;
   requirement: string;
-  compliance: '○' | '×';
+  compliance: "○" | "×";
   reason: string;
   evidence: string;
   urls: string[];
@@ -316,14 +328,15 @@ export interface AnalysisResult {
     totalRequirements: number;
     compliantRequirements: number;
     complianceRate: number;
-    infringementPossibility: '○' | '×';
+    infringementPossibility: "○" | "×";
   };
 }
 ```
 
 **サンプルコード（src/lib/openai.ts）**:
+
 ```typescript
-import OpenAI from 'openai';
+import OpenAI from "openai";
 
 export class OpenAIClient {
   private client: OpenAI;
@@ -335,30 +348,28 @@ export class OpenAIClient {
     this.client = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
-    this.model = process.env.MODEL_NAME || 'gpt-3.5-turbo';
-    this.maxTokens = parseInt(process.env.MAX_TOKENS || '2000', 10);
-    this.temperature = parseFloat(process.env.TEMPERATURE || '0.3');
+    this.model = process.env.MODEL_NAME || "gpt-3.5-turbo";
+    this.maxTokens = parseInt(process.env.MAX_TOKENS || "2000", 10);
+    this.temperature = parseFloat(process.env.TEMPERATURE || "0.3");
   }
 
-  async generate(
-    systemPrompt: string,
-    userPrompt: string,
-    temperature?: number
-  ): Promise<string> {
+  async generate(systemPrompt: string, userPrompt: string, temperature?: number): Promise<string> {
     try {
       const response = await this.client.chat.completions.create({
         model: this.model,
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
         ],
         max_tokens: this.maxTokens,
         temperature: temperature ?? this.temperature,
       });
 
-      return response.choices[0]?.message?.content || '';
+      return response.choices[0]?.message?.content || "";
     } catch (error) {
-      throw new Error(`OpenAI API Error: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `OpenAI API Error: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 }
@@ -368,10 +379,11 @@ export const openaiClient = new OpenAIClient();
 ```
 
 **サンプルコード（src/lib/requirements.ts）**:
+
 ```typescript
-import { openaiClient } from './openai';
-import { PROMPTS } from './prompts';
-import { Requirement } from '@/types/patent';
+import { openaiClient } from "./openai";
+import { PROMPTS } from "./prompts";
+import { Requirement } from "@/types/patent";
 
 export async function extractRequirements(
   patentNumber: string,
@@ -387,7 +399,7 @@ export async function extractRequirements(
 
 export function parseRequirements(response: string): Requirement[] {
   const requirements: Requirement[] = [];
-  const lines = response.trim().split('\n');
+  const lines = response.trim().split("\n");
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -408,12 +420,13 @@ export function parseRequirements(response: string): Requirement[] {
 }
 ```
 
-**ユニットテスト（__tests__/lib/requirements.test.ts）**:
-```typescript
-import { parseRequirements } from '@/lib/requirements';
+**ユニットテスト（**tests**/lib/requirements.test.ts）**:
 
-describe('parseRequirements', () => {
-  it('should parse requirements from GPT response', () => {
+```typescript
+import { parseRequirements } from "@/lib/requirements";
+
+describe("parseRequirements", () => {
+  it("should parse requirements from GPT response", () => {
     const response = `
 1. 構成要件A: サーバーとクライアント端末を含むシステム
 2. 構成要件B: 遠隔制御機能を有すること
@@ -424,18 +437,18 @@ describe('parseRequirements', () => {
 
     expect(result).toHaveLength(3);
     expect(result[0]).toEqual({
-      id: '構成要件A',
-      description: 'サーバーとクライアント端末を含むシステム',
+      id: "構成要件A",
+      description: "サーバーとクライアント端末を含むシステム",
     });
-    expect(result[2].id).toBe('構成要件C');
+    expect(result[2].id).toBe("構成要件C");
   });
 
-  it('should handle empty response', () => {
-    const result = parseRequirements('');
+  it("should handle empty response", () => {
+    const result = parseRequirements("");
     expect(result).toEqual([]);
   });
 
-  it('should handle bullet points', () => {
+  it("should handle bullet points", () => {
     const response = `
 - 構成要件1: 第一の機能
 - 構成要件2: 第二の機能
@@ -449,12 +462,14 @@ describe('parseRequirements', () => {
 ### Day 5: Web検索モジュールとテスト戦略
 
 **作業内容**:
+
 1. Web検索モジュールの実装（TypeScript）
 2. 単体テスト（Jest）の作成と実行
 3. E2Eテスト（Playwright）のセットアップ
 4. 初期テスト実行とCI設定
 
 **成果物**:
+
 - `src/lib/search.ts` - Web検索クライアント
 - `__tests__/lib/search.test.ts` - 検索モジュールのユニットテスト
 - `__tests__/lib/openai.test.ts` - OpenAIクライアントのテスト
@@ -463,12 +478,14 @@ describe('parseRequirements', () => {
 - `.github/workflows/test.yml` - CI設定（オプション）
 
 **テスト戦略**:
+
 - **ユニットテスト（Jest）**: ライブラリ関数（parse系、ユーティリティ）
 - **E2Eテスト（Playwright）**: UI操作、API統合、画面遷移
 
 **サンプルコード（src/lib/search.ts）**:
+
 ```typescript
-import axios from 'axios';
+import axios from "axios";
 
 export interface SearchResult {
   title: string;
@@ -491,7 +508,7 @@ export class WebSearchClient {
       try {
         return await this.searchPerplexity(query, numResults);
       } catch (error) {
-        console.error('Perplexity API failed:', error);
+        console.error("Perplexity API failed:", error);
       }
     }
 
@@ -500,7 +517,7 @@ export class WebSearchClient {
       try {
         return await this.searchSerpAPI(query, numResults);
       } catch (error) {
-        console.error('SerpAPI failed:', error);
+        console.error("SerpAPI failed:", error);
       }
     }
 
@@ -510,11 +527,11 @@ export class WebSearchClient {
 
   private async searchPerplexity(query: string, numResults: number): Promise<SearchResult[]> {
     // TODO: Perplexity API実装
-    throw new Error('Perplexity API not implemented');
+    throw new Error("Perplexity API not implemented");
   }
 
   private async searchSerpAPI(query: string, numResults: number): Promise<SearchResult[]> {
-    const response = await axios.get('https://serpapi.com/search', {
+    const response = await axios.get("https://serpapi.com/search", {
       params: {
         q: query,
         api_key: this.serpapiKey,
@@ -525,9 +542,9 @@ export class WebSearchClient {
     const results: SearchResult[] = [];
     for (const item of response.data.organic_results || []) {
       results.push({
-        title: item.title || '',
-        url: item.link || '',
-        snippet: item.snippet || '',
+        title: item.title || "",
+        url: item.link || "",
+        snippet: item.snippet || "",
       });
     }
 
@@ -548,21 +565,24 @@ export class WebSearchClient {
 ### Day 6-7: 充足性判定モジュールの実装
 
 **作業内容**:
+
 1. 充足性判定モジュールの実装
 2. レポート生成モジュールの実装
 3. データ保存機能の実装
 
 **成果物**:
+
 - `src/lib/compliance.ts` - 充足性判定モジュール
 - `src/lib/storage.ts` - データ保存モジュール
 
 **サンプルコード（src/lib/compliance.ts）**:
+
 ```typescript
-import { OpenAIClient } from './openai';
-import { WebSearchClient, SearchResult } from './search';
-import { PROMPTS } from './prompts';
-import type { Requirement } from '@/types/patent';
-import type { ComplianceResult } from '@/types/analysis';
+import { OpenAIClient } from "./openai";
+import { WebSearchClient, SearchResult } from "./search";
+import { PROMPTS } from "./prompts";
+import type { Requirement } from "@/types/patent";
+import type { ComplianceResult } from "@/types/analysis";
 
 export class ComplianceChecker {
   private openaiClient: OpenAIClient;
@@ -610,35 +630,37 @@ export class ComplianceChecker {
   }
 
   private formatSearchResults(results: SearchResult[]): string {
-    return results
-      .map((result, i) => `${i + 1}. ${result.title}\n${result.snippet}`)
-      .join('\n\n');
+    return results.map((result, i) => `${i + 1}. ${result.title}\n${result.snippet}`).join("\n\n");
   }
 
   private parseJudgment(response: string): {
-    compliance: '○' | '×';
+    compliance: "○" | "×";
     reason: string;
     evidence: string;
   } {
-    const lines = response.trim().split('\n');
+    const lines = response.trim().split("\n");
     const judgment = {
-      compliance: '×' as '○' | '×',
-      reason: '',
-      evidence: '',
+      compliance: "×" as "○" | "×",
+      reason: "",
+      evidence: "",
     };
 
     for (const line of lines) {
       const trimmedLine = line.trim();
-      if (trimmedLine.includes('充足判断') || trimmedLine.toLowerCase().includes('compliance')) {
-        if (trimmedLine.includes('○')) {
-          judgment.compliance = '○';
-        } else if (trimmedLine.includes('×')) {
-          judgment.compliance = '×';
+      if (trimmedLine.includes("充足判断") || trimmedLine.toLowerCase().includes("compliance")) {
+        if (trimmedLine.includes("○")) {
+          judgment.compliance = "○";
+        } else if (trimmedLine.includes("×")) {
+          judgment.compliance = "×";
         }
-      } else if (trimmedLine.includes('理由') || trimmedLine.toLowerCase().includes('reason')) {
-        judgment.reason = trimmedLine.includes(':') ? trimmedLine.split(':', 2)[1].trim() : trimmedLine;
-      } else if (trimmedLine.includes('根拠') || trimmedLine.toLowerCase().includes('evidence')) {
-        judgment.evidence = trimmedLine.includes(':') ? trimmedLine.split(':', 2)[1].trim() : trimmedLine;
+      } else if (trimmedLine.includes("理由") || trimmedLine.toLowerCase().includes("reason")) {
+        judgment.reason = trimmedLine.includes(":")
+          ? trimmedLine.split(":", 2)[1].trim()
+          : trimmedLine;
+      } else if (trimmedLine.includes("根拠") || trimmedLine.toLowerCase().includes("evidence")) {
+        judgment.evidence = trimmedLine.includes(":")
+          ? trimmedLine.split(":", 2)[1].trim()
+          : trimmedLine;
       }
     }
 
@@ -660,12 +682,14 @@ export async function checkCompliance(
 ### Day 8-9: Next.js UIの開発
 
 **作業内容**:
+
 1. Next.jsページとレイアウトの実装
 2. shadcn/uiコンポーネントの統合
 3. 分析ページとフォームの実装
 4. Playwrightで動作確認
 
 **成果物**:
+
 - `src/app/layout.tsx` - ルートレイアウト
 - `src/app/page.tsx` - トップページ
 - `src/app/analyze/page.tsx` - 分析ページ
@@ -675,6 +699,7 @@ export async function checkCompliance(
 - `e2e/analyze.spec.ts` - E2Eテスト
 
 **実装方針**:
+
 1. **shadcn/ui導入**: `npx shadcn-ui@latest init`でセットアップ
 2. **必要なコンポーネント**: Button, Card, Input, Textarea, Badge, Dialog
 3. **Tailwind CSS**: レスポンシブデザイン対応
@@ -684,16 +709,19 @@ export async function checkCompliance(
 **主要ページの概要**:
 
 **トップページ（src/app/page.tsx）**:
+
 - プロジェクト概要の表示
 - `/analyze`への導線
 
 **分析ページ（src/app/analyze/page.tsx）**:
+
 - 特許情報入力フォーム
 - リアルタイム分析実行
 - 結果表示エリア
 - JSONダウンロード機能
 
 **分析ページ（src/app/analyze/page.tsx）**:
+
 ```typescript
 'use client';
 
@@ -745,6 +773,7 @@ export default function AnalyzePage() {
 ```
 
 **入力フォームコンポーネント（src/components/PatentInputForm.tsx）**:
+
 ```typescript
 'use client';
 
@@ -829,10 +858,11 @@ export function PatentInputForm({ onSubmit, isLoading }: PatentInputFormProps) {
 ```
 
 **APIルート（src/app/api/analyze/route.ts）**:
+
 ```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { extractRequirements } from '@/lib/requirements';
-import { checkCompliance } from '@/lib/compliance';
+import { NextRequest, NextResponse } from "next/server";
+import { extractRequirements } from "@/lib/requirements";
+import { checkCompliance } from "@/lib/compliance";
 
 export async function POST(request: NextRequest) {
   try {
@@ -847,7 +877,7 @@ export async function POST(request: NextRequest) {
     );
 
     // 総合判定
-    const compliantCount = complianceResults.filter((r) => r.compliance === '○').length;
+    const compliantCount = complianceResults.filter((r) => r.compliance === "○").length;
     const totalCount = requirements.length;
 
     return NextResponse.json({
@@ -861,59 +891,60 @@ export async function POST(request: NextRequest) {
         totalRequirements: totalCount,
         compliantRequirements: compliantCount,
         complianceRate: (compliantCount / totalCount) * 100,
-        infringementPossibility: compliantCount === totalCount ? '○' : '×',
+        infringementPossibility: compliantCount === totalCount ? "○" : "×",
       },
     });
   } catch (error) {
-    console.error('Analysis error:', error);
-    return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
+    console.error("Analysis error:", error);
+    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
   }
 }
 ```
 
 **E2Eテスト（e2e/analyze.spec.ts）**:
-```typescript
-import { test, expect } from '@playwright/test';
 
-test.describe('Patent Analysis Flow', () => {
-  test('should complete full analysis workflow', async ({ page }) => {
+```typescript
+import { test, expect } from "@playwright/test";
+
+test.describe("Patent Analysis Flow", () => {
+  test("should complete full analysis workflow", async ({ page }) => {
     // ページに移動
-    await page.goto('/analyze');
+    await page.goto("/analyze");
 
     // タイトルを確認
-    await expect(page.locator('h1')).toContainText('特許侵害調査システム');
+    await expect(page.locator("h1")).toContainText("特許侵害調査システム");
 
     // フォームに入力
-    await page.fill('#patentNumber', '06195960');
-    await page.fill('#claimText', 'サーバーと、クライアント端末と、を含むシステムであって...');
-    await page.fill('#companyName', 'TeamViewer');
-    await page.fill('#productName', 'TeamViewer Assist AR');
+    await page.fill("#patentNumber", "06195960");
+    await page.fill("#claimText", "サーバーと、クライアント端末と、を含むシステムであって...");
+    await page.fill("#companyName", "TeamViewer");
+    await page.fill("#productName", "TeamViewer Assist AR");
 
     // 分析開始
     await page.click('button[type="submit"]');
 
     // ローディング状態を確認
-    await expect(page.locator('button[type="submit"]')).toContainText('分析中');
+    await expect(page.locator('button[type="submit"]')).toContainText("分析中");
 
     // 結果が表示されるまで待機
-    await expect(page.locator('text=構成要件')).toBeVisible({ timeout: 30000 });
+    await expect(page.locator("text=構成要件")).toBeVisible({ timeout: 30000 });
 
     // 構成要件が表示されることを確認
-    await expect(page.locator('text=構成要件A')).toBeVisible();
+    await expect(page.locator("text=構成要件A")).toBeVisible();
 
     // 充足性判定結果が表示されることを確認
-    await expect(page.locator('text=充足性判定')).toBeVisible();
+    await expect(page.locator("text=充足性判定")).toBeVisible();
   });
 
-  test('should validate required fields', async ({ page }) => {
-    await page.goto('/analyze');
+  test("should validate required fields", async ({ page }) => {
+    await page.goto("/analyze");
 
     // 空のまま送信
     await page.click('button[type="submit"]');
 
     // HTML5のバリデーションが動作することを確認
-    const patentNumberInput = page.locator('#patentNumber');
-    await expect(patentNumberInput).toHaveAttribute('required', '');
+    const patentNumberInput = page.locator("#patentNumber");
+    await expect(patentNumberInput).toHaveAttribute("required", "");
   });
 });
 ```
@@ -921,11 +952,13 @@ test.describe('Patent Analysis Flow', () => {
 ### Day 10: テストと修正
 
 **作業内容**:
+
 1. 実際の特許データでテスト
 2. バグ修正と調整
 3. ドキュメント作成
 
 **成果物**:
+
 - テスト結果レポート
 - README.md
 - setup.md
@@ -937,11 +970,13 @@ test.describe('Patent Analysis Flow', () => {
 ### Day 11-12: 精度検証
 
 **作業内容**:
+
 1. サンプル特許データで検証（オプティムの特許5件程度）
 2. 人間の判断との比較
 3. プロンプトの調整と改善
 
 **検証データ**:
+
 - 特許06195960（遠隔指示システム）
 - 特許05148670（固有アドレスによる電化製品設定）
 - 特許06077068（拡張現実システム）
@@ -957,12 +992,14 @@ test.describe('Patent Analysis Flow', () => {
 ### Day 13: ドキュメント整備とデモ準備
 
 **作業内容**:
+
 1. READMEの完成
 2. セットアップガイドの作成
 3. デモ用スクリプトの準備
 4. Phase 1完成レポートの作成
 
 **成果物**:
+
 - 完成したPhase 1システム
 - ドキュメント一式
 - デモ用資料
@@ -975,12 +1012,14 @@ test.describe('Patent Analysis Flow', () => {
 ### API利用
 
 **OpenAI API**:
+
 - モデル: gpt-3.5-turbo
 - トークン制限: 2000 tokens/request
 - Temperature: 0.3（一貫性重視）
 - 推定コスト: $0.02〜1/月（10件分析時）
 
 **Web検索**:
+
 - 優先順位1: Perplexity API（無料枠: 100req/日）
 - 優先順位2: SerpAPI（無料枠: 100検索/月）
 - フォールバック: axios + Cheerio（Node.js用スクレイピング）
@@ -988,6 +1027,7 @@ test.describe('Patent Analysis Flow', () => {
 ### データ形式
 
 **入力データ**:
+
 ```json
 {
   "patentNumber": "06195960",
@@ -998,6 +1038,7 @@ test.describe('Patent Analysis Flow', () => {
 ```
 
 **出力データ**:
+
 ```json
 {
   "patentNumber": "06195960",
@@ -1033,32 +1074,33 @@ test.describe('Patent Analysis Flow', () => {
 
 ## マイルストーン
 
-| マイルストーン | 期限 | 成果物 |
-|---------------|------|--------|
-| **M1: プロジェクト初期化完了** | Day 2 | プロジェクト構造、プロンプト設計 |
-| **M2: コアモジュール完成** | Day 5 | 構成要件抽出、Web検索機能 |
-| **M3: 充足性判定機能完成** | Day 7 | 充足性判定モジュール |
-| **M4: UI完成** | Day 9 | Next.jsアプリ |
-| **M5: 検証完了** | Day 12 | 精度検証レポート |
-| **M6: Phase 1完成** | Day 13 | 完成システム + ドキュメント |
+| マイルストーン                 | 期限   | 成果物                           |
+| ------------------------------ | ------ | -------------------------------- |
+| **M1: プロジェクト初期化完了** | Day 2  | プロジェクト構造、プロンプト設計 |
+| **M2: コアモジュール完成**     | Day 5  | 構成要件抽出、Web検索機能        |
+| **M3: 充足性判定機能完成**     | Day 7  | 充足性判定モジュール             |
+| **M4: UI完成**                 | Day 9  | Next.jsアプリ                    |
+| **M5: 検証完了**               | Day 12 | 精度検証レポート                 |
+| **M6: Phase 1完成**            | Day 13 | 完成システム + ドキュメント      |
 
 ---
 
 ## リスクと対策
 
-| リスク | 影響度 | 対策 |
-|--------|--------|------|
-| OpenAI API制限・コスト超過 | 中 | キャッシング実装、トークン数削減 |
-| Web検索API無料枠超過 | 中 | フォールバック実装、キャッシング |
-| 構成要件抽出精度不足 | 高 | プロンプト改善、few-shot例追加 |
-| 充足性判定精度不足 | 高 | プロンプト改善、検索結果の質向上 |
-| 処理時間超過（5分/件） | 低 | 並列処理、キャッシング |
+| リスク                     | 影響度 | 対策                             |
+| -------------------------- | ------ | -------------------------------- |
+| OpenAI API制限・コスト超過 | 中     | キャッシング実装、トークン数削減 |
+| Web検索API無料枠超過       | 中     | フォールバック実装、キャッシング |
+| 構成要件抽出精度不足       | 高     | プロンプト改善、few-shot例追加   |
+| 充足性判定精度不足         | 高     | プロンプト改善、検索結果の質向上 |
+| 処理時間超過（5分/件）     | 低     | 並列処理、キャッシング           |
 
 ---
 
 ## 次のステップ
 
 Phase 1完成後:
+
 1. Phase 2（売上推定の自動化）の開発開始
 2. Phase 1の改善点をフィードバック
 3. Phase 2へのデータ連携設計

@@ -85,12 +85,46 @@ cp .env.local.example .env.local
      SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
      # Prisma (特殊文字は%エンコード: / → %2F, @ → %40)
-     DATABASE_URL="postgresql://postgres.xxxxx:[PASSWORD]@aws-x-xx-xxxx-x.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+     # schema=local または schema=production でスキーマを切り替え
+     # ローカル開発:
+     DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres?schema=local"
+     # 本番環境:
+     DATABASE_URL="postgresql://postgres.xxxxx:[PASSWORD]@aws-x-xx-xxxx-x.pooler.supabase.com:6543/postgres?schema=production&pgbouncer=true&connection_limit=1"
      ```
-  6. Prisma Clientを生成:
+  6. スキーマをセットアップ（初回のみ）:
+     ```bash
+     # 方法1: スクリプト実行（推奨）
+     cd apps/poc/phase1
+     ./scripts/reset-and-setup-schemas.sh
+
+     # 方法2: 手動実行
+     # schemaパラメータを除去したURLでマイグレーション実行
+     psql "postgresql://postgres:postgres@localhost:54322/postgres" -f prisma/migrations/setup_schemas.sql
+     ```
+
+     ⚠️ **注意**: このスクリプトは既存のテーブルを全て削除します！
+
+  7. Prisma Clientを生成:
      ```bash
      npm run prisma:generate
      ```
+
+### 環境の切り替え
+
+`.env.local`の`DATABASE_URL`の`schema`パラメータを変更:
+
+```bash
+# ローカル開発環境
+DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres?schema=local"
+
+# 本番環境
+DATABASE_URL="postgresql://postgres.[ref]:[password]@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?schema=production"
+```
+
+スキーマを変更した後は必ずPrisma Clientを再生成:
+```bash
+npm run prisma:generate
+```
 
 ### 3. データベース接続テスト
 
@@ -117,13 +151,82 @@ npm run prisma:studio
 # http://localhost:5555 で起動
 ```
 
-### 4. 開発サーバーの起動
+### 4. Deep Research Service環境変数の設定
+
+Deep Research ServiceでWebhook経由で特許情報を取得する場合、以下の環境変数を設定します。
+
+```bash
+# apps/deep-research-service/.env
+USE_MOCK=true                                      # モックモード（本番はfalse）
+PORT=3002
+TAVILY_API_KEY=tvly-xxxxx                          # 実APIモード時のみ必要
+```
+
+`.env.local`にDeep Research Service関連の設定を追加:
+
+```bash
+# Deep Research Service
+DEEP_RESEARCH_SERVICE_URL=http://localhost:3002    # ローカル開発時
+NEXT_PUBLIC_APP_URL=http://localhost:3001          # Next.jsアプリのURL
+
+# ngrok使用時は以下のように変更（後述）
+# NEXT_PUBLIC_APP_URL=https://xxxx-xx-xx-xxx-xxx.ngrok-free.app
+```
+
+### 5. 開発サーバーの起動
+
+#### Next.js開発サーバー（port 3001）
 
 ```bash
 npm run dev
 ```
 
 http://localhost:3001 でアクセス可能
+
+#### Deep Research Service（port 3002）
+
+別ターミナルで起動:
+
+```bash
+cd ../../deep-research-service
+npm install  # 初回のみ
+npm run dev
+```
+
+http://localhost:3002/health で動作確認可能
+
+### 6. ngrokでWebhook受信を有効化（任意）
+
+ローカル開発環境でWebhookを受信するには、ngrokを使ってNext.jsを外部公開します。
+
+**詳細な設定手順は `NGROK_SETUP.md` を参照してください。**
+
+#### クイックスタート
+
+```bash
+# ngrokインストール（初回のみ）
+brew install ngrok
+
+# 認証設定（初回のみ）
+ngrok config add-authtoken YOUR_AUTH_TOKEN
+
+# トンネル開始
+ngrok http 3001
+```
+
+#### 環境変数の更新
+
+`.env.local`:
+```bash
+NEXT_PUBLIC_APP_URL=https://xxxx-xx-xx-xxx-xxx.ngrok-free.app
+```
+
+#### 疎通確認
+
+スマホで以下にアクセス:
+```
+https://xxxx-xx-xx-xxx-xxx.ngrok-free.app/api/ngrok/health
+```
 
 ## 使い方
 

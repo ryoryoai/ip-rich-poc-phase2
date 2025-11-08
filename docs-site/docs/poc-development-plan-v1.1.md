@@ -8,13 +8,13 @@ Vercelの300秒タイムアウト制限に対応するため、Deep Researchを�
 
 ## 📋 v1.0からの主な変更点
 
-| 項目 | v1.0（同期処理） | v1.1（非同期処理） |
-|------|------------------|-------------------|
-| **Deep Research** | Next.js API内で実行 | 外部サービス + Webhook |
-| **タイムアウト** | 300秒（5分）で強制終了 | 15分以上対応可能 |
-| **データベース** | ローカルJSON | Supabase/Neon（無料） |
-| **ステータス管理** | なし | ポーリング + ジョブ管理 |
-| **フロントエンド** | 同期待機 | ポーリング + リアルタイム更新 |
+| 項目               | v1.0（同期処理）       | v1.1（非同期処理）            |
+| ------------------ | ---------------------- | ----------------------------- |
+| **Deep Research**  | Next.js API内で実行    | 外部サービス + Webhook        |
+| **タイムアウト**   | 300秒（5分）で強制終了 | 15分以上対応可能              |
+| **データベース**   | ローカルJSON           | Supabase/Neon（無料）         |
+| **ステータス管理** | なし                   | ポーリング + ジョブ管理       |
+| **フロントエンド** | 同期待機               | ポーリング + リアルタイム更新 |
 
 :::danger Vercelタイムアウト制限
 Vercel無料プランでは、APIルートは**300秒（5分）**で強制終了します。Deep Researchは5〜15分かかるため、**v1.0のアーキテクチャでは動作しません**。
@@ -96,18 +96,19 @@ graph LR
 
 ### 推奨DB: Supabase vs Neon比較
 
-| 項目 | Supabase（推奨） | Neon | PlanetScale |
-|------|------------------|------|-------------|
-| **データベース** | PostgreSQL | PostgreSQL | MySQL/PostgreSQL |
-| **無料枠** | 500MB + 1GB Storage | 10 branches, 1GB RAM | 有料のみ（$34/月〜） |
-| **認証機能** | ✅ 組み込み | ❌ なし | ❌ なし |
-| **リアルタイム** | ✅ あり | ❌ なし | ❌ なし |
-| **API自動生成** | ✅ REST + GraphQL | ❌ なし | ❌ なし |
-| **Vercel統合** | ✅ 簡単 | ✅ 簡単 | ✅ 簡単 |
-| **ローカル開発** | Docker Compose | Docker/PostgreSQL | Docker/MySQL |
-| **料金体系** | 無料〜$25/月 | 無料〜$69/月 | $34/月〜 |
+| 項目             | Supabase（推奨）    | Neon                 | PlanetScale          |
+| ---------------- | ------------------- | -------------------- | -------------------- |
+| **データベース** | PostgreSQL          | PostgreSQL           | MySQL/PostgreSQL     |
+| **無料枠**       | 500MB + 1GB Storage | 10 branches, 1GB RAM | 有料のみ（$34/月〜） |
+| **認証機能**     | ✅ 組み込み         | ❌ なし              | ❌ なし              |
+| **リアルタイム** | ✅ あり             | ❌ なし              | ❌ なし              |
+| **API自動生成**  | ✅ REST + GraphQL   | ❌ なし              | ❌ なし              |
+| **Vercel統合**   | ✅ 簡単             | ✅ 簡単              | ✅ 簡単              |
+| **ローカル開発** | Docker Compose      | Docker/PostgreSQL    | Docker/MySQL         |
+| **料金体系**     | 無料〜$25/月        | 無料〜$69/月         | $34/月〜             |
 
 **推奨**: **Supabase**
+
 - 認証、API、リアルタイム機能が全て無料枠に含まれる
 - Next.jsとの統合が公式にサポートされている
 - 将来的にリアルタイム通知機能を追加しやすい
@@ -188,7 +189,7 @@ supabase db push
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 services:
   postgres:
     image: postgres:16-alpine
@@ -220,6 +221,7 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ip_rich_tools
 ### オプション1: Render.com無料枠（推奨）
 
 **特徴**:
+
 - 無料プランで750時間/月の稼働時間
 - タイムアウト: 15分（Vercelの3倍）
 - 自動デプロイ（GitHub連携）
@@ -228,8 +230,8 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ip_rich_tools
 
 ```typescript
 // deep-research-service/src/index.ts
-import express from 'express';
-import axios from 'axios';
+import express from "express";
+import axios from "axios";
 
 const app = express();
 app.use(express.json());
@@ -241,36 +243,40 @@ interface ResearchRequest {
   max_results?: number;
 }
 
-app.post('/research/start', async (req, res) => {
+app.post("/research/start", async (req, res) => {
   const { job_id, webhook_url, query, max_results = 5 }: ResearchRequest = req.body;
 
   // すぐにレスポンス（非同期処理開始）
-  res.status(202).json({ status: 'accepted', job_id });
+  res.status(202).json({ status: "accepted", job_id });
 
   // バックグラウンドで処理
   (async () => {
     try {
       // Tavily Deep Research API呼び出し
-      const tavilyResponse = await axios.post('https://api.tavily.com/research', {
-        api_key: process.env.TAVILY_API_KEY,
-        query,
-        search_depth: 'advanced',
-        max_results,
-      }, {
-        timeout: 900000, // 15分
-      });
+      const tavilyResponse = await axios.post(
+        "https://api.tavily.com/research",
+        {
+          api_key: process.env.TAVILY_API_KEY,
+          query,
+          search_depth: "advanced",
+          max_results,
+        },
+        {
+          timeout: 900000, // 15分
+        }
+      );
 
       // Webhook送信
       await axios.post(webhook_url, {
         job_id,
-        status: 'completed',
+        status: "completed",
         results: tavilyResponse.data,
       });
     } catch (error) {
       // エラー時もWebhookで通知
       await axios.post(webhook_url, {
         job_id,
-        status: 'failed',
+        status: "failed",
         error: error.message,
       });
     }
@@ -278,7 +284,7 @@ app.post('/research/start', async (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log('Deep Research Service running on port 3000');
+  console.log("Deep Research Service running on port 3000");
 });
 ```
 
@@ -301,6 +307,7 @@ services:
 ### オプション2: Railway無料枠
 
 **特徴**:
+
 - 無料プランで500時間/月 + $5クレジット
 - タイムアウト制限なし
 - 自動スケーリング
@@ -310,6 +317,7 @@ services:
 ### オプション3: Fly.io無料枠
 
 **特徴**:
+
 - 3つのVMを無料で提供
 - タイムアウト制限なし
 - グローバルデプロイ
@@ -323,6 +331,7 @@ services:
 ### 1. `POST /api/analyze/start` - 分析開始
 
 **リクエスト**:
+
 ```typescript
 interface AnalyzeStartRequest {
   patentNumber: string;
@@ -333,19 +342,21 @@ interface AnalyzeStartRequest {
 ```
 
 **レスポンス**:
+
 ```typescript
 interface AnalyzeStartResponse {
   job_id: string;
-  status: 'pending';
+  status: "pending";
   created_at: string;
 }
 ```
 
 **実装例**:
+
 ```typescript
 // apps/poc/phase1/src/app/api/analyze/start/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -359,9 +370,9 @@ export async function POST(request: NextRequest) {
 
   // ジョブ作成
   const { data: job, error } = await supabase
-    .from('analysis_jobs')
+    .from("analysis_jobs")
     .insert({
-      status: 'pending',
+      status: "pending",
       patent_number: patentNumber,
       claim_text: claimText,
       company_name: companyName,
@@ -379,9 +390,9 @@ export async function POST(request: NextRequest) {
   const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhook/research`;
   const query = `${companyName} ${productName} specifications features`;
 
-  await fetch(process.env.DEEP_RESEARCH_SERVICE_URL + '/research/start', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  await fetch(process.env.DEEP_RESEARCH_SERVICE_URL + "/research/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       job_id: job.id,
       webhook_url: webhookUrl,
@@ -391,13 +402,13 @@ export async function POST(request: NextRequest) {
 
   // ステータス更新
   await supabase
-    .from('analysis_jobs')
-    .update({ status: 'researching', progress: 10 })
-    .eq('id', job.id);
+    .from("analysis_jobs")
+    .update({ status: "researching", progress: 10 })
+    .eq("id", job.id);
 
   return NextResponse.json({
     job_id: job.id,
-    status: 'pending',
+    status: "pending",
     created_at: job.created_at,
   });
 }
@@ -406,35 +417,34 @@ export async function POST(request: NextRequest) {
 ### 2. `GET /api/analyze/status/:job_id` - ステータス確認
 
 **レスポンス**:
+
 ```typescript
 interface AnalyzeStatusResponse {
   job_id: string;
-  status: 'pending' | 'researching' | 'analyzing' | 'completed' | 'failed';
+  status: "pending" | "researching" | "analyzing" | "completed" | "failed";
   progress: number; // 0-100
   error_message?: string;
 }
 ```
 
 **実装例**:
+
 ```typescript
 // apps/poc/phase1/src/app/api/analyze/status/[job_id]/route.ts
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { job_id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { job_id: string } }) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
   const { data: job, error } = await supabase
-    .from('analysis_jobs')
-    .select('id, status, progress, error_message')
-    .eq('id', params.job_id)
+    .from("analysis_jobs")
+    .select("id, status, progress, error_message")
+    .eq("id", params.job_id)
     .single();
 
   if (error || !job) {
-    return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+    return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }
 
   return NextResponse.json({
@@ -449,10 +459,11 @@ export async function GET(
 ### 3. `GET /api/analyze/result/:job_id` - 結果取得
 
 **レスポンス**:
+
 ```typescript
 interface AnalyzeResultResponse {
   job_id: string;
-  status: 'completed';
+  status: "completed";
   result: {
     patentNumber: string;
     companyName: string;
@@ -463,7 +474,7 @@ interface AnalyzeResultResponse {
       totalRequirements: number;
       compliantRequirements: number;
       complianceRate: number;
-      infringementPossibility: '○' | '×';
+      infringementPossibility: "○" | "×";
     };
   };
 }
@@ -472,16 +483,18 @@ interface AnalyzeResultResponse {
 ### 4. `POST /api/webhook/research` - Webhook受信
 
 **リクエスト**:
+
 ```typescript
 interface WebhookResearchRequest {
   job_id: string;
-  status: 'completed' | 'failed';
+  status: "completed" | "failed";
   results?: any;
   error?: string;
 }
 ```
 
 **実装例**:
+
 ```typescript
 // apps/poc/phase1/src/app/api/webhook/research/route.ts
 export async function POST(request: NextRequest) {
@@ -493,29 +506,29 @@ export async function POST(request: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  if (status === 'failed') {
+  if (status === "failed") {
     await supabase
-      .from('analysis_jobs')
-      .update({ status: 'failed', error_message: error })
-      .eq('id', job_id);
+      .from("analysis_jobs")
+      .update({ status: "failed", error_message: error })
+      .eq("id", job_id);
 
-    return NextResponse.json({ status: 'error_recorded' });
+    return NextResponse.json({ status: "error_recorded" });
   }
 
   // 検索結果を保存
   await supabase
-    .from('analysis_jobs')
+    .from("analysis_jobs")
     .update({
       research_results: results,
-      status: 'analyzing',
+      status: "analyzing",
       progress: 50,
     })
-    .eq('id', job_id);
+    .eq("id", job_id);
 
   // LLM分析を開始（別関数で実行）
   await performLLMAnalysis(job_id);
 
-  return NextResponse.json({ status: 'processing' });
+  return NextResponse.json({ status: "processing" });
 }
 
 async function performLLMAnalysis(job_id: string) {
@@ -525,11 +538,7 @@ async function performLLMAnalysis(job_id: string) {
   );
 
   // ジョブ情報取得
-  const { data: job } = await supabase
-    .from('analysis_jobs')
-    .select('*')
-    .eq('id', job_id)
-    .single();
+  const { data: job } = await supabase.from("analysis_jobs").select("*").eq("id", job_id).single();
 
   if (!job) return;
 
@@ -542,10 +551,7 @@ async function performLLMAnalysis(job_id: string) {
     job.claim_text
   );
 
-  await supabase
-    .from('analysis_jobs')
-    .update({ requirements, progress: 70 })
-    .eq('id', job_id);
+  await supabase.from("analysis_jobs").update({ requirements, progress: 70 }).eq("id", job_id);
 
   // 充足性判定
   const searchProvider = getSearchProvider();
@@ -558,24 +564,24 @@ async function performLLMAnalysis(job_id: string) {
   );
 
   // 総合判定
-  const compliantCount = complianceResults.filter((r) => r.compliance === '○').length;
+  const compliantCount = complianceResults.filter((r) => r.compliance === "○").length;
   const summary = {
     totalRequirements: requirements.length,
     compliantRequirements: compliantCount,
     complianceRate: (compliantCount / requirements.length) * 100,
-    infringementPossibility: compliantCount === requirements.length ? '○' : '×',
+    infringementPossibility: compliantCount === requirements.length ? "○" : "×",
   };
 
   // 最終結果保存
   await supabase
-    .from('analysis_jobs')
+    .from("analysis_jobs")
     .update({
       compliance_results: complianceResults,
       summary,
-      status: 'completed',
+      status: "completed",
       progress: 100,
     })
-    .eq('id', job_id);
+    .eq("id", job_id);
 }
 ```
 
@@ -736,14 +742,14 @@ npm install -D typescript @types/express @types/node tsx
 
 ## 🚀 実装ステップ（v1.1移行）
 
-| ステップ | 作業内容 | 期間 | 成果物 |
-|---------|----------|------|--------|
-| 1 | **Supabaseセットアップ** | 1日 | テーブル作成、ローカル環境構築 |
-| 2 | **Deep Researchサービス開発** | 2日 | Render.comデプロイ準備 |
-| 3 | **Next.js API改修** | 3日 | start/status/result/webhook実装 |
-| 4 | **フロントエンド改修** | 2日 | ポーリングUI実装 |
-| 5 | **統合テスト** | 2日 | E2Eテスト、負荷テスト |
-| **合計** | - | **10日** | 完全非同期対応システム |
+| ステップ | 作業内容                      | 期間     | 成果物                          |
+| -------- | ----------------------------- | -------- | ------------------------------- |
+| 1        | **Supabaseセットアップ**      | 1日      | テーブル作成、ローカル環境構築  |
+| 2        | **Deep Researchサービス開発** | 2日      | Render.comデプロイ準備          |
+| 3        | **Next.js API改修**           | 3日      | start/status/result/webhook実装 |
+| 4        | **フロントエンド改修**        | 2日      | ポーリングUI実装                |
+| 5        | **統合テスト**                | 2日      | E2Eテスト、負荷テスト           |
+| **合計** | -                             | **10日** | 完全非同期対応システム          |
 
 ---
 
@@ -821,21 +827,21 @@ PORT=3000
 
 ```typescript
 // tests/api/analyze/start.test.ts
-describe('POST /api/analyze/start', () => {
-  it('should create a job and return job_id', async () => {
-    const res = await fetch('/api/analyze/start', {
-      method: 'POST',
+describe("POST /api/analyze/start", () => {
+  it("should create a job and return job_id", async () => {
+    const res = await fetch("/api/analyze/start", {
+      method: "POST",
       body: JSON.stringify({
-        patentNumber: 'JP1234567',
-        claimText: 'テスト請求項',
-        companyName: 'テスト企業',
-        productName: 'テスト製品',
+        patentNumber: "JP1234567",
+        claimText: "テスト請求項",
+        companyName: "テスト企業",
+        productName: "テスト製品",
       }),
     });
 
     const data = await res.json();
     expect(data.job_id).toBeDefined();
-    expect(data.status).toBe('pending');
+    expect(data.status).toBe("pending");
   });
 });
 ```
@@ -844,28 +850,28 @@ describe('POST /api/analyze/start', () => {
 
 ```typescript
 // tests/e2e/analysis-flow.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('full analysis workflow', async ({ page }) => {
-  await page.goto('/analyze');
+test("full analysis workflow", async ({ page }) => {
+  await page.goto("/analyze");
 
   // フォーム入力
-  await page.fill('[name="patentNumber"]', 'JP1234567');
-  await page.fill('[name="claimText"]', 'テスト請求項');
-  await page.fill('[name="companyName"]', 'テスト企業');
-  await page.fill('[name="productName"]', 'テスト製品');
+  await page.fill('[name="patentNumber"]', "JP1234567");
+  await page.fill('[name="claimText"]', "テスト請求項");
+  await page.fill('[name="companyName"]', "テスト企業");
+  await page.fill('[name="productName"]', "テスト製品");
 
   // 分析開始
   await page.click('button[type="submit"]');
 
   // ジョブID表示確認
-  await expect(page.locator('text=ジョブID:')).toBeVisible();
+  await expect(page.locator("text=ジョブID:")).toBeVisible();
 
   // ポーリング待機（最大15分）
-  await page.waitForSelector('text=分析完了！', { timeout: 900000 });
+  await page.waitForSelector("text=分析完了！", { timeout: 900000 });
 
   // 結果表示確認
-  await expect(page.locator('text=侵害可能性')).toBeVisible();
+  await expect(page.locator("text=侵害可能性")).toBeVisible();
 });
 ```
 
@@ -918,9 +924,10 @@ test('full analysis workflow', async ({ page }) => {
 ---
 
 :::tip v1.1のメリット
+
 - ✅ Vercelタイムアウト制限を回避（15分以上対応可能）
 - ✅ 完全無料枠内で運用可能（Supabase + Render.com）
 - ✅ ポーリングによる進捗表示でUX向上
 - ✅ Deep Researchを外部サービス化して再利用可能
 - ✅ 将来的なリアルタイム通知への移行が容易
-:::
+  :::

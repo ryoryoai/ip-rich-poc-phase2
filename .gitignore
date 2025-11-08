@@ -43,3 +43,18 @@ Thumbs.db
 
 # mise
 .mise.local.toml
+
+# Session notes and temp files
+ASIS.md
+TOBE.md
+SESSION_SUMMARY.md
+DEEP_RESEARCH_IMPLEMENTATION_PLAN.md
+NGROK_SETUP.md
+*.js
+!apps/*/
+!infra/
+
+# Temporary scripts
+**/migrate.js
+**/update_job.js
+.claude/

@@ -63,10 +63,12 @@ end note
 ## Key Components
 
 ### User Access Layer
+
 - **Users**: Access the documentation site via web browser
 - **HTTPS**: All traffic encrypted in transit
 
 ### Security Layer
+
 - **AWS WAF**: Web Application Firewall protecting against common threats
   - SQL injection protection
   - XSS protection
@@ -74,6 +76,7 @@ end note
   - Geographic restrictions
 
 ### CDN Layer
+
 - **CloudFront**: Global content delivery network
   - Edge caching for low latency
   - Custom domain support
@@ -81,6 +84,7 @@ end note
   - Lambda@Edge integration
 
 ### Authentication Layer (Optional)
+
 - **Amazon Cognito**: User authentication and authorization
   - User Pool for user directory
   - OAuth2 / OpenID Connect support
@@ -93,6 +97,7 @@ end note
   - Manages session cookies
 
 ### Storage Layer
+
 - **S3 Bucket**: Static website hosting
   - Private bucket (not public)
   - Versioning enabled
@@ -102,6 +107,7 @@ end note
 ## Request Flow
 
 ### Unauthenticated User (with Cognito)
+
 1. User requests page → CloudFront
 2. Lambda@Edge checks for auth token
 3. No token → Redirect to Cognito Hosted UI
@@ -112,6 +118,7 @@ end note
 8. Content returned to user
 
 ### Authenticated User
+
 1. User requests page with valid token
 2. Lambda@Edge validates token
 3. Request forwarded to S3 via CloudFront
@@ -119,6 +126,7 @@ end note
 5. CloudFront caches and delivers to user
 
 ### Public Access (without Cognito)
+
 1. User requests page → CloudFront
 2. CloudFront fetches from S3 (if not cached)
 3. Content returned to user
@@ -135,6 +143,7 @@ end note
 ## Deployment
 
 Infrastructure is managed with Terraform:
+
 - `infra/environments/dev/`: Development environment
 - `infra/modules/docusaurus/`: Reusable module
   - `s3.tf`: S3 bucket configuration

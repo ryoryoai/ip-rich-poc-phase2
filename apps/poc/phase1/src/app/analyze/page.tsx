@@ -162,9 +162,9 @@ export default function AnalyzePage() {
               {process.env.NODE_ENV === 'development' && (
                 <div className="text-xs text-gray-400 mt-2 p-2 bg-gray-100 rounded">
                   <p>Debug Info:</p>
-                  <p>patentNumber: "{patentNumber}"</p>
+                  <p>patentNumber: &quot;{patentNumber}&quot;</p>
                   <p>patentNumber.length: {patentNumber.length}</p>
-                  <p>patentNumber.trim(): "{patentNumber.trim()}"</p>
+                  <p>patentNumber.trim(): &quot;{patentNumber.trim()}&quot;</p>
                   <p>!patentNumber.trim(): {String(!patentNumber.trim())}</p>
                   <p>isFetchingPatent: {String(isFetchingPatent)}</p>
                   <p>isAnalyzing: {String(isAnalyzing)}</p>

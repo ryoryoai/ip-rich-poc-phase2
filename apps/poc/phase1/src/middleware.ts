@@ -2,6 +2,16 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  const url = request.nextUrl;
+
+  // Webhook受信エンドポイントは認証をバイパス
+  if (
+    url.pathname === '/api/webhook/research' ||
+    url.pathname === '/api/webhook/openai'
+  ) {
+    return NextResponse.next();
+  }
+
   // Basic認証をスキップする環境（開発環境など）
   if (process.env.SKIP_AUTH === 'true') {
     return NextResponse.next();
@@ -9,7 +19,6 @@ export function middleware(request: NextRequest) {
 
   // Basic認証の設定
   const basicAuth = request.headers.get('authorization');
-  const url = request.nextUrl;
 
   // 環境変数から認証情報を取得
   const username = process.env.BASIC_AUTH_USERNAME || 'admin';

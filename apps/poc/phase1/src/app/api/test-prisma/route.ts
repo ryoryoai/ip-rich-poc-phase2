@@ -8,10 +8,10 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     // 全ジョブ数を取得
-    const totalJobs = await prisma.analysis_jobs_local.count();
+    const totalJobs = await prisma.analysis_jobs.count();
 
     // 最新の5件を取得
-    const recentJobs = await prisma.analysis_jobs_local.findMany({
+    const recentJobs = await prisma.analysis_jobs.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
       select: {
@@ -26,7 +26,7 @@ export async function GET() {
     });
 
     // ステータス別集計
-    const statusCounts = await prisma.analysis_jobs_local.groupBy({
+    const statusCounts = await prisma.analysis_jobs.groupBy({
       by: ['status'],
       _count: true,
     });
@@ -57,7 +57,7 @@ export async function GET() {
  */
 export async function POST() {
   try {
-    const testJob = await prisma.analysis_jobs_local.create({
+    const testJob = await prisma.analysis_jobs.create({
       data: {
         status: 'pending',
         progress: 0,
