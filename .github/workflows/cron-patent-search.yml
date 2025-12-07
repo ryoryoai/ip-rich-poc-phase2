@@ -1,0 +1,106 @@
+name: Patent Search Batch Processing
+
+on:
+  schedule:
+    # 15分ごとに実行
+    - cron: '*/15 * * * *'  # 毎時0分、15分、30分、45分に実行
+  workflow_dispatch:       # 手動実行用
+    inputs:
+      dry_run:
+        description: 'Dry run mode (テスト実行)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  batch-process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get current time in JST
+        id: time
+        run: |
+          echo "jst_time=$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S JST')" >> $GITHUB_OUTPUT
+          echo "hour=$(TZ=Asia/Tokyo date '+%H')" >> $GITHUB_OUTPUT
+
+      - name: Determine priority level
+        id: priority
+        run: |
+          # 15分ごとの実行では、分単位で優先度を決定
+          MINUTE=$(TZ=Asia/Tokyo date '+%-M')
+          if [ "$MINUTE" = "0" ]; then
+            echo "level=high" >> $GITHUB_OUTPUT
+            echo "priority=8-10" >> $GITHUB_OUTPUT
+          elif [ "$MINUTE" = "15" ]; then
+            echo "level=medium" >> $GITHUB_OUTPUT
+            echo "priority=4-7" >> $GITHUB_OUTPUT
+          elif [ "$MINUTE" = "30" ]; then
+            echo "level=low" >> $GITHUB_OUTPUT
+            echo "priority=0-3" >> $GITHUB_OUTPUT
+          else
+            echo "level=mixed" >> $GITHUB_OUTPUT
+            echo "priority=0-10" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Show execution info
+        run: |
+          echo "🕐 Execution time: ${{ steps.time.outputs.jst_time }}"
+          echo "📊 Priority level: ${{ steps.priority.outputs.level }} (${{ steps.priority.outputs.priority }})"
+          echo "🔗 Target URL: https://ip-rich-poc-phase1.vercel.app"
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "⚠️ DRY RUN MODE - No actual API call will be made"
+          fi
+
+      - name: Trigger cron endpoint
+        if: github.event.inputs.dry_run != 'true'
+        id: cron_call
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET_KEY }}" \
+            -H "Content-Type: application/json" \
+            -u "${{ secrets.BASIC_AUTH_USERNAME }}:${{ secrets.BASIC_AUTH_PASSWORD }}" \
+            https://ip-rich-poc-phase1.vercel.app/api/cron/check-and-do)
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+
+          echo "HTTP Status: $http_code"
+          echo "Response body: $body"
+
+          if [ "$http_code" != "200" ]; then
+            echo "❌ Cron endpoint returned error status: $http_code"
+            exit 1
+          fi
+
+          echo "✅ Cron job triggered successfully"
+          echo "response_body=$body" >> $GITHUB_OUTPUT
+
+      - name: Parse response
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          echo "📊 Cron execution results:"
+          echo "${{ steps.cron_call.outputs.response_body }}" | jq '.' || echo "${{ steps.cron_call.outputs.response_body }}"
+
+      - name: Send notification on failure
+        if: failure() && github.event.inputs.dry_run != 'true'
+        run: |
+          echo "❌ Patent search batch processing failed at ${{ steps.time.outputs.jst_time }}"
+          # TODO: Slack/Discord通知を追加
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 🤖 Patent Search Batch Processing Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time**: ${{ steps.time.outputs.jst_time }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Priority**: ${{ steps.priority.outputs.level }} (${{ steps.priority.outputs.priority }})" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "- **Mode**: DRY RUN (テスト実行)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Mode**: PRODUCTION" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
