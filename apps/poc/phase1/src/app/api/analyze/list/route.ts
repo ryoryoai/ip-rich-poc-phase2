@@ -7,11 +7,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
+    const status = searchParams.get('status');
 
-    console.log(`[API] Fetching job list (limit: ${limit}, offset: ${offset})`);
+    console.log(`[API] Fetching job list (limit: ${limit}, offset: ${offset}, status: ${status})`);
+
+    const where = status ? { status } : {};
 
     const jobs = await prisma.analysis_jobs.findMany({
-      orderBy: { createdAt: 'desc' },
+      where,
+      orderBy: [
+        { priority: 'desc' },
+        { createdAt: 'desc' }
+      ],
       take: limit,
       skip: offset,
       select: {
@@ -19,15 +26,19 @@ export async function GET(request: NextRequest) {
         status: true,
         progress: true,
         patentNumber: true,
+        claimText: true,
         companyName: true,
         productName: true,
+        priority: true,
         createdAt: true,
         updatedAt: true,
+        startedAt: true,
+        finishedAt: true,
         errorMessage: true,
       },
     });
 
-    const total = await prisma.analysis_jobs.count();
+    const total = await prisma.analysis_jobs.count({ where });
 
     return NextResponse.json({
       jobs: jobs.map((job) => ({
@@ -35,10 +46,14 @@ export async function GET(request: NextRequest) {
         status: job.status,
         progress: job.progress,
         patent_number: job.patentNumber,
+        claim_text: job.claimText,
         company_name: job.companyName,
         product_name: job.productName,
+        priority: job.priority || 5,
         created_at: job.createdAt.toISOString(),
         updated_at: job.updatedAt.toISOString(),
+        started_at: job.startedAt?.toISOString(),
+        finished_at: job.finishedAt?.toISOString(),
         error_message: job.errorMessage,
       })),
       total,
