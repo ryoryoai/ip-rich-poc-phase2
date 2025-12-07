@@ -182,3 +182,31 @@ Per global CLAUDE.md: Avoid `terraform state rm/mv/import` without explicit user
 2. Add API keys (Claude/OpenAI + Tavily)
 3. `npm run dev` in `apps/poc/phase1/`
 4. Access http://localhost:3001/analyze
+
+### Database Migration (Prisma)
+**IMPORTANT**: This project uses `prisma db push` instead of traditional migrations for schema changes.
+
+#### Production Database Changes
+```bash
+# 1. Pull production environment variables from Vercel
+cd apps/poc/phase1
+vercel env pull .env.production.local --environment production
+
+# 2. Fix DIRECT_URL to include schema parameter
+# Edit .env.production.local and ensure DIRECT_URL has ?schema=production
+
+# 3. Push schema changes to production database
+DATABASE_URL="<production_url>" DIRECT_URL="<direct_url>?schema=production" npx prisma db push
+```
+
+#### Local Development Database Changes
+```bash
+# Use the local schema
+cd apps/poc/phase1
+npx prisma db push
+```
+
+**Note**:
+- Always use `prisma db push` for schema changes, not `prisma migrate dev`
+- Production uses schema=production, local development uses schema=local
+- Ensure DIRECT_URL includes the appropriate schema parameter
