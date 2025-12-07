@@ -160,21 +160,13 @@ export default function ResultPage({ params }: { params: { job_id: string } }) {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="mb-8">
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">
                 特許番号
               </h3>
               <p className="text-lg font-semibold text-gray-900">
                 {result.patent_number}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">
-                調査対象
-              </h3>
-              <p className="text-lg font-semibold text-gray-900">
-                {result.company_name} / {result.product_name}
               </p>
             </div>
           </div>

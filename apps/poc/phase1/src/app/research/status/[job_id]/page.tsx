@@ -17,7 +17,7 @@ export default function StatusPage({ params }: { params: { job_id: string } }) {
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
   const [pollCount, setPollCount] = useState(0);
 
-  const MAX_POLL_ATTEMPTS = 90; // 15分 (90回 × 10秒)
+  const MAX_POLL_ATTEMPTS = 30; // 15分 (30回 × 30秒)
 
   useEffect(() => {
     const pollStatus = async () => {
@@ -35,7 +35,7 @@ export default function StatusPage({ params }: { params: { job_id: string } }) {
 
         // タイムアウトチェック
         if (pollCount >= MAX_POLL_ATTEMPTS && data.status === 'researching') {
-          setError('分析がタイムアウトしました（15分経過）。しばらく時間をおいて、分析履歴から確認してください。');
+          setError('画面のポーリングが15分経過しました。分析はバックグラウンドで継続中です。ページをリロードして状態を確認してください。');
           return;
         }
 
@@ -63,8 +63,8 @@ export default function StatusPage({ params }: { params: { job_id: string } }) {
       return;
     }
 
-    // 10秒ごとにポーリング
-    const interval = setInterval(pollStatus, 10000);
+    // 30秒ごとにポーリング
+    const interval = setInterval(pollStatus, 30000);
 
     return () => clearInterval(interval);
   }, [params.job_id, router, pollCount]);
@@ -141,7 +141,7 @@ export default function StatusPage({ params }: { params: { job_id: string } }) {
               {status?.status === 'researching' && (
                 <div className="mt-4 flex items-center space-x-2">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                  <span className="text-sm text-gray-600">10秒ごとに自動確認中...</span>
+                  <span className="text-sm text-gray-600">30秒ごとに自動確認中...</span>
                 </div>
               )}
             </div>

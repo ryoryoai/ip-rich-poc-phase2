@@ -31,13 +31,13 @@ export default function Home() {
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2 text-blue-700">📊 動作確認済み項目</h3>
+                <h3 className="font-semibold mb-2 text-blue-700">💼 ビジネス的にできるようになったこと</h3>
                 <div className="bg-blue-50 p-3 rounded-lg">
                   <ul className="list-disc list-inside space-y-1 text-sm">
-                    <li>Basic認証（patent:data1234）の動作確認</li>
-                    <li>データベース接続とスキーマ分離（local/production）</li>
-                    <li>環境変数の正しい設定と管理</li>
-                    <li>ビルドとデプロイの成功</li>
+                    <li><strong>Deep Research侵害調査結果のデータベース管理</strong></li>
+                    <li className="ml-6 text-xs">- 特許番号と請求項1を入力するだけで侵害製品調査を開始</li>
+                    <li className="ml-6 text-xs">- 調査結果をデータベースに保存し、いつでも参照可能</li>
+                    <li className="ml-6 text-xs">- 過去の調査履歴を一覧で確認・再利用できる</li>
                   </ul>
                 </div>
               </div>
@@ -45,44 +45,89 @@ export default function Home() {
           </div>
 
           <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-4 text-blue-900">🚀 Phase 2に向けて</h2>
+            <h2 className="text-xl font-bold mb-4 text-blue-900">🚀 Phase 2: iprich内での業務利用可能性検証</h2>
             <div className="space-y-4">
+              <div className="bg-blue-100 p-3 rounded-lg mb-4">
+                <p className="text-sm font-semibold text-blue-900">
+                  🎯 目標: iprich内で業務利用可能性を検証可能な状態を目指す
+                </p>
+              </div>
+
               <div>
-                <h3 className="font-semibold mb-2">1. 実用化に向けた課題</h3>
+                <h3 className="font-semibold mb-2">1. 前提条件</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li className="text-orange-700 font-semibold">OpenAI APIのレート制限対策（Tier 2以上へのアップグレード）</li>
-                  <li>分析精度の向上（プロンプトエンジニアリング）</li>
-                  <li>コスト最適化（キャッシュ戦略、必要最小限のトークン使用）</li>
-                  <li>エラーハンドリングとリトライ戦略の強化</li>
+                  <li className="text-green-700 font-semibold">OpenAI API契約（iprich）で7日経過後、$50課金済み</li>
+                  <li className="text-green-700 font-semibold">Tier 2へアップグレード完了</li>
+                  <li>TPM (Tokens Per Minute): 2,000,000 → 安定した分析実行が可能</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">2. 機能拡張計画</h3>
+                <h3 className="font-semibold mb-2">2. 主要機能の実装</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>複数特許の一括分析機能</li>
-                  <li>侵害製品の売上規模推定</li>
-                  <li>損害賠償額の概算計算</li>
-                  <li>定期的な新製品監視とアラート機能</li>
-                  <li>分析結果のエクスポート機能（Excel、PDF）</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2">3. システム改善</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li className="font-semibold text-blue-700">侵害製品の売上規模推定機能の追加</li>
+                  <li className="ml-6 text-xs">- sample/被疑侵害製品の売上推定のプロンプト.txt を実装</li>
+                  <li className="ml-6 text-xs">- 企業の財務情報・市場規模からの売上推定</li>
+                  <li className="ml-6 text-xs">- 損害賠償額の概算計算</li>
+                  <li className="font-semibold text-blue-700">侵害調査結果の構造化とDB保存</li>
+                  <li className="ml-6 text-xs">- 製品ごとの充足性判定データを構造化</li>
+                  <li className="ml-6 text-xs">- 検索・分析可能な形式でDBに保存</li>
+                  <li className="ml-6 text-xs">- 過去の調査結果との比較分析を可能に</li>
+                  <li>イレギュラー発生時の自動化（エラー時の通知・再実行）</li>
                   <li>ユーザー管理とマルチテナント対応</li>
                   <li>分析履歴の管理とダッシュボード</li>
-                  <li>APIエンドポイント化（外部システム連携）</li>
-                  <li>パフォーマンス最適化とスケーラビリティ向上</li>
                 </ul>
               </div>
+            </div>
+          </div>
 
-              <div className="bg-yellow-50 p-3 rounded-lg mt-4">
-                <p className="text-sm text-yellow-900">
-                  <strong>💡 推奨事項:</strong> 本格運用前にOpenAI APIのTier 2以上へのアップグレードが必要です。
-                  現在のTier 1（200,000 TPM）では、Deep Research APIの実行に制限があります。
+          <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-6">
+            <h2 className="text-xl font-bold mb-4 text-purple-900">🔮 Phase 3: iprich内での大規模利用検証</h2>
+            <div className="space-y-4">
+              <div className="bg-purple-100 p-3 rounded-lg mb-4">
+                <p className="text-sm font-semibold text-purple-900">
+                  🎯 目標: iprichで大規模利用可能か検証可能な状態を目指す
                 </p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">バッチ処理による大規模分析</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li><strong>複数特許の一括分析</strong> - バッチ実行による効率化</li>
+                  <li>特許ポートフォリオ全体の侵害リスク評価</li>
+                  <li>業界全体の侵害動向分析</li>
+                  <li>スケジュール実行による定期監視</li>
+                  <li>定期的な新製品監視とアラート機能</li>
+                  <li>分析結果のエクスポート機能（Excel、PDF）</li>
+                  <li className="font-semibold text-purple-700">J-PlatPatとの連携</li>
+                  <li className="ml-6 text-xs">- 特許情報の自動取得</li>
+                  <li className="ml-6 text-xs">- 請求項データの構造化</li>
+                  <li className="ml-6 text-xs">- 特許ステータスの自動確認</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-6">
+            <h2 className="text-xl font-bold mb-4 text-orange-900">🌐 Phase 4: 外部公開に向けた大規模開発</h2>
+            <div className="space-y-4">
+              <div className="bg-orange-100 p-3 rounded-lg mb-4">
+                <p className="text-sm font-semibold text-orange-900">
+                  🎯 目標: 外部公開を目指して大規模開発を行う
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">エンタープライズ対応</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>マルチテナント・エンタープライズアーキテクチャ</li>
+                  <li>高度なセキュリティとアクセス制御</li>
+                  <li>APIエンドポイント化（外部システム連携）</li>
+                  <li>SLA保証とサポート体制の構築</li>
+                  <li>パフォーマンス最適化とスケーラビリティ向上</li>
+                  <li>料金プラン設計と課金システム</li>
+                  <li>ドキュメントとオンボーディング整備</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -91,32 +136,32 @@ export default function Home() {
       </div>
       
         <div className="mt-16">
-          <h2 className="text-xl font-bold mb-4 text-center">システムの特徴</h2>
+          <h2 className="text-xl font-bold mb-4 text-center">システムの使い方</h2>
           <div className="max-w-2xl mx-auto space-y-4">
             <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-bold mb-2">🔍 Step 1: 特許情報取得</h3>
+              <h3 className="font-bold mb-2">📝 Step 1: 特許情報の入力</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>特許番号のみ入力でOK</li>
-                <li>O4 Mini Deep Researchが特許情報を自動取得</li>
-                <li>J-PlatPat、USPTO、Google Patentsから情報収集</li>
-                <li>請求項1と特許権者を自動抽出</li>
+                <li><strong>特許番号</strong>を入力（例: 07666636, US7666636）</li>
+                <li><strong>請求項1の全文</strong>を入力</li>
+                <li>この2つだけで分析開始！</li>
               </ul>
             </div>
             <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="font-bold mb-2">🎯 Step 2: 潜在的侵害製品の検出</h3>
+              <h3 className="font-bold mb-2">🔍 Step 2: AI による自動調査（バックグラウンド実行）</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Deep Researchが関連製品を自動検出</li>
-                <li>日本国内でサービス展開している外国企業を重点調査</li>
-                <li>侵害可能性の高い製品をリストアップ</li>
+                <li>OpenAI Deep ResearchがWeb検索で情報収集</li>
+                <li>日本国内でサービス展開している外国企業の製品を調査</li>
+                <li>請求項1の構成要件を満たす製品を検出</li>
+                <li>最大15分の長時間分析をサポート</li>
               </ul>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg">
-              <h3 className="font-bold mb-2">⚖️ Step 3: 侵害調査分析</h3>
+              <h3 className="font-bold mb-2">📊 Step 3: 結果の確認</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>各構成要件の充足性を判定</li>
-                <li>製品の仕様と特許請求項を詳細比較</li>
-                <li>根拠となる公開情報を提示</li>
-                <li>結果をJSON形式でエクスポート</li>
+                <li>各製品の構成要件充足性をマークダウンテーブルで表示</li>
+                <li>充足判断（○/×）と根拠となるURL・公開情報を提示</li>
+                <li>複数製品の分析結果を一覧で確認可能</li>
+                <li>分析履歴はデータベースに保存され、いつでも参照可能</li>
               </ul>
             </div>
           </div>
