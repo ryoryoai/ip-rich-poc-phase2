@@ -4,6 +4,23 @@ import OpenAI from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// NULL文字を除去する関数
+function sanitizeText(text: any): any {
+  if (typeof text === 'string') {
+    // NULL文字（\u0000）を除去
+    return text.replace(/\u0000/g, '');
+  } else if (Array.isArray(text)) {
+    return text.map(sanitizeText);
+  } else if (text !== null && typeof text === 'object') {
+    const sanitized: any = {};
+    for (const key in text) {
+      sanitized[key] = sanitizeText(text[key]);
+    }
+    return sanitized;
+  }
+  return text;
+}
+
 // GETハンドラー（互換性のため）
 export async function GET(request: NextRequest) {
   return POST(request);
@@ -47,12 +64,13 @@ export async function POST(request: NextRequest) {
           if (response.status === 'completed') {
             console.log(`[Cron] Job ${job.id} completed`);
 
-            // 結果を保存
+            // 結果を保存（NULL文字を除去）
+            const sanitizedOutput = sanitizeText(response.output);
             await prisma.analysis_jobs.update({
               where: { id: job.id },
               data: {
                 status: 'completed',
-                researchResults: response.output as any,
+                researchResults: sanitizedOutput as any,
                 finishedAt: new Date(),
                 progress: 100
               }
@@ -65,7 +83,7 @@ export async function POST(request: NextRequest) {
               where: { id: job.id },
               data: {
                 status: 'failed',
-                errorMessage: `Research ${response.status}`,
+                errorMessage: sanitizeText(`Research ${response.status}`),
                 finishedAt: new Date()
               }
             });
@@ -84,7 +102,7 @@ export async function POST(request: NextRequest) {
               where: { id: job.id },
               data: {
                 status: 'failed',
-                errorMessage: error instanceof Error ? error.message : 'Failed to check status',
+                errorMessage: sanitizeText(error instanceof Error ? error.message : 'Failed to check status'),
                 retryCount: newRetryCount,
                 finishedAt: new Date()
               }
@@ -184,7 +202,7 @@ export async function POST(request: NextRequest) {
               data: {
                 status: 'failed',
                 retryCount: newRetryCount,
-                errorMessage: error instanceof Error ? error.message : 'Failed to start',
+                errorMessage: sanitizeText(error instanceof Error ? error.message : 'Failed to start'),
                 finishedAt: new Date()
               }
             });
@@ -238,7 +256,11 @@ export async function POST(request: NextRequest) {
 
 // 既存のプロンプト生成関数を流用
 function buildInfringementQuery(patentNumber: string, claimText: string): string {
-  return `下記の特許${patentNumber}の請求項１の要件を満たす侵害製品を念入りに調査せよ。対象は日本国内でサービス展開している外国企業（日本企業以外）とする。
+  // NULL文字を除去
+  const sanitizedPatentNumber = sanitizeText(patentNumber);
+  const sanitizedClaimText = sanitizeText(claimText);
+
+  return `下記の特許${sanitizedPatentNumber}の請求項１の要件を満たす侵害製品を念入りに調査せよ。対象は日本国内でサービス展開している外国企業（日本企業以外）とする。
 
 ▼要求事項：
 ・請求項１に記載された**すべての構成要件を満たす製品のみ**を調査対象とする（１つでも欠ける場合は除外）
@@ -273,6 +295,6 @@ function buildInfringementQuery(patentNumber: string, claimText: string): string
 ※時価総額の大きい外資系企業から順に3社以上調査すること
 ・日本語で回答すること
 
-＜以下、特許${patentNumber}（請求項１を全文で記載）＞
-${claimText}`;
+＜以下、特許${sanitizedPatentNumber}（請求項１を全文で記載）＞
+${sanitizedClaimText}`;
 }
