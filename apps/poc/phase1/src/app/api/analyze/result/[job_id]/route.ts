@@ -29,6 +29,57 @@ export async function GET(
       );
     }
 
+    // research_resultsをフロントエンド用の形式に変換
+    let formattedResearchResults = null;
+    if (job.researchResults) {
+      // OpenAI Deep Researchの結果が配列形式の場合、適切に変換
+      if (Array.isArray(job.researchResults)) {
+        // 最後のメッセージ（通常は結果）を探す
+        const messageResult = (job.researchResults as any[])
+          .reverse()
+          .find((item: any) => item.type === 'message' && item.content);
+
+        let reportText = '結果が取得できませんでした';
+        let citations: any[] = [];
+
+        if (messageResult && messageResult.content) {
+          // contentが配列の場合、textタイプのものを結合
+          if (Array.isArray(messageResult.content)) {
+            reportText = messageResult.content
+              .filter((c: any) => c.type === 'output_text' || c.text)
+              .map((c: any) => c.text || '')
+              .join('\n\n');
+
+            // annotationsからcitationsを抽出
+            const annotations = messageResult.content
+              .flatMap((c: any) => c.annotations || [])
+              .filter((a: any) => a.type === 'url_citation');
+
+            citations = annotations.map((a: any) => ({
+              type: a.type,
+              title: a.title || a.url,
+              url: a.url
+            }));
+          } else {
+            reportText = messageResult.content;
+          }
+        }
+
+        formattedResearchResults = {
+          reportText: reportText,
+          citations: citations,
+          rawResponse: {
+            output: job.researchResults,
+            model: process.env.OPENAI_DEEP_RESEARCH_MODEL || 'o4-mini-deep-research-2025-06-26'
+          },
+          usage: null // Deep Researchではusage情報が別途必要
+        };
+      } else if (typeof job.researchResults === 'object') {
+        // すでにオブジェクト形式の場合はそのまま使用
+        formattedResearchResults = job.researchResults;
+      }
+    }
+
     return NextResponse.json({
       job_id: job.id,
       status: job.status,
@@ -39,7 +90,7 @@ export async function GET(
       product_name: job.productName,
       claim_text: job.claimText,
       input_prompt: job.inputPrompt,
-      research_results: job.researchResults,
+      research_results: formattedResearchResults,
       requirements: job.requirements,
       compliance_results: job.complianceResults,
       summary: job.summary,
