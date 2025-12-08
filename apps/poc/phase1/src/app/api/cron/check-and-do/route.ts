@@ -4,6 +4,11 @@ import OpenAI from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// GETハンドラー（互換性のため）
+export async function GET(request: NextRequest) {
+  return POST(request);
+}
+
 export async function POST(request: NextRequest) {
   // Cron認証
   const cronSecret = request.headers.get('X-Cron-Secret');

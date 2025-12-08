@@ -9,7 +9,7 @@ API_URL="https://ip-rich-poc-phase1.vercel.app"
 
 # Basic認証設定
 USERNAME="patent"
-PASSWORD="datas1234"
+PASSWORD="data1234"
 
 # Color codes
 RED='\033[0;31m'

@@ -59,9 +59,8 @@ jobs:
         if: github.event.inputs.dry_run != 'true'
         id: cron_call
         run: |
-          response=$(curl -s -w "\n%{http_code}" -X POST \
+          response=$(curl -s -w "\n%{http_code}" -X GET \
             -H "X-Cron-Secret: ${{ secrets.CRON_SECRET_KEY }}" \
-            -H "Content-Type: application/json" \
             -u "${{ secrets.BASIC_AUTH_USERNAME }}:${{ secrets.BASIC_AUTH_PASSWORD }}" \
             https://ip-rich-poc-phase1.vercel.app/api/cron/check-and-do)
 
