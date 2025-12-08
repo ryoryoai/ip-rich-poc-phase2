@@ -79,7 +79,7 @@ export default function ListPage() {
     });
   };
 
-  const truncateText = (text: string, maxLength: number = 200) => {
+  const truncateText = (text: string, maxLength: number = 100) => {
     if (!text) return '';
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
@@ -164,33 +164,31 @@ export default function ListPage() {
                       </span>
                     </div>
 
-                    {/* 請求項1の表示 */}
-                    <p className="text-gray-900 text-sm mb-2 line-clamp-2">
-                      {truncateText(job.claim_text)}
-                    </p>
-
-                    {/* 企業・製品情報 */}
-                    {(job.company_name || job.product_name) && (
-                      <p className="text-sm text-gray-600 mb-2">
-                        {job.company_name && <span>{job.company_name}</span>}
-                        {job.company_name && job.product_name && ' - '}
-                        {job.product_name && <span>{job.product_name}</span>}
+                    {/* 請求項1のプレビュー（最初の100文字） */}
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-500 mb-1">請求項1:</p>
+                      <p className="text-gray-900 text-sm line-clamp-2">
+                        {truncateText(job.claim_text, 100)}
                       </p>
-                    )}
+                    </div>
 
-                    <div className="mt-2 text-xs text-gray-500">
-                      作成: {formatDate(job.created_at)}
+                    {/* 日時情報 */}
+                    <div className="space-y-1 text-xs text-gray-600">
+                      <div>
+                        <span className="font-medium">作成日時:</span>{' '}
+                        {formatDate(job.created_at)}
+                      </div>
                       {job.started_at && (
-                        <>
-                          {' '}
-                          | 開始: {formatDate(job.started_at)}
-                        </>
+                        <div>
+                          <span className="font-medium">検索開始日時:</span>{' '}
+                          {formatDate(job.started_at)}
+                        </div>
                       )}
                       {job.finished_at && (
-                        <>
-                          {' '}
-                          | 完了: {formatDate(job.finished_at)}
-                        </>
+                        <div>
+                          <span className="font-medium">検索終了日時:</span>{' '}
+                          {formatDate(job.finished_at)}
+                        </div>
                       )}
                     </div>
 
