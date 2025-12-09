@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 An automated patent infringement investigation system with two main components:
 1. **Documentation Site** (`docs-site/`): Docusaurus-based documentation with AWS CloudFront and flexible authentication (none, basic, Cognito, IP restriction)
-2. **Patent Analysis App** (`apps/poc/phase1/`): Next.js PoC that automates patent infringement analysis using AI (Claude/GPT) and web search (Tavily)
+2. **Patent Analysis App** (`apps/poc/phase1/`): Next.js app that automates patent infringement analysis using OpenAI Deep Research and web search APIs
 
 ## Key Commands
 
@@ -36,7 +36,7 @@ cd apps/poc/phase1
 npm install              # Install dependencies
 npm run dev              # Dev server on http://localhost:3001 (custom port!)
 npm run build            # Production build
-npm start                # Production server (port 3001)
+npm start                # Production server (port 3002)
 npm run lint             # ESLint check
 npm run type-check       # TypeScript type check
 npm run test             # Jest unit tests
@@ -68,25 +68,36 @@ mise run fmt            # terraform fmt
 ```
 apps/poc/phase1/
 ├── src/
-│   ├── app/              # Next.js App Router pages
-│   │   ├── api/analyze   # Main analysis API endpoint
-│   │   └── analyze/      # Analysis UI page
-│   ├── services/         # Core business logic
-│   │   ├── PatentInfringementAnalyzer.ts    # Main orchestrator
-│   │   ├── RequirementExtractionService.ts  # Extract patent requirements
-│   │   └── ComplianceCheckService.ts        # Check product compliance
-│   └── interfaces/       # Provider interfaces (LLM, Search, Storage)
-└── .env.local.example    # Environment variables template
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── analyze/start/     # Submit patent for async analysis
+│   │   │   ├── analyze/status/    # Check job status
+│   │   │   ├── analyze/result/    # Get completed results
+│   │   │   ├── analyze/list/      # List all analysis jobs
+│   │   │   ├── cron/check-and-do/ # Batch job processor (cron endpoint)
+│   │   │   └── webhook/openai/    # OpenAI Deep Research webhook receiver
+│   │   ├── research/              # Main UI (list, status, result pages)
+│   │   └── simple/                # Simple analysis UI
+│   ├── lib/
+│   │   ├── container.ts           # DI container for providers
+│   │   ├── prisma.ts              # Prisma client singleton
+│   │   └── providers/             # LLM, Search, Patent providers
+│   ├── services/                  # Core business logic
+│   └── interfaces/                # Provider interfaces
+└── prisma/schema.prisma           # Database schema
 ```
 
-**Key Services Flow**:
-1. `PatentInfringementAnalyzer` orchestrates the entire analysis
-2. `RequirementExtractionService` extracts structured requirements from patent claims
-3. Search provider (Tavily/Dummy) finds product information
-4. `ComplianceCheckService` evaluates each requirement against product specs
-5. Results formatted as JSON with infringement probability score
+**Async Analysis Flow** (OpenAI Deep Research):
+1. Client submits patent via `/api/analyze/start` → Job created with status `pending`
+2. Cron (`/api/cron/check-and-do`) picks up pending jobs, calls OpenAI Deep Research API
+3. Job status changes to `researching` while Deep Research runs (background: true)
+4. Either cron polling or webhook (`/api/webhook/openai`) receives completion
+5. Results stored in `analysis_jobs` table, status → `completed`
 
-**Provider Pattern**: Dependency injection allows swapping LLM (Claude/OpenAI) and search (Tavily/Dummy) providers via environment variables.
+**Provider Pattern**: DI container (`lib/container.ts`) selects providers based on env vars:
+- `LLM_PROVIDER`: `openai` | `claude`
+- `SEARCH_PROVIDER`: `tavily` | `dummy`
+- Patent provider: OpenAI Deep Research (default)
 
 ### Infrastructure Architecture
 
@@ -114,6 +125,7 @@ infra/
 ### Port Configuration
 - **Docusaurus dev server**: Port **1919** (not 3000)
 - **Patent app dev server**: Port **3001** (not 3000)
+- **Patent app production**: Port **3002**
 
 ### PlantUML Workflow
 1. Edit `.puml` files in `docs-site/docs/diagrams/`
@@ -128,7 +140,7 @@ infra/
 ### Environment Variables (Patent App)
 ```bash
 # LLM Provider
-LLM_PROVIDER=claude          # or "openai"
+LLM_PROVIDER=openai          # or "claude"
 ANTHROPIC_API_KEY=sk-ant-xxx
 OPENAI_API_KEY=sk-xxx
 
@@ -136,16 +148,25 @@ OPENAI_API_KEY=sk-xxx
 SEARCH_PROVIDER=tavily        # or "dummy"
 TAVILY_API_KEY=tvly-xxx
 
-# Optional Basic Auth (Vercel)
+# Database (Supabase PostgreSQL)
+DATABASE_URL=postgresql://...   # Prisma Client (pgbouncer)
+DIRECT_URL=postgresql://...     # Migrations (direct connection)
+
+# OpenAI Deep Research (async processing)
+OPENAI_DEEP_RESEARCH_MODEL=o4-mini-deep-research-2025-06-26
+OPENAI_WEBHOOK_SECRET=whsec_xxx  # For webhook signature verification
+CRON_SECRET_KEY=xxx              # Auth for cron endpoint
+
+# Basic Auth (Vercel)
 BASIC_AUTH_USERNAME=admin
 BASIC_AUTH_PASSWORD=secure
 SKIP_AUTH=false              # true only for development
 ```
 
 ### API Cost Considerations
-- Claude API: ~$0.50 per 10 patent analyses (free tier: $5 credit)
-- Tavily API: 1000 searches/month free (~200-300 analyses)
-- OpenAI: Usage-based pricing as fallback
+- OpenAI Deep Research: Primary analysis method, usage-based pricing
+- Claude API: ~$0.50 per 10 analyses (alternative provider)
+- Tavily API: 1000 searches/month free
 
 ### Terraform State Operations
 Per global CLAUDE.md: Avoid `terraform state rm/mv/import` without explicit user approval. Use standard Terraform workflow:
@@ -157,6 +178,13 @@ Per global CLAUDE.md: Avoid `terraform state rm/mv/import` without explicit user
 - **Documentation Site**: GitHub Actions workflow (`deploy.yml`) deploys to S3+CloudFront
 - **Patent App**: Vercel deployment via `vercel --prod` or GitHub integration
 
+### Local Webhook Testing (ngrok)
+For testing OpenAI Deep Research webhooks locally:
+1. Start ngrok: `ngrok http 3001`
+2. Update `OPENAI_WEBHOOK_URL` in `.env.local` with ngrok URL
+3. Configure webhook URL in OpenAI Dashboard (https://platform.openai.com/webhooks)
+4. Health check endpoint: `/api/ngrok/health`
+
 ## Common Development Tasks
 
 ### Adding Documentation
@@ -166,10 +194,11 @@ Per global CLAUDE.md: Avoid `terraform state rm/mv/import` without explicit user
 4. Commit after verifying with `npm run build`
 
 ### Modifying Patent Analysis Logic
-1. Core logic in `apps/poc/phase1/src/services/`
-2. Add/modify provider interfaces in `src/interfaces/`
-3. Test locally with `npm run dev` on localhost:3001
-4. Verify types with `npm run type-check`
+1. API endpoints in `apps/poc/phase1/src/app/api/`
+2. Provider implementations in `src/lib/providers/`
+3. Add/modify provider interfaces in `src/interfaces/`
+4. Test locally with `npm run dev` on localhost:3001
+5. Verify types with `npm run type-check`
 
 ### Updating Infrastructure
 1. Modify Terraform in `infra/modules/docusaurus/` or `infra/environments/dev/`
@@ -179,9 +208,17 @@ Per global CLAUDE.md: Avoid `terraform state rm/mv/import` without explicit user
 
 ### Running Analysis Locally
 1. Copy `.env.local.example` to `.env.local`
-2. Add API keys (Claude/OpenAI + Tavily)
-3. `npm run dev` in `apps/poc/phase1/`
-4. Access http://localhost:3001/analyze
+2. Add API keys (OpenAI required, Tavily optional)
+3. Set up database connection (DATABASE_URL, DIRECT_URL)
+4. `npm run dev` in `apps/poc/phase1/`
+5. Access http://localhost:3001/research for main UI
+
+### Triggering Batch Processing
+The cron endpoint processes pending jobs:
+```bash
+curl -X POST http://localhost:3001/api/cron/check-and-do \
+  -H "X-Cron-Secret: your-cron-secret-key"
+```
 
 ### Database Migration (Prisma)
 **IMPORTANT**: This project uses `prisma db push` instead of traditional migrations for schema changes.
