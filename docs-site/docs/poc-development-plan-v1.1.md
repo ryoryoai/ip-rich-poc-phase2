@@ -2,27 +2,27 @@
 sidebar_position: 5
 ---
 
-# PoC開発計画 v1.1（非同期処理対応版）
+# PoC開発計画 v1.1（実装完了版）
 
-Vercelの300秒タイムアウト制限に対応するため、Deep Researchを非同期処理化したアーキテクチャに移行します。
+Vercelの300秒タイムアウト制限に対応するため、OpenAI Deep Research APIの非同期モード（`background: true`）とGitHub Actions Cronを活用したアーキテクチャを実装しました。
 
-## 📋 v1.0からの主な変更点
+## 📋 概要
 
-| 項目               | v1.0（同期処理）       | v1.1（非同期処理）            |
-| ------------------ | ---------------------- | ----------------------------- |
-| **Deep Research**  | Next.js API内で実行    | 外部サービス + Webhook        |
-| **タイムアウト**   | 300秒（5分）で強制終了 | 15分以上対応可能              |
-| **データベース**   | ローカルJSON           | Supabase/Neon（無料）         |
-| **ステータス管理** | なし                   | ポーリング + ジョブ管理       |
-| **フロントエンド** | 同期待機               | ポーリング + リアルタイム更新 |
+| 項目               | 実装内容                              |
+| ------------------ | ------------------------------------- |
+| **Deep Research**  | OpenAI API直接呼び出し（background: true） |
+| **タイムアウト**   | 非同期処理により制限回避              |
+| **データベース**   | Supabase PostgreSQL（Prisma経由）     |
+| **ステータス管理** | Cron + Webhook + ポーリング           |
+| **バッチ処理**     | GitHub Actions（15分ごと）            |
 
-:::danger Vercelタイムアウト制限
-Vercel無料プランでは、APIルートは**300秒（5分）**で強制終了します。Deep Researchは5〜15分かかるため、**v1.0のアーキテクチャでは動作しません**。
+:::tip Vercelタイムアウト対策
+OpenAI Deep Research APIの`background: true`オプションを使用することで、Vercelの300秒制限を回避。処理完了はWebhookで通知されます。
 :::
 
 ---
 
-## 🏗️ v1.1 アーキテクチャ概要
+## 🏗️ アーキテクチャ
 
 ### システム構成図
 
@@ -33,142 +33,154 @@ Vercel無料プランでは、APIルートは**300秒（5分）**で強制終了
        │ 1. 分析リクエスト
        ▼
 ┌─────────────────────────┐
-│   Next.js Frontend      │
-│   (Vercel)              │
+│   Next.js (Vercel)      │
+│   /api/analyze/start    │
+│   /api/patent-search/   │
+│     schedule            │
 └──────┬──────────────────┘
-       │ 2. POST /api/analyze/start
+       │ 2. ジョブ作成
        ▼
 ┌─────────────────────────┐         ┌──────────────────┐
-│   Next.js API Routes    │◄────────┤  Supabase/Neon   │
+│   Next.js API Routes    │◄────────┤  Supabase        │
 │   (Vercel)              │         │  PostgreSQL      │
-│                         │         │  (無料プラン)     │
+│                         │         │  (Prisma)        │
 │ - /api/analyze/start    │         └──────────────────┘
 │ - /api/analyze/status   │
 │ - /api/analyze/result   │
-│ - /api/webhook/research │
+│ - /api/analyze/list     │
+│ - /api/cron/check-and-do│
+│ - /api/webhook/openai   │
 └──────┬──────────────────┘
        │ 3. Deep Research依頼
+       │    (background: true)
        ▼
 ┌─────────────────────────┐
-│  Deep Research Service  │
-│  (Render.com 無料枠)    │
+│  OpenAI Deep Research   │
+│  API                    │
 │                         │
-│  - Tavily API統合       │
-│  - 15分タイムアウト     │
-│  - Webhook送信機能      │
+│  - o4-mini-deep-research│
+│  - Web検索機能内蔵      │
+│  - 非同期処理           │
 └──────┬──────────────────┘
        │ 4. Webhook (結果返却)
        ▼
 ┌─────────────────────────┐
-│   /api/webhook/research │
-│   (Next.js API)         │
-└──────┬──────────────────┘
-       │ 5. LLM分析
-       ▼
+│   /api/webhook/openai   │
+│   結果をPrismaに保存    │
+└─────────────────────────┘
+
+        ↑
+        │ 15分ごと
 ┌─────────────────────────┐
-│   Claude/OpenAI API     │
-│   (構成要件抽出・判定)   │
+│   GitHub Actions Cron   │
+│   /api/cron/check-and-do│
+│   - ステータス確認      │
+│   - 新規ジョブ開始      │
 └─────────────────────────┘
 ```
 
 ### 処理フロー
 
 ```mermaid
-graph LR
-    A[ユーザー] -->|1. 分析開始| B[Next.js API]
-    B -->|2. ジョブ作成| C[DB: pending]
-    B -->|3. Deep Research依頼| D[Deep Research Service]
-    B -->|4. job_id返却| A
-    A -->|5. ポーリング| B
-    B -->|6. ステータス確認| C
-    D -->|7. 検索完了| E[Webhook API]
-    E -->|8. 結果保存| C[DB: researching]
-    E -->|9. LLM分析| F[Claude/OpenAI]
-    F -->|10. 判定結果| E
-    E -->|11. 完了| C[DB: completed]
-    A -->|12. 結果取得| B
-    B -->|13. 結果返却| C
+sequenceDiagram
+    participant U as ユーザー
+    participant N as Next.js API
+    participant DB as PostgreSQL
+    participant O as OpenAI API
+    participant C as GitHub Actions
+
+    U->>N: POST /api/analyze/start
+    N->>DB: ジョブ作成 (status: pending)
+    N->>O: Deep Research (background: true)
+    O-->>N: response.id
+    N->>DB: ステータス更新 (researching)
+    N-->>U: job_id
+
+    U->>N: GET /api/analyze/status/:id
+    N->>DB: ステータス取得
+    DB-->>N: status, progress
+    N-->>U: 進捗状況
+
+    Note over O: Deep Research実行中...
+
+    O->>N: POST /api/webhook/openai
+    N->>DB: 結果保存 (completed)
+
+    U->>N: GET /api/analyze/result/:id
+    N->>DB: 結果取得
+    DB-->>N: research_results
+    N-->>U: 分析結果
+
+    Note over C: 15分ごとにCron実行
+    C->>N: POST /api/cron/check-and-do
+    N->>O: ステータス確認 (polling)
+    N->>DB: 必要に応じて更新
+    N->>O: 新規ジョブ開始
 ```
 
 ---
 
 ## 🗄️ データベース設計
 
-### 推奨DB: Supabase vs Neon比較
+### Prisma + Supabase PostgreSQL
 
-| 項目             | Supabase（推奨）    | Neon                 | PlanetScale          |
-| ---------------- | ------------------- | -------------------- | -------------------- |
-| **データベース** | PostgreSQL          | PostgreSQL           | MySQL/PostgreSQL     |
-| **無料枠**       | 500MB + 1GB Storage | 10 branches, 1GB RAM | 有料のみ（$34/月〜） |
-| **認証機能**     | ✅ 組み込み         | ❌ なし              | ❌ なし              |
-| **リアルタイム** | ✅ あり             | ❌ なし              | ❌ なし              |
-| **API自動生成**  | ✅ REST + GraphQL   | ❌ なし              | ❌ なし              |
-| **Vercel統合**   | ✅ 簡単             | ✅ 簡単              | ✅ 簡単              |
-| **ローカル開発** | Docker Compose      | Docker/PostgreSQL    | Docker/MySQL         |
-| **料金体系**     | 無料〜$25/月        | 無料〜$69/月         | $34/月〜             |
+Supabaseの無料プランを使用し、Prismaで型安全なデータベースアクセスを実現。
 
-**推奨**: **Supabase**
+#### スキーマ
 
-- 認証、API、リアルタイム機能が全て無料枠に含まれる
-- Next.jsとの統合が公式にサポートされている
-- 将来的にリアルタイム通知機能を追加しやすい
+```prisma
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
 
-### Supabaseテーブルスキーマ
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
 
-```sql
--- 分析ジョブテーブル
-CREATE TABLE analysis_jobs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+model analysis_jobs {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  -- ジョブステータス
-  status TEXT NOT NULL CHECK (status IN ('pending', 'researching', 'analyzing', 'completed', 'failed')),
-  progress INTEGER DEFAULT 0 CHECK (progress BETWEEN 0 AND 100),
-  error_message TEXT,
+  // ジョブステータス
+  status       String  @db.Text
+  progress     Int     @default(0) @db.Integer
+  errorMessage String? @map("error_message") @db.Text
 
-  -- 入力データ
-  patent_number TEXT NOT NULL,
-  claim_text TEXT NOT NULL,
-  company_name TEXT NOT NULL,
-  product_name TEXT NOT NULL,
+  // 入力データ
+  patentNumber String @map("patent_number") @db.Text
+  claimText    String @map("claim_text") @db.Text
+  companyName  String @map("company_name") @db.Text
+  productName  String @map("product_name") @db.Text
 
-  -- Deep Research結果
-  research_results JSONB,
+  // Deep Research結果
+  openaiResponseId String? @map("openai_response_id") @db.Text
+  inputPrompt      String? @map("input_prompt") @db.Text
+  researchResults  Json?   @map("research_results") @db.JsonB
 
-  -- 分析結果
-  requirements JSONB,
-  compliance_results JSONB,
-  summary JSONB,
+  // バッチ処理用
+  priority      Int       @default(5)
+  scheduledFor  DateTime? @map("scheduled_for") @db.Timestamptz(6)
+  retryCount    Int       @default(0) @map("retry_count")
+  maxRetries    Int       @default(3) @map("max_retries")
+  searchType    String    @default("infringement_check") @map("search_type") @db.Text
 
-  -- メタデータ
-  user_id UUID, -- 将来的な認証対応
-  ip_address TEXT
-);
+  // タイムスタンプ
+  startedAt   DateTime? @map("started_at") @db.Timestamptz(6)
+  finishedAt  DateTime? @map("finished_at") @db.Timestamptz(6)
 
--- インデックス
-CREATE INDEX idx_jobs_status ON analysis_jobs(status);
-CREATE INDEX idx_jobs_created_at ON analysis_jobs(created_at DESC);
-CREATE INDEX idx_jobs_user_id ON analysis_jobs(user_id);
-
--- 自動更新トリガー
-CREATE OR REPLACE FUNCTION update_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_update_jobs_updated_at
-BEFORE UPDATE ON analysis_jobs
-FOR EACH ROW
-EXECUTE FUNCTION update_updated_at();
+  @@index([status], map: "idx_jobs_status")
+  @@index([createdAt(sort: Desc)], map: "idx_jobs_created_at")
+  @@index([status, priority, scheduledFor], map: "idx_jobs_queue")
+}
 ```
 
 ### ローカル開発環境
 
-#### オプション1: Supabase CLI（推奨）
+#### Supabase CLI使用
 
 ```bash
 # Supabase CLIインストール
@@ -178,416 +190,173 @@ npm install -g supabase
 supabase init
 supabase start
 
-# マイグレーション適用
-supabase db push
+# Prismaスキーマをプッシュ
+npx prisma db push
 
 # ローカルURL: http://localhost:54321
-# PostgreSQL: postgresql://postgres:postgres@localhost:54322/postgres
-```
-
-#### オプション2: Docker PostgreSQL
-
-```yaml
-# docker-compose.yml
-version: "3.8"
-services:
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ip_rich_tools
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-```
-
-```bash
-# 起動
-docker-compose up -d
-
-# 接続文字列
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ip_rich_tools
+# PostgreSQL: postgresql://postgres:postgres@localhost:54322/postgres?schema=local
 ```
 
 ---
 
-## 🔄 Deep Researchサービスの実装
+## 🔄 OpenAI Deep Research API
 
-### オプション1: Render.com無料枠（推奨）
-
-**特徴**:
-
-- 無料プランで750時間/月の稼働時間
-- タイムアウト: 15分（Vercelの3倍）
-- 自動デプロイ（GitHub連携）
-
-**コスト**: $0/月（無料枠内）
-
-```typescript
-// deep-research-service/src/index.ts
-import express from "express";
-import axios from "axios";
-
-const app = express();
-app.use(express.json());
-
-interface ResearchRequest {
-  job_id: string;
-  webhook_url: string;
-  query: string;
-  max_results?: number;
-}
-
-app.post("/research/start", async (req, res) => {
-  const { job_id, webhook_url, query, max_results = 5 }: ResearchRequest = req.body;
-
-  // すぐにレスポンス（非同期処理開始）
-  res.status(202).json({ status: "accepted", job_id });
-
-  // バックグラウンドで処理
-  (async () => {
-    try {
-      // Tavily Deep Research API呼び出し
-      const tavilyResponse = await axios.post(
-        "https://api.tavily.com/research",
-        {
-          api_key: process.env.TAVILY_API_KEY,
-          query,
-          search_depth: "advanced",
-          max_results,
-        },
-        {
-          timeout: 900000, // 15分
-        }
-      );
-
-      // Webhook送信
-      await axios.post(webhook_url, {
-        job_id,
-        status: "completed",
-        results: tavilyResponse.data,
-      });
-    } catch (error) {
-      // エラー時もWebhookで通知
-      await axios.post(webhook_url, {
-        job_id,
-        status: "failed",
-        error: error.message,
-      });
-    }
-  })();
-});
-
-app.listen(3000, () => {
-  console.log("Deep Research Service running on port 3000");
-});
-```
-
-#### Render.comデプロイ設定
-
-```yaml
-# render.yaml
-services:
-  - type: web
-    name: deep-research-service
-    env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm start
-    envVars:
-      - key: TAVILY_API_KEY
-        sync: false
-    plan: free
-```
-
-### オプション2: Railway無料枠
-
-**特徴**:
-
-- 無料プランで500時間/月 + $5クレジット
-- タイムアウト制限なし
-- 自動スケーリング
-
-**コスト**: $0〜5/月（無料クレジット内）
-
-### オプション3: Fly.io無料枠
-
-**特徴**:
-
-- 3つのVMを無料で提供
-- タイムアウト制限なし
-- グローバルデプロイ
-
-**コスト**: $0/月（無料枠内）
-
----
-
-## 🔌 Next.js APIエンドポイント設計
-
-### 1. `POST /api/analyze/start` - 分析開始
-
-**リクエスト**:
-
-```typescript
-interface AnalyzeStartRequest {
-  patentNumber: string;
-  claimText: string;
-  companyName: string;
-  productName: string;
-}
-```
-
-**レスポンス**:
-
-```typescript
-interface AnalyzeStartResponse {
-  job_id: string;
-  status: "pending";
-  created_at: string;
-}
-```
-
-**実装例**:
+### 非同期呼び出し
 
 ```typescript
 // apps/poc/phase1/src/app/api/analyze/start/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+const response = await openai.responses.create({
+  model: 'o4-mini-deep-research-2025-06-26',
+  input: [
+    {
+      type: 'message',
+      role: 'user',
+      content: query,
+    },
+  ],
+  reasoning: { summary: 'auto' },
+  tools: [{ type: 'web_search_preview' }],
+  background: true,  // 非同期モード
+  metadata: { job_id: job.id },
+});
 
+// response.idをDBに保存してWebhookで照合
+await prisma.analysis_jobs.update({
+  where: { id: job.id },
+  data: {
+    status: 'researching',
+    openaiResponseId: response.id,
+  },
+});
+```
+
+### Webhook受信
+
+```typescript
+// apps/poc/phase1/src/app/api/webhook/openai/route.ts
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { patentNumber, claimText, companyName, productName } = body;
+  // 1. 署名検証
+  const wh = new Webhook(process.env.OPENAI_WEBHOOK_SECRET!);
+  wh.verify(payload, headers);
 
-  // Supabaseクライアント
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  // 2. イベント処理
+  const event = JSON.parse(payload);
+  if (event.type === 'response.completed') {
+    const { id: responseId, output } = event.data;
 
-  // ジョブ作成
-  const { data: job, error } = await supabase
-    .from("analysis_jobs")
-    .insert({
-      status: "pending",
-      patent_number: patentNumber,
-      claim_text: claimText,
-      company_name: companyName,
-      product_name: productName,
-      progress: 0,
-    })
-    .select()
-    .single();
+    // 3. ジョブ検索
+    const job = await prisma.analysis_jobs.findFirst({
+      where: { openaiResponseId: responseId },
+    });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    // 4. 結果保存
+    await prisma.analysis_jobs.update({
+      where: { id: job.id },
+      data: {
+        status: 'completed',
+        researchResults: { reportText, citations, rawResponse },
+      },
+    });
   }
-
-  // Deep Researchサービスに非同期リクエスト
-  const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhook/research`;
-  const query = `${companyName} ${productName} specifications features`;
-
-  await fetch(process.env.DEEP_RESEARCH_SERVICE_URL + "/research/start", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      job_id: job.id,
-      webhook_url: webhookUrl,
-      query,
-    }),
-  });
-
-  // ステータス更新
-  await supabase
-    .from("analysis_jobs")
-    .update({ status: "researching", progress: 10 })
-    .eq("id", job.id);
-
-  return NextResponse.json({
-    job_id: job.id,
-    status: "pending",
-    created_at: job.created_at,
-  });
 }
 ```
 
-### 2. `GET /api/analyze/status/:job_id` - ステータス確認
+### Webhook設定
 
-**レスポンス**:
+OpenAI Dashboard (https://platform.openai.com/webhooks) で設定:
 
-```typescript
-interface AnalyzeStatusResponse {
-  job_id: string;
-  status: "pending" | "researching" | "analyzing" | "completed" | "failed";
-  progress: number; // 0-100
-  error_message?: string;
-}
+1. **URL**: `https://ip-rich-poc-phase1.vercel.app/api/webhook/openai`
+2. **Events**: `response.completed`
+3. **Signing Secret**: 環境変数 `OPENAI_WEBHOOK_SECRET` に設定
+
+---
+
+## ⏰ GitHub Actions Cron
+
+### ワークフロー設定
+
+```yaml
+# .github/workflows/cron-patent-search.yml
+name: Patent Search Batch Processing
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # 15分ごと
+  workflow_dispatch:        # 手動実行用
+
+jobs:
+  batch-process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger cron endpoint
+        run: |
+          curl -s -w "\n%{http_code}" -X GET \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET_KEY }}" \
+            -u "${{ secrets.BASIC_AUTH_USERNAME }}:${{ secrets.BASIC_AUTH_PASSWORD }}" \
+            https://ip-rich-poc-phase1.vercel.app/api/cron/check-and-do
 ```
 
-**実装例**:
+### Cronハンドラーの処理内容
 
 ```typescript
-// apps/poc/phase1/src/app/api/analyze/status/[job_id]/route.ts
-export async function GET(request: NextRequest, { params }: { params: { job_id: string } }) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-
-  const { data: job, error } = await supabase
-    .from("analysis_jobs")
-    .select("id, status, progress, error_message")
-    .eq("id", params.job_id)
-    .single();
-
-  if (error || !job) {
-    return NextResponse.json({ error: "Job not found" }, { status: 404 });
-  }
-
-  return NextResponse.json({
-    job_id: job.id,
-    status: job.status,
-    progress: job.progress,
-    error_message: job.error_message,
-  });
-}
-```
-
-### 3. `GET /api/analyze/result/:job_id` - 結果取得
-
-**レスポンス**:
-
-```typescript
-interface AnalyzeResultResponse {
-  job_id: string;
-  status: "completed";
-  result: {
-    patentNumber: string;
-    companyName: string;
-    productName: string;
-    requirements: Requirement[];
-    complianceResults: ComplianceResult[];
-    summary: {
-      totalRequirements: number;
-      compliantRequirements: number;
-      complianceRate: number;
-      infringementPossibility: "○" | "×";
-    };
-  };
-}
-```
-
-### 4. `POST /api/webhook/research` - Webhook受信
-
-**リクエスト**:
-
-```typescript
-interface WebhookResearchRequest {
-  job_id: string;
-  status: "completed" | "failed";
-  results?: any;
-  error?: string;
-}
-```
-
-**実装例**:
-
-```typescript
-// apps/poc/phase1/src/app/api/webhook/research/route.ts
+// apps/poc/phase1/src/app/api/cron/check-and-do/route.ts
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { job_id, status, results, error } = body;
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-
-  if (status === "failed") {
-    await supabase
-      .from("analysis_jobs")
-      .update({ status: "failed", error_message: error })
-      .eq("id", job_id);
-
-    return NextResponse.json({ status: "error_recorded" });
+  // 認証
+  if (cronSecret !== process.env.CRON_SECRET_KEY) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // 検索結果を保存
-  await supabase
-    .from("analysis_jobs")
-    .update({
-      research_results: results,
-      status: "analyzing",
-      progress: 50,
-    })
-    .eq("id", job_id);
+  // 1. 実行中ジョブのステータス確認
+  const inProgressJobs = await prisma.analysis_jobs.findMany({
+    where: { status: 'researching' },
+  });
 
-  // LLM分析を開始（別関数で実行）
-  await performLLMAnalysis(job_id);
+  for (const job of inProgressJobs) {
+    const response = await openai.responses.retrieve(job.openaiResponseId);
+    if (response.status === 'completed') {
+      // 結果を保存
+      await prisma.analysis_jobs.update({
+        where: { id: job.id },
+        data: { status: 'completed', researchResults: response.output },
+      });
+    }
+  }
 
-  return NextResponse.json({ status: "processing" });
-}
+  // 2. 新規ジョブの開始
+  const maxConcurrent = parseInt(process.env.MAX_CONCURRENT_JOBS || '3');
+  const currentRunning = await prisma.analysis_jobs.count({
+    where: { status: 'researching' },
+  });
 
-async function performLLMAnalysis(job_id: string) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  if (currentRunning < maxConcurrent) {
+    const pendingJobs = await prisma.analysis_jobs.findMany({
+      where: { status: 'pending' },
+      orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
+      take: maxConcurrent - currentRunning,
+    });
 
-  // ジョブ情報取得
-  const { data: job } = await supabase.from("analysis_jobs").select("*").eq("id", job_id).single();
+    for (const job of pendingJobs) {
+      // Deep Research開始
+      const response = await openai.responses.create({
+        model: 'o4-mini-deep-research-2025-06-26',
+        input: [{ type: 'message', role: 'user', content: buildQuery(job) }],
+        background: true,
+      });
 
-  if (!job) return;
-
-  // 既存のLLM分析ロジックを実行
-  const llmProvider = getLLMProvider();
-  const requirementService = new RequirementExtractionService(llmProvider);
-
-  const requirements = await requirementService.extractRequirements(
-    job.patent_number,
-    job.claim_text
-  );
-
-  await supabase.from("analysis_jobs").update({ requirements, progress: 70 }).eq("id", job_id);
-
-  // 充足性判定
-  const searchProvider = getSearchProvider();
-  const complianceService = new ComplianceCheckService(llmProvider, searchProvider);
-
-  const complianceResults = await Promise.all(
-    requirements.map((req) =>
-      complianceService.checkCompliance(req, job.product_name, job.company_name)
-    )
-  );
-
-  // 総合判定
-  const compliantCount = complianceResults.filter((r) => r.compliance === "○").length;
-  const summary = {
-    totalRequirements: requirements.length,
-    compliantRequirements: compliantCount,
-    complianceRate: (compliantCount / requirements.length) * 100,
-    infringementPossibility: compliantCount === requirements.length ? "○" : "×",
-  };
-
-  // 最終結果保存
-  await supabase
-    .from("analysis_jobs")
-    .update({
-      compliance_results: complianceResults,
-      summary,
-      status: "completed",
-      progress: 100,
-    })
-    .eq("id", job_id);
+      await prisma.analysis_jobs.update({
+        where: { id: job.id },
+        data: { status: 'researching', openaiResponseId: response.id },
+      });
+    }
+  }
 }
 ```
 
 ---
 
-## 🎨 フロントエンド実装（ポーリング対応）
+## 🎨 フロントエンド実装
 
 ### ポーリングコンポーネント
 
@@ -597,14 +366,9 @@ async function performLLMAnalysis(job_id: string) {
 
 import { useEffect, useState } from 'react';
 
-interface AnalysisProgressProps {
-  jobId: string;
-  onComplete: (result: any) => void;
-}
-
-export function AnalysisProgress({ jobId, onComplete }: AnalysisProgressProps) {
-  const [status, setStatus] = useState<string>('pending');
-  const [progress, setProgress] = useState<number>(0);
+export function AnalysisProgress({ jobId, onComplete }) {
+  const [status, setStatus] = useState('pending');
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const pollInterval = setInterval(async () => {
@@ -616,318 +380,158 @@ export function AnalysisProgress({ jobId, onComplete }: AnalysisProgressProps) {
 
       if (data.status === 'completed') {
         clearInterval(pollInterval);
-
-        // 結果を取得
-        const resultRes = await fetch(`/api/analyze/result/${jobId}`);
-        const result = await resultRes.json();
-        onComplete(result);
+        const result = await fetch(`/api/analyze/result/${jobId}`);
+        onComplete(await result.json());
       } else if (data.status === 'failed') {
         clearInterval(pollInterval);
-        alert('分析に失敗しました: ' + data.error_message);
       }
     }, 10000); // 10秒ごとにポーリング
 
     return () => clearInterval(pollInterval);
   }, [jobId, onComplete]);
 
-  const getStatusText = () => {
-    switch (status) {
-      case 'pending': return '分析を開始しています...';
-      case 'researching': return '製品情報を検索中...';
-      case 'analyzing': return 'AI分析を実行中...';
-      case 'completed': return '分析完了！';
-      case 'failed': return '分析に失敗しました';
-      default: return '処理中...';
-    }
-  };
-
   return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-lg font-medium">{getStatusText()}</p>
-        <p className="text-sm text-gray-500">ジョブID: {jobId}</p>
-      </div>
-
+    <div>
+      <p>{getStatusText(status)}</p>
       <div className="w-full bg-gray-200 rounded-full h-4">
         <div
-          className="bg-blue-600 h-4 rounded-full transition-all duration-500"
+          className="bg-blue-600 h-4 rounded-full"
           style={{ width: `${progress}%` }}
         />
       </div>
-
-      <p className="text-sm text-gray-600">{progress}% 完了</p>
     </div>
   );
 }
 ```
 
-### 分析開始ページ
-
-```typescript
-// apps/poc/phase1/src/app/analyze/page.tsx
-'use client';
-
-import { useState } from 'react';
-import { AnalysisProgress } from '@/components/AnalysisProgress';
-
-export default function AnalyzePage() {
-  const [jobId, setJobId] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    const res = await fetch('/api/analyze/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        patentNumber: formData.get('patentNumber'),
-        claimText: formData.get('claimText'),
-        companyName: formData.get('companyName'),
-        productName: formData.get('productName'),
-      }),
-    });
-
-    const data = await res.json();
-    setJobId(data.job_id);
-  };
-
-  if (result) {
-    return <div>結果表示: {JSON.stringify(result, null, 2)}</div>;
-  }
-
-  if (jobId) {
-    return <AnalysisProgress jobId={jobId} onComplete={setResult} />;
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <input name="patentNumber" placeholder="特許番号" required />
-      <textarea name="claimText" placeholder="請求項1" required />
-      <input name="companyName" placeholder="企業名" required />
-      <input name="productName" placeholder="製品名" required />
-      <button type="submit">分析開始</button>
-    </form>
-  );
-}
-```
-
----
-
-## 📦 必要な依存関係
-
-### Next.jsプロジェクト（apps/poc/phase1/）
-
-```bash
-# Supabaseクライアント
-npm install @supabase/supabase-js
-
-# 既存の依存関係は継続
-npm install @anthropic-ai/sdk openai axios zod
-```
-
-### Deep Researchサービス（新規プロジェクト）
-
-```bash
-mkdir deep-research-service
-cd deep-research-service
-npm init -y
-
-npm install express axios dotenv
-npm install -D typescript @types/express @types/node tsx
-```
-
----
-
-## 🚀 実装ステップ（v1.1移行）
-
-| ステップ | 作業内容                      | 期間     | 成果物                          |
-| -------- | ----------------------------- | -------- | ------------------------------- |
-| 1        | **Supabaseセットアップ**      | 1日      | テーブル作成、ローカル環境構築  |
-| 2        | **Deep Researchサービス開発** | 2日      | Render.comデプロイ準備          |
-| 3        | **Next.js API改修**           | 3日      | start/status/result/webhook実装 |
-| 4        | **フロントエンド改修**        | 2日      | ポーリングUI実装                |
-| 5        | **統合テスト**                | 2日      | E2Eテスト、負荷テスト           |
-| **合計** | -                             | **10日** | 完全非同期対応システム          |
-
----
-
-## 💰 コスト試算（v1.1）
-
-```
-Supabase無料枠:
-  - データベース: 500MB（無料）
-  - API呼び出し: 50,000/月（無料）
-  - ストレージ: 1GB（無料）
-
-Render.com無料枠:
-  - 稼働時間: 750時間/月（無料）
-  - Deep Researchサービス: $0
-
-Claude API:
-  - 構成要件抽出: $0.09（無料枠内）
-  - 充足性判定: $0.18（無料枠内）
-
-Tavily API:
-  - 1000検索/月（無料）
-
-Vercel:
-  - Next.jsホスティング: $0（無料枠）
-
-合計コスト: $0（完全無料）
-```
-
----
-
-## 📊 シーケンス図
-
-![非同期処理ワークフロー](./diagrams/async-workflow-v1.1.svg)
-
-シーケンス図は`docs-site/docs/diagrams/async-workflow-v1.1.puml`を参照してください。
-
 ---
 
 ## 🔧 環境変数設定
 
-### Next.js（.env.local）
+### Vercel環境変数
 
 ```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# データベース（Prisma）
+DATABASE_URL=postgresql://postgres.[ref]:[password]@pooler.supabase.com:6543/postgres?schema=production&pgbouncer=true
+DIRECT_URL=postgresql://postgres.[ref]:[password]@pooler.supabase.com:5432/postgres?schema=production
 
-# Deep Research Service
-DEEP_RESEARCH_SERVICE_URL=https://deep-research-service.onrender.com
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+# OpenAI API
+OPENAI_API_KEY=sk-proj-xxxxx
+OPENAI_DEEP_RESEARCH_MODEL=o4-mini-deep-research-2025-06-26
 
-# LLM Provider
-LLM_PROVIDER=claude
-ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
-OPENAI_API_KEY=sk-xxxxx
+# OpenAI Webhook
+OPENAI_WEBHOOK_SECRET=whsec_xxxxx
+OPENAI_WEBHOOK_URL=https://ip-rich-poc-phase1.vercel.app/api/webhook/openai
 
-# Search Provider
-SEARCH_PROVIDER=tavily
-TAVILY_API_KEY=tvly-xxxxx
+# Cron設定
+CRON_SECRET_KEY=your-secure-random-string
+MAX_CONCURRENT_JOBS=3
+
+# Basic認証
+BASIC_AUTH_USERNAME=patent
+BASIC_AUTH_PASSWORD=xxxxx
+SKIP_AUTH=false
+
+# Next.js
+NEXT_PUBLIC_APP_URL=https://ip-rich-poc-phase1.vercel.app
 ```
 
-### Deep Research Service（.env）
+### GitHub Secrets
 
-```bash
-TAVILY_API_KEY=tvly-xxxxx
-PORT=3000
+```
+CRON_SECRET_KEY        # Cronエンドポイント認証
+BASIC_AUTH_USERNAME    # Basic認証ユーザー名
+BASIC_AUTH_PASSWORD    # Basic認証パスワード
 ```
 
 ---
 
-## ✅ テスト計画
+## 💰 コスト試算
 
-### 1. ユニットテスト
-
-```typescript
-// tests/api/analyze/start.test.ts
-describe("POST /api/analyze/start", () => {
-  it("should create a job and return job_id", async () => {
-    const res = await fetch("/api/analyze/start", {
-      method: "POST",
-      body: JSON.stringify({
-        patentNumber: "JP1234567",
-        claimText: "テスト請求項",
-        companyName: "テスト企業",
-        productName: "テスト製品",
-      }),
-    });
-
-    const data = await res.json();
-    expect(data.job_id).toBeDefined();
-    expect(data.status).toBe("pending");
-  });
-});
 ```
+Supabase無料枠:
+  - データベース: 500MB（無料）
+  - API呼び出し: 制限なし
+  - ストレージ: 1GB（無料）
 
-### 2. E2Eテスト（Playwright）
+OpenAI Deep Research:
+  - 使用量に応じた従量課金
+  - 1件あたり約$0.10〜$0.50（検索量による）
 
-```typescript
-// tests/e2e/analysis-flow.spec.ts
-import { test, expect } from "@playwright/test";
+GitHub Actions:
+  - 2,000分/月（無料枠）
+  - 15分×4回/時×24時間×30日 = 43,200分必要
+  - → 実際は条件分岐で削減可能
 
-test("full analysis workflow", async ({ page }) => {
-  await page.goto("/analyze");
+Vercel:
+  - Hobby: $0（無料）
+  - Pro: $20/月（商用利用時）
 
-  // フォーム入力
-  await page.fill('[name="patentNumber"]', "JP1234567");
-  await page.fill('[name="claimText"]', "テスト請求項");
-  await page.fill('[name="companyName"]', "テスト企業");
-  await page.fill('[name="productName"]', "テスト製品");
-
-  // 分析開始
-  await page.click('button[type="submit"]');
-
-  // ジョブID表示確認
-  await expect(page.locator("text=ジョブID:")).toBeVisible();
-
-  // ポーリング待機（最大15分）
-  await page.waitForSelector("text=分析完了！", { timeout: 900000 });
-
-  // 結果表示確認
-  await expect(page.locator("text=侵害可能性")).toBeVisible();
-});
+月額コスト目安:
+  - 開発中: $0〜$5
+  - 本番運用: $20〜$50
 ```
 
 ---
 
-## 🎯 移行チェックリスト
+## ✅ 実装完了チェックリスト
 
-- [ ] Supabaseアカウント作成 + プロジェクト作成
-- [ ] Supabaseローカル環境セットアップ（`supabase start`）
-- [ ] テーブルスキーマ適用（`analysis_jobs`テーブル作成）
-- [ ] Render.comアカウント作成
-- [ ] Deep Researchサービスリポジトリ作成
-- [ ] Deep ResearchサービスをRender.comにデプロイ
-- [ ] Next.js APIルート改修（start/status/result/webhook）
-- [ ] フロントエンドポーリング機能実装
-- [ ] 環境変数設定（Vercel + Render.com）
-- [ ] E2Eテスト実行
-- [ ] 本番デプロイ
+- [x] Supabase PostgreSQL + Prisma設定
+- [x] Next.js APIルート実装
+  - [x] /api/analyze/start
+  - [x] /api/analyze/status/[job_id]
+  - [x] /api/analyze/result/[job_id]
+  - [x] /api/analyze/list
+  - [x] /api/patent-search/schedule
+  - [x] /api/cron/check-and-do
+  - [x] /api/webhook/openai
+- [x] OpenAI Deep Research API統合
+- [x] Webhook署名検証
+- [x] GitHub Actions Cron設定
+- [x] フロントエンドポーリング実装
+- [x] 環境変数設定（Vercel）
+- [x] 本番デプロイ
 
 ---
 
 ## 📚 関連資料
 
-- [非同期処理シーケンス図](./diagrams/async-workflow-v1.1.puml)
-- [Phase 1 PoC開発計画（v1.0）](./poc-development-plan.md)
+- [Phase 1 実装計画](./phase1-implementation-plan.md)
 - [特許侵害調査ワークフロー](./patent-workflow.md)
+- [OpenAI Deep Research API Docs](https://platform.openai.com/docs)
 - [Supabase公式ドキュメント](https://supabase.com/docs)
-- [Render.com公式ドキュメント](https://render.com/docs)
-- [Tavily API Documentation](https://docs.tavily.com/)
+- [Prisma公式ドキュメント](https://www.prisma.io/docs)
 
 ---
 
 ## 🔮 今後の拡張案
 
-### v1.2: リアルタイム通知対応
+### Phase 2: 業務利用可能性検証
 
-- Supabase Realtimeを使用したWebSocket通知
-- ポーリングの代わりにプッシュ通知
+- 侵害調査結果の妥当性確認
+- 特許有識者によるレビュー
 
-### v1.3: バッチ処理対応
+### Phase 3: 機能拡張
 
-- 複数特許の一括分析
-- バックグラウンドジョブキュー（BullMQ）
+- J-PlatPat連携による特許情報自動取得
+- 侵害調査結果の管理・検索機能
+- 侵害額推定機能
+- CSV出力機能
 
-### v1.4: ユーザー認証・マルチテナント
+### Phase 4: 商用化対応
 
-- Supabase Authでユーザー管理
-- 分析履歴の保存・検索機能
+- ログイン機能
+- ユーザー・グループ管理
+- 利用料管理
 
 ---
 
-:::tip v1.1のメリット
+:::tip v1.1アーキテクチャのメリット
 
-- ✅ Vercelタイムアウト制限を回避（15分以上対応可能）
-- ✅ 完全無料枠内で運用可能（Supabase + Render.com）
-- ✅ ポーリングによる進捗表示でUX向上
-- ✅ Deep Researchを外部サービス化して再利用可能
-- ✅ 将来的なリアルタイム通知への移行が容易
-  :::
+- ✅ Vercelタイムアウト制限を回避（非同期処理）
+- ✅ OpenAI Deep Research API直接利用（別サービス不要）
+- ✅ GitHub Actions Cronで定期実行
+- ✅ Webhookで確実に結果を受信
+- ✅ Prismaによる型安全なDB操作
+- ✅ 完全無料枠での運用可能
+:::
