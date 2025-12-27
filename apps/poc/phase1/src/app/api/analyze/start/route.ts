@@ -55,26 +55,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // ジョブ作成
-    const job = await prisma.analysis_jobs.create({
-      data: {
-        status: 'pending',
-        patentNumber,
-        claimText,
-        companyName,
-        productName,
-        progress: 0,
-      },
-    });
-
-    console.log(`[API] Job created: ${job.id}`);
-
-    // OpenAI Deep Research API呼び出し（非同期モード）
-    const webhookUrl =
-      process.env.OPENAI_WEBHOOK_URL ||
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/webhook/openai`;
-
-    // サンプル/侵害調査プロンプト.txt のフォーマットに従う
+    // プロンプトを生成（cronジョブで使用するため事前に生成・保存）
     const query = `下記の特許${patentNumber}の請求項１の要件を満たす侵害製品を念入りに調査せよ。対象は日本国内でサービス展開している外国企業（日本企業以外）とする。
 
 ▼重要指示：
@@ -121,64 +102,22 @@ export async function POST(request: NextRequest) {
 ＜以下、特許${patentNumber}（請求項１を全文で記載）＞
 ${claimText}`;
 
-    console.log(`[API] Starting OpenAI Deep Research...`);
-    console.log(`[API] Patent Number: ${patentNumber}`);
-    console.log(`[API] Webhook URL: ${webhookUrl}`);
+    // ジョブ作成（プロンプトも保存）
+    const job = await prisma.analysis_jobs.create({
+      data: {
+        status: 'pending',
+        patentNumber,
+        claimText,
+        companyName,
+        productName,
+        inputPrompt: query,  // プロンプトを保存
+        progress: 0,
+      },
+    });
 
-    try {
-      const response = await openai.responses.create({
-        model: 'o4-mini-deep-research-2025-06-26',
-        input: [
-          {
-            type: 'message',
-            role: 'user',
-            content: query,
-          },
-        ],
-        reasoning: { summary: 'auto' },
-        tools: [{ type: 'web_search_preview' }],
-        background: true, // 非同期モード
-        metadata: { job_id: job.id }, // Webhook時に識別するため
-        // NOTE: WebhookはOpenAI Dashboard (https://platform.openai.com/webhooks) で設定
-      });
-
-      console.log(`[API] Deep Research started:`, response.id);
-
-      // ステータス更新（response.idとプロンプトを保存）
-      await prisma.analysis_jobs.update({
-        where: { id: job.id },
-        data: {
-          status: 'researching',
-          progress: 10,
-          openaiResponseId: response.id, // Webhook時に照合するため
-          inputPrompt: query, // プロンプトを保存
-        },
-      });
-
-      console.log(`[API] Job status updated to 'researching' with response ID: ${response.id}`);
-    } catch (error) {
-      console.error('[API] Failed to start OpenAI Deep Research:', error);
-
-      // エラー時はジョブを失敗状態に更新
-      await prisma.analysis_jobs.update({
-        where: { id: job.id },
-        data: {
-          status: 'failed',
-          errorMessage:
-            error instanceof Error
-              ? error.message
-              : 'Failed to start OpenAI Deep Research',
-        },
-      });
-
-      return NextResponse.json(
-        {
-          error: 'Failed to start OpenAI Deep Research',
-          details: error instanceof Error ? error.message : 'Unknown error',
-        },
-        { status: 500 }
-      );
-    }
+    console.log(`[API] Job created: ${job.id} with status 'pending'`);
+    console.log(`[API] Job will be processed by cron job later`);
+    console.log(`[API] Prompt has been saved for future processing`);
 
     const response: AnalyzeStartResponse = {
       job_id: job.id,
