@@ -16,8 +16,32 @@ export default function StatusPage({ params }: { params: { job_id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
   const [pollCount, setPollCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   const MAX_POLL_ATTEMPTS = 30; // 15分 (30回 × 30秒)
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    try {
+      const res = await fetch(`/api/analyze/retry/${params.job_id}`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to retry');
+      }
+
+      // リトライ成功後、ステータスを更新
+      setStatus(data);
+      setError(null);
+      setPollCount(0); // ポーリングカウントをリセット
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'リトライに失敗しました');
+    } finally {
+      setIsRetrying(false);
+    }
+  };
 
   useEffect(() => {
     const pollStatus = async () => {
@@ -150,6 +174,24 @@ export default function StatusPage({ params }: { params: { job_id: string } }) {
               <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
                 <p className="font-medium">✓ 分析が完了しました</p>
                 <p className="text-sm mt-1">結果ページに移動します...</p>
+              </div>
+            )}
+
+            {status?.status === 'failed' && (
+              <div className="space-y-4">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                  <p className="font-medium">✗ 分析に失敗しました</p>
+                  {status.error_message && (
+                    <p className="text-sm mt-1">{status.error_message}</p>
+                  )}
+                </div>
+                <button
+                  onClick={handleRetry}
+                  disabled={isRetrying}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isRetrying ? 'リトライ中...' : 'もう一度分析を実行'}
+                </button>
               </div>
             )}
 
