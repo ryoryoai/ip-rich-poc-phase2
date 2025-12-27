@@ -24,7 +24,7 @@ Vercel無料プランでは、APIルートは**300秒（5分）**で強制終了
 
 ## 🏗️ v1.1 アーキテクチャ概要
 
-### システム構成図
+### システム構成図（現在の実装）
 
 ```
 ┌─────────────┐
@@ -36,58 +36,68 @@ Vercel無料プランでは、APIルートは**300秒（5分）**で強制終了
 │   Next.js Frontend      │
 │   (Vercel)              │
 └──────┬──────────────────┘
-       │ 2. POST /api/analyze/start
+       │ 2. POST /api/analyze/start (pending作成)
        ▼
 ┌─────────────────────────┐         ┌──────────────────┐
-│   Next.js API Routes    │◄────────┤  Supabase/Neon   │
+│   Next.js API Routes    │◄────────┤  Supabase        │
 │   (Vercel)              │         │  PostgreSQL      │
-│                         │         │  (無料プラン)     │
+│                         │         │  + Prisma ORM    │
 │ - /api/analyze/start    │         └──────────────────┘
 │ - /api/analyze/status   │
 │ - /api/analyze/result   │
-│ - /api/webhook/research │
+│ - /api/cron/check-and-do│
+│ - /api/webhook/openai   │
 └──────┬──────────────────┘
-       │ 3. Deep Research依頼
+       │ 3. Cronジョブ実行
        ▼
 ┌─────────────────────────┐
-│  Deep Research Service  │
-│  (Render.com 無料枠)    │
+│  Cron Job               │
+│  /api/cron/check-and-do │
 │                         │
-│  - Tavily API統合       │
-│  - 15分タイムアウト     │
-│  - Webhook送信機能      │
+│  - pendingジョブ取得    │
+│  - OpenAI API呼び出し   │
+│  - status更新           │
 └──────┬──────────────────┘
-       │ 4. Webhook (結果返却)
+       │ 4. Deep Research実行
        ▼
 ┌─────────────────────────┐
-│   /api/webhook/research │
-│   (Next.js API)         │
+│  OpenAI Deep Research   │
+│  (background: true)     │
+│                         │
+│  - o4-mini-deep-research│
+│  - 5-15分で実行         │
+│  - Webhook/Polling      │
 └──────┬──────────────────┘
-       │ 5. LLM分析
+       │ 5. 結果保存
        ▼
 ┌─────────────────────────┐
-│   Claude/OpenAI API     │
-│   (構成要件抽出・判定)   │
+│   Database更新          │
+│   status → completed    │
 └─────────────────────────┘
 ```
 
-### 処理フロー
+### 処理フロー（実際の実装）
 
 ```mermaid
 graph LR
-    A[ユーザー] -->|1. 分析開始| B[Next.js API]
+    A[ユーザー] -->|1. 分析開始| B[/api/analyze/start]
     B -->|2. ジョブ作成| C[DB: pending]
-    B -->|3. Deep Research依頼| D[Deep Research Service]
-    B -->|4. job_id返却| A
-    A -->|5. ポーリング| B
-    B -->|6. ステータス確認| C
-    D -->|7. 検索完了| E[Webhook API]
-    E -->|8. 結果保存| C[DB: researching]
-    E -->|9. LLM分析| F[Claude/OpenAI]
-    F -->|10. 判定結果| E
-    E -->|11. 完了| C[DB: completed]
-    A -->|12. 結果取得| B
-    B -->|13. 結果返却| C
+    B -->|3. job_id返却| A
+
+    D[Cron Job] -->|4. 定期実行| E[/api/cron/check-and-do]
+    E -->|5. pendingジョブ取得| C
+    E -->|6. OpenAI Deep Research開始| F[OpenAI API]
+    E -->|7. status更新| C[DB: researching]
+
+    F -->|8. バックグラウンド処理| F
+    E -->|9. ポーリングで確認| F
+    F -->|10. 完了| E
+    E -->|11. 結果保存| C[DB: completed]
+
+    A -->|12. ステータス確認| G[/api/analyze/status]
+    G -->|13. 状態返却| C
+    A -->|14. 結果取得| H[/api/analyze/result]
+    H -->|15. 結果返却| C
 ```
 
 ---
@@ -368,48 +378,29 @@ export async function POST(request: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // ジョブ作成
-  const { data: job, error } = await supabase
-    .from("analysis_jobs")
-    .insert({
-      status: "pending",
-      patent_number: patentNumber,
-      claim_text: claimText,
-      company_name: companyName,
-      product_name: productName,
+  // プロンプトを生成（cronジョブで使用するため事前に保存）
+  const query = buildInfringementPrompt(patentNumber, claimText);
+
+  // ジョブ作成（Prisma使用）
+  const job = await prisma.analysis_jobs.create({
+    data: {
+      status: "pending",  // pendingで作成
+      patentNumber,
+      claimText,
+      companyName,
+      productName,
+      inputPrompt: query,  // プロンプトを保存
       progress: 0,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  // Deep Researchサービスに非同期リクエスト
-  const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhook/research`;
-  const query = `${companyName} ${productName} specifications features`;
-
-  await fetch(process.env.DEEP_RESEARCH_SERVICE_URL + "/research/start", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      job_id: job.id,
-      webhook_url: webhookUrl,
-      query,
-    }),
+    },
   });
 
-  // ステータス更新
-  await supabase
-    .from("analysis_jobs")
-    .update({ status: "researching", progress: 10 })
-    .eq("id", job.id);
+  // 注: OpenAI APIの呼び出しはcronジョブで実行される
+  // /api/cron/check-and-do が定期的にpendingジョブを処理
 
   return NextResponse.json({
     job_id: job.id,
     status: "pending",
-    created_at: job.created_at,
+    created_at: job.createdAt.toISOString(),
   });
 }
 ```
