@@ -24,7 +24,7 @@ OpenAI Deep Research APIの`background: true`オプションを使用するこ�
 
 ## 🏗️ アーキテクチャ
 
-### システム構成図
+### システム構成図（現在の実装）
 
 ```
 ┌─────────────┐
@@ -35,15 +35,14 @@ OpenAI Deep Research APIの`background: true`オプションを使用するこ�
 ┌─────────────────────────┐
 │   Next.js (Vercel)      │
 │   /api/analyze/start    │
-│   /api/patent-search/   │
-│     schedule            │
 └──────┬──────────────────┘
-       │ 2. ジョブ作成
+       │ 2. ジョブ作成 (status: pending)
+       │    ※OpenAI APIは呼び出さない
        ▼
 ┌─────────────────────────┐         ┌──────────────────┐
 │   Next.js API Routes    │◄────────┤  Supabase        │
 │   (Vercel)              │         │  PostgreSQL      │
-│                         │         │  (Prisma)        │
+│                         │         │  + Prisma ORM    │
 │ - /api/analyze/start    │         └──────────────────┘
 │ - /api/analyze/status   │
 │ - /api/analyze/result   │
@@ -51,71 +50,77 @@ OpenAI Deep Research APIの`background: true`オプションを使用するこ�
 │ - /api/cron/check-and-do│
 │ - /api/webhook/openai   │
 └──────┬──────────────────┘
-       │ 3. Deep Research依頼
+       │
+       ▼
+┌─────────────────────────┐
+│  Cron Job               │◄─── GitHub Actions (15分ごと)
+│  /api/cron/check-and-do │      または Vercel Cron
+│                         │
+│  - pendingジョブ取得    │
+│  - OpenAI API呼び出し   │
+│  - researchingの確認    │
+│  - リトライ処理         │
+└──────┬──────────────────┘
+       │ 3. OpenAI Deep Research開始
        │    (background: true)
        ▼
 ┌─────────────────────────┐
 │  OpenAI Deep Research   │
-│  API                    │
+│  (background: true)     │
 │                         │
 │  - o4-mini-deep-research│
-│  - Web検索機能内蔵      │
-│  - 非同期処理           │
+│  - 5-15分で実行         │
 └──────┬──────────────────┘
-       │ 4. Webhook (結果返却)
+       │ 4. 完了通知
        ▼
 ┌─────────────────────────┐
-│   /api/webhook/openai   │
-│   結果をPrismaに保存    │
-└─────────────────────────┘
-
-        ↑
-        │ 15分ごと
-┌─────────────────────────┐
-│   GitHub Actions Cron   │
-│   /api/cron/check-and-do│
-│   - ステータス確認      │
-│   - 新規ジョブ開始      │
+│  結果受信               │
+│  - Webhook: /api/webhook/openai
+│  - Polling: Cronで定期確認
+│  → status: completed    │
 └─────────────────────────┘
 ```
 
-### 処理フロー
+### 処理フロー（実際の実装）
 
 ```mermaid
 sequenceDiagram
     participant U as ユーザー
     participant N as Next.js API
     participant DB as PostgreSQL
+    participant C as Cron Job
     participant O as OpenAI API
-    participant C as GitHub Actions
 
     U->>N: POST /api/analyze/start
     N->>DB: ジョブ作成 (status: pending)
-    N->>O: Deep Research (background: true)
-    O-->>N: response.id
-    N->>DB: ステータス更新 (researching)
-    N-->>U: job_id
-
-    U->>N: GET /api/analyze/status/:id
-    N->>DB: ステータス取得
-    DB-->>N: status, progress
-    N-->>U: 進捗状況
-
-    Note over O: Deep Research実行中...
-
-    O->>N: POST /api/webhook/openai
-    N->>DB: 結果保存 (completed)
-
-    U->>N: GET /api/analyze/result/:id
-    N->>DB: 結果取得
-    DB-->>N: research_results
-    N-->>U: 分析結果
+    N-->>U: job_id, status: pending
 
     Note over C: 15分ごとにCron実行
     C->>N: POST /api/cron/check-and-do
-    N->>O: ステータス確認 (polling)
-    N->>DB: 必要に応じて更新
-    N->>O: 新規ジョブ開始
+    N->>DB: pendingジョブ取得
+    N->>O: Deep Research (background: true)
+    O-->>N: response.id
+    N->>DB: status: researching
+
+    Note over O: Deep Research実行中...
+
+    alt Webhook経由
+        O->>N: POST /api/webhook/openai
+        N->>DB: 結果保存 (completed)
+    else Polling経由
+        C->>N: POST /api/cron/check-and-do
+        N->>O: responses.retrieve(id)
+        O-->>N: status: completed, output
+        N->>DB: 結果保存 (completed)
+    end
+
+    U->>N: GET /api/analyze/status/:id
+    N->>DB: ステータス取得
+    N-->>U: status: completed
+
+    U->>N: GET /api/analyze/result/:id
+    N->>DB: 結果取得
+    N-->>U: 分析結果
 ```
 
 ---
@@ -201,36 +206,98 @@ npx prisma db push
 
 ## 🔄 OpenAI Deep Research API
 
-### 非同期呼び出し
+### ジョブ作成（/api/analyze/start）
 
 ```typescript
 // apps/poc/phase1/src/app/api/analyze/start/route.ts
-const response = await openai.responses.create({
-  model: 'o4-mini-deep-research-2025-06-26',
-  input: [
-    {
-      type: 'message',
-      role: 'user',
-      content: query,
-    },
-  ],
-  reasoning: { summary: 'auto' },
-  tools: [{ type: 'web_search_preview' }],
-  background: true,  // 非同期モード
-  metadata: { job_id: job.id },
-});
+export async function POST(request: NextRequest) {
+  const { patentNumber, claimText, companyName, productName } = await request.json();
 
-// response.idをDBに保存してWebhookで照合
-await prisma.analysis_jobs.update({
-  where: { id: job.id },
-  data: {
-    status: 'researching',
-    openaiResponseId: response.id,
-  },
-});
+  // プロンプトを生成（cronジョブで使用するため事前に保存）
+  const query = buildInfringementPrompt(patentNumber, claimText);
+
+  // ジョブ作成（Prisma使用）- pendingで作成
+  const job = await prisma.analysis_jobs.create({
+    data: {
+      status: "pending",  // pendingで作成
+      patentNumber,
+      claimText,
+      companyName,
+      productName,
+      inputPrompt: query,  // プロンプトを保存
+      progress: 0,
+    },
+  });
+
+  // 注: OpenAI APIの呼び出しはcronジョブで実行される
+  // /api/cron/check-and-do が定期的にpendingジョブを処理
+
+  return NextResponse.json({
+    job_id: job.id,
+    status: "pending",
+    created_at: job.createdAt.toISOString(),
+  });
+}
 ```
 
-### Webhook受信
+### Cronジョブ処理（/api/cron/check-and-do）
+
+```typescript
+// apps/poc/phase1/src/app/api/cron/check-and-do/route.ts
+export async function POST(request: NextRequest) {
+  // 1. 実行中ジョブのステータス確認（Polling）
+  const inProgressJobs = await prisma.analysis_jobs.findMany({
+    where: { status: 'researching' },
+  });
+
+  for (const job of inProgressJobs) {
+    const response = await openai.responses.retrieve(job.openaiResponseId);
+    if (response.status === 'completed') {
+      await prisma.analysis_jobs.update({
+        where: { id: job.id },
+        data: {
+          status: 'completed',
+          researchResults: response.output,
+          finishedAt: new Date(),
+        },
+      });
+    }
+  }
+
+  // 2. 新規ジョブの開始
+  const pendingJobs = await prisma.analysis_jobs.findMany({
+    where: { status: 'pending' },
+    orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
+    take: maxConcurrent - currentRunning,
+  });
+
+  for (const job of pendingJobs) {
+    // 保存済みのプロンプトを使用
+    const query = job.inputPrompt || buildInfringementQuery(job.patentNumber, job.claimText);
+
+    // OpenAI Deep Research API呼び出し
+    const response = await openai.responses.create({
+      model: 'o4-mini-deep-research-2025-06-26',
+      input: [{ type: 'message', role: 'user', content: query }],
+      reasoning: { summary: 'auto' },
+      tools: [{ type: 'web_search_preview' }],
+      background: true,  // 非同期モード
+      metadata: { job_id: job.id },
+    });
+
+    await prisma.analysis_jobs.update({
+      where: { id: job.id },
+      data: {
+        status: 'researching',
+        openaiResponseId: response.id,
+        startedAt: new Date(),
+      },
+    });
+  }
+}
+```
+
+### Webhook受信（/api/webhook/openai）
 
 ```typescript
 // apps/poc/phase1/src/app/api/webhook/openai/route.ts
@@ -254,6 +321,7 @@ export async function POST(request: NextRequest) {
       where: { id: job.id },
       data: {
         status: 'completed',
+        progress: 100,
         researchResults: { reportText, citations, rawResponse },
       },
     });
@@ -298,59 +366,17 @@ jobs:
             https://ip-rich-poc-phase1.vercel.app/api/cron/check-and-do
 ```
 
-### Cronハンドラーの処理内容
+### Vercel Cron（代替）
 
-```typescript
-// apps/poc/phase1/src/app/api/cron/check-and-do/route.ts
-export async function POST(request: NextRequest) {
-  // 認証
-  if (cronSecret !== process.env.CRON_SECRET_KEY) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  // 1. 実行中ジョブのステータス確認
-  const inProgressJobs = await prisma.analysis_jobs.findMany({
-    where: { status: 'researching' },
-  });
-
-  for (const job of inProgressJobs) {
-    const response = await openai.responses.retrieve(job.openaiResponseId);
-    if (response.status === 'completed') {
-      // 結果を保存
-      await prisma.analysis_jobs.update({
-        where: { id: job.id },
-        data: { status: 'completed', researchResults: response.output },
-      });
+```json
+// vercel.json
+{
+  "crons": [
+    {
+      "path": "/api/cron/check-and-do",
+      "schedule": "*/15 * * * *"
     }
-  }
-
-  // 2. 新規ジョブの開始
-  const maxConcurrent = parseInt(process.env.MAX_CONCURRENT_JOBS || '3');
-  const currentRunning = await prisma.analysis_jobs.count({
-    where: { status: 'researching' },
-  });
-
-  if (currentRunning < maxConcurrent) {
-    const pendingJobs = await prisma.analysis_jobs.findMany({
-      where: { status: 'pending' },
-      orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
-      take: maxConcurrent - currentRunning,
-    });
-
-    for (const job of pendingJobs) {
-      // Deep Research開始
-      const response = await openai.responses.create({
-        model: 'o4-mini-deep-research-2025-06-26',
-        input: [{ type: 'message', role: 'user', content: buildQuery(job) }],
-        background: true,
-      });
-
-      await prisma.analysis_jobs.update({
-        where: { id: job.id },
-        data: { status: 'researching', openaiResponseId: response.id },
-      });
-    }
-  }
+  ]
 }
 ```
 
@@ -488,6 +514,7 @@ Vercel:
 - [x] OpenAI Deep Research API統合
 - [x] Webhook署名検証
 - [x] GitHub Actions Cron設定
+- [x] Vercel Cron設定
 - [x] フロントエンドポーリング実装
 - [x] 環境変数設定（Vercel）
 - [x] 本番デプロイ
@@ -530,8 +557,9 @@ Vercel:
 
 - ✅ Vercelタイムアウト制限を回避（非同期処理）
 - ✅ OpenAI Deep Research API直接利用（別サービス不要）
-- ✅ GitHub Actions Cronで定期実行
+- ✅ GitHub Actions / Vercel Cronで定期実行
 - ✅ Webhookで確実に結果を受信
+- ✅ Polling（フォールバック）で信頼性向上
 - ✅ Prismaによる型安全なDB操作
 - ✅ 完全無料枠での運用可能
 :::

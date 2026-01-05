@@ -154,8 +154,14 @@ export async function POST(request: NextRequest) {
         try {
           console.log(`[Cron] Starting job ${job.id} for patent ${job.patentNumber}`);
 
-          // プロンプトを構築
-          const query = buildInfringementQuery(job.patentNumber, job.claimText);
+          // 保存済みのプロンプトを使用、なければ生成
+          const query = job.inputPrompt || buildInfringementQuery(job.patentNumber, job.claimText);
+
+          if (!job.inputPrompt) {
+            console.log(`[Cron] Generated prompt for job ${job.id} (not pre-saved)`);
+          } else {
+            console.log(`[Cron] Using pre-saved prompt for job ${job.id}`);
+          }
 
           // OpenAI Deep Research APIを呼び出し
           const response = await openai.responses.create({
@@ -175,13 +181,13 @@ export async function POST(request: NextRequest) {
 
           console.log(`[Cron] Deep Research started for job ${job.id}: ${response.id}`);
 
-          // ジョブステータスを更新
+          // ジョブステータスを更新（プロンプトがなかった場合は保存）
           await prisma.analysis_jobs.update({
             where: { id: job.id },
             data: {
               status: 'researching',
               openaiResponseId: response.id,
-              inputPrompt: query,
+              inputPrompt: job.inputPrompt || query,  // 既存があればそのまま、なければ保存
               startedAt: new Date(),
               queuedAt: job.queuedAt || new Date(),
               progress: 10

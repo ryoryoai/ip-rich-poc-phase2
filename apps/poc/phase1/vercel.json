@@ -13,8 +13,17 @@
     },
     "app/api/webhook/openai/route.ts": {
       "maxDuration": 30
+    },
+    "app/api/cron/check-and-do/route.ts": {
+      "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/check-and-do",
+      "schedule": "*/15 * * * *"
+    }
+  ],
   "env": {
     "NODE_ENV": "production"
   }
