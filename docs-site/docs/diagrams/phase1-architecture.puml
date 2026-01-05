@@ -1,68 +1,39 @@
 @startuml phase1-architecture
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle rectangle
-skinparam linetype ortho
 
 title Phase 1 アーキテクチャ
 
 actor "ユーザー" as User
 
 rectangle "Vercel" #E5F5FF {
-  component "Next.js\nフロントエンド" as Frontend
-
-  rectangle "API Routes" {
-    component "/api/analyze/start" as APIStart
-    component "/api/patent-search/schedule" as APISchedule
-    component "/api/cron/check-and-do" as APICron
-    component "/api/webhook/openai" as APIWebhook
-    component "/api/analyze/status" as APIStatus
-    component "/api/analyze/result" as APIResult
-  }
+  component "Next.js\nApp" as NextJS
 }
 
-database "Supabase\nPostgreSQL" as DB #E5FFE5 {
-  component "analysis_jobs" as Jobs
-}
+database "Supabase\nPostgreSQL" as DB #E5FFE5
 
 cloud "OpenAI" #FFF5E5 {
-  component "Deep Research API\no4-mini-deep-research" as DeepResearch
+  component "Deep Research API" as DeepResearch
 }
 
 rectangle "GitHub Actions" #FFE5E5 {
   component "Cron\n(15分ごと)" as Cron
 }
 
-User -down-> Frontend : 1. 分析リクエスト
-Frontend -down-> APIStart : 2. POST
-Frontend -down-> APISchedule : または\nスケジュール
-
-APIStart -down-> Jobs : 3. ジョブ作成
-APISchedule -down-> Jobs : ジョブ作成
-
-APIStart -right-> DeepResearch : 4. Deep Research\n(background: true)
-DeepResearch -left-> APIWebhook : 5. Webhook\n(response.completed)
-APIWebhook -down-> Jobs : 6. 結果保存
-
-Cron -down-> APICron : 7. 定期実行
-APICron -down-> Jobs : ステータス確認
-APICron -right-> DeepResearch : 新規ジョブ開始\nまたはステータス取得
-
-Frontend -down-> APIStatus : 8. ステータス確認
-APIStatus -down-> Jobs
-Frontend -down-> APIResult : 9. 結果取得
-APIResult -down-> Jobs
+User -down-> NextJS : 1. 分析リクエスト
+NextJS -down-> DB : 2. ジョブ作成・更新
+NextJS -right-> DeepResearch : 3. Deep Research\n(background: true)
+DeepResearch -left-> NextJS : 4. Webhook\n(response.completed)
+Cron -down-> NextJS : 5. 定期ステータス確認\n新規ジョブ開始
 
 note right of DeepResearch
   非同期処理
-  background: true
   Webhookで完了通知
 end note
 
 note bottom of Cron
   15分ごとに実行
-  - ステータス確認
-  - 新規ジョブ開始
-  - リトライ処理
+  バッチ処理制御
 end note
 
 @enduml

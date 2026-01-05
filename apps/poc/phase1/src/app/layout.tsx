@@ -3,7 +3,7 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "特許侵害調査システム - Phase 1 PoC",
+  title: "Phase 1 PoC",
   description: "特許の構成要件抽出と侵害可能性の自動判定",
 };
 

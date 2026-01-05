@@ -4,7 +4,7 @@
 [tools]
 # Global tools
 terraform = "1.9.8"
-node = "20.18.0"
+node = "22.17.1"
 
 [env]
 # Environment variables
