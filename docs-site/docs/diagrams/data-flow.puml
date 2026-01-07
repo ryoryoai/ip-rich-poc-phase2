@@ -8,7 +8,7 @@ RECTANGLE "特許権者リスト" as input {
   + 対象期間
 }
 
-RECTANGLE "特許情報\n(DynamoDB)" as patentdb {
+RECTANGLE "特許情報\n(Supabase)" as patentdb {
   + 特許番号
   + 請求項
   + 発明の内容

@@ -6,7 +6,7 @@ skinparam swimlaneWidth 320
 start
 :特許権者リストを入力;
 
-|自動化システム\n(Dify/GPT Builder)|
+|自動化システム\n(Next.js + Vercel)|
 :特許情報を自動取得;
 note right
   **データソース**
@@ -30,11 +30,11 @@ note right
   ・根拠URLの自動記録
 end note
 
-|自動化システム\n(Dify/GPT Builder)|
+|自動化システム\n(Next.js + Vercel)|
 if (侵害可能性あり?) then (○)
   :売上推定エージェントを起動;
 else (×)
-  :結果をDynamoDBに保存;
+  :結果をSupabaseに保存;
   |知財担当者|
   :結果を確認;
   stop
@@ -52,7 +52,7 @@ note right
   ・収益ランクの自動判定
 end note
 
-|自動化システム\n(Dify/GPT Builder)|
+|自動化システム\n(Next.js + Vercel)|
 :DD管理シートを自動更新;
 :通知を送信;
 
@@ -70,15 +70,15 @@ end note
 
 if (訴訟すべきか?) then (Yes)
   :訴訟準備開始;
-  |自動化システム\n(Dify/GPT Builder)|
+  |自動化システム\n(Next.js + Vercel)|
   :ステータス更新（訴訟準備中）;
-  :履歴をDynamoDBに記録;
+  :履歴をSupabaseに記録;
   stop
 else (No)
   :終了;
-  |自動化システム\n(Dify/GPT Builder)|
+  |自動化システム\n(Next.js + Vercel)|
   :ステータス更新（却下/保留）;
-  :履歴をDynamoDBに記録;
+  :履歴をSupabaseに記録;
   stop
 endif
 

@@ -89,6 +89,10 @@ const config: Config = {
           label: "Documentation",
         },
         {
+          type: "docsVersionDropdown",
+          position: "right",
+        },
+        {
           href: "https://github.com/your-org/your-project",
           label: "GitHub",
           position: "right",
