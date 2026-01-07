@@ -166,20 +166,37 @@ model analysis_jobs {
   inputPrompt      String? @map("input_prompt") @db.Text
   researchResults  Json?   @map("research_results") @db.JsonB
 
+  // 分析結果（拡張用）
+  requirements      Json? @db.JsonB                        // 構成要件
+  complianceResults Json? @map("compliance_results") @db.JsonB  // コンプライアンス結果
+  summary           Json? @db.JsonB                        // サマリー
+
   // バッチ処理用
-  priority      Int       @default(5)
-  scheduledFor  DateTime? @map("scheduled_for") @db.Timestamptz(6)
-  retryCount    Int       @default(0) @map("retry_count")
-  maxRetries    Int       @default(3) @map("max_retries")
+  priority      Int       @default(5)                                   // 優先度 (0-10)
+  scheduledFor  DateTime? @map("scheduled_for") @db.Timestamptz(6)     // 実行予定時刻
+  retryCount    Int       @default(0) @map("retry_count")              // リトライ回数
+  maxRetries    Int       @default(3) @map("max_retries")              // 最大リトライ数
+  batchId       String?   @map("batch_id") @db.Text                    // バッチID
   searchType    String    @default("infringement_check") @map("search_type") @db.Text
 
+  // 追加の分析結果（拡張用）
+  infringementScore Float? @map("infringement_score")      // 侵害可能性スコア (0-100)
+  revenueEstimate   Json?  @map("revenue_estimate") @db.JsonB  // 売上推定
+
   // タイムスタンプ
-  startedAt   DateTime? @map("started_at") @db.Timestamptz(6)
-  finishedAt  DateTime? @map("finished_at") @db.Timestamptz(6)
+  queuedAt    DateTime? @map("queued_at") @db.Timestamptz(6)   // キュー追加時刻
+  startedAt   DateTime? @map("started_at") @db.Timestamptz(6)  // 処理開始時刻
+  finishedAt  DateTime? @map("finished_at") @db.Timestamptz(6) // 処理完了時刻
+
+  // メタデータ（拡張用）
+  userId    String? @map("user_id") @db.Uuid
+  ipAddress String? @map("ip_address") @db.Text
 
   @@index([status], map: "idx_jobs_status")
   @@index([createdAt(sort: Desc)], map: "idx_jobs_created_at")
+  @@index([userId], map: "idx_jobs_user_id")
   @@index([status, priority, scheduledFor], map: "idx_jobs_queue")
+  @@index([batchId], map: "idx_jobs_batch")
 }
 ```
 
@@ -297,6 +314,83 @@ export async function POST(request: NextRequest) {
 }
 ```
 
+### ステータス確認（/api/analyze/status/[job_id]）
+
+```typescript
+// apps/poc/phase1/src/app/api/analyze/status/[job_id]/route.ts
+export async function GET(request: NextRequest, { params }) {
+  const job = await prisma.analysis_jobs.findUnique({
+    where: { id: params.job_id },
+  });
+
+  // researching状態でOpenAI APIに直接問い合わせ
+  if (job.status === 'researching' && job.openaiResponseId) {
+    const openaiResponse = await openai.responses.retrieve(job.openaiResponseId);
+
+    // 完了していたら結果を保存
+    if (openaiResponse.status === 'completed') {
+      await prisma.analysis_jobs.update({
+        where: { id: job.id },
+        data: {
+          status: 'completed',
+          progress: 100,
+          researchResults: parseResponse(openaiResponse),
+        },
+      });
+    }
+  }
+
+  return NextResponse.json({
+    job_id: job.id,
+    status: job.status,
+    progress: job.progress,
+    error_message: job.errorMessage,
+  });
+}
+```
+
+:::info ステータスAPIの自動保存機能
+ステータス確認時にOpenAI APIにポーリングし、完了していれば自動的に結果を保存します。
+これにより、Webhookが失敗した場合でもフロントエンドからのポーリングで結果を取得できます。
+:::
+
+### 失敗ジョブのリトライ（/api/analyze/retry/[job_id]）
+
+```typescript
+// apps/poc/phase1/src/app/api/analyze/retry/[job_id]/route.ts
+export async function POST(request: NextRequest, { params }) {
+  const job = await prisma.analysis_jobs.findUnique({
+    where: { id: params.job_id },
+  });
+
+  // failedステータスのジョブのみリトライ可能
+  if (job.status !== 'failed') {
+    return NextResponse.json(
+      { error: `Cannot retry job with status: ${job.status}` },
+      { status: 400 }
+    );
+  }
+
+  // ジョブをpendingに戻す
+  const updatedJob = await prisma.analysis_jobs.update({
+    where: { id: params.job_id },
+    data: {
+      status: 'pending',
+      progress: 0,
+      errorMessage: null,
+      retryCount: job.retryCount + 1,
+      openaiResponseId: null,
+      researchResults: null,
+    },
+  });
+
+  return NextResponse.json({
+    job_id: updatedJob.id,
+    status: updatedJob.status,
+  });
+}
+```
+
 ### Webhook受信（/api/webhook/openai）
 
 ```typescript
@@ -366,69 +460,160 @@ jobs:
             https://ip-rich-poc-phase1.vercel.app/api/cron/check-and-do
 ```
 
-### Vercel Cron（代替）
+### Vercel Cron設定
 
 ```json
 // vercel.json
 {
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "regions": ["hnd1"],
+  "functions": {
+    "app/api/analyze/start/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/analyze/status/[id]/route.ts": {
+      "maxDuration": 10
+    },
+    "app/api/webhook/openai/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/cron/check-and-do/route.ts": {
+      "maxDuration": 60
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/check-and-do",
       "schedule": "*/15 * * * *"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
 ```
+
+:::tip Vercel Cron vs GitHub Actions
+- **Vercel Cron（推奨）**: Proプランで15分間隔対応。設定がシンプル。
+- **GitHub Actions**: 無料プランでも利用可能。より詳細な制御が可能。
+:::
 
 ---
 
 ## 🎨 フロントエンド実装
 
-### ポーリングコンポーネント
+### ページ構成
+
+```
+apps/poc/phase1/src/app/research/
+├── page.tsx                    # 新規分析フォーム
+├── list/page.tsx               # 分析履歴一覧
+├── status/[job_id]/page.tsx    # ステータス確認（ポーリング）
+└── result/[job_id]/page.tsx    # 結果表示
+```
+
+### ステータスページ（ポーリング実装）
 
 ```typescript
-// apps/poc/phase1/src/components/AnalysisProgress.tsx
+// apps/poc/phase1/src/app/research/status/[job_id]/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-export function AnalysisProgress({ jobId, onComplete }) {
-  const [status, setStatus] = useState('pending');
-  const [progress, setProgress] = useState(0);
+export default function StatusPage({ params }: { params: { job_id: string } }) {
+  const router = useRouter();
+  const [status, setStatus] = useState<StatusData | null>(null);
+  const [pollCount, setPollCount] = useState(0);
+  const MAX_POLL_ATTEMPTS = 30; // 15分 (30回 × 30秒)
+
+  // リトライ処理
+  const handleRetry = async () => {
+    const res = await fetch(`/api/analyze/retry/${params.job_id}`, {
+      method: 'POST',
+    });
+    const data = await res.json();
+    setStatus(data);
+    setPollCount(0); // ポーリングカウントをリセット
+  };
 
   useEffect(() => {
-    const pollInterval = setInterval(async () => {
-      const res = await fetch(`/api/analyze/status/${jobId}`);
+    const pollStatus = async () => {
+      const res = await fetch(`/api/analyze/status/${params.job_id}`);
       const data = await res.json();
+      setStatus(data);
+      setPollCount(prev => prev + 1);
 
-      setStatus(data.status);
-      setProgress(data.progress);
-
-      if (data.status === 'completed') {
-        clearInterval(pollInterval);
-        const result = await fetch(`/api/analyze/result/${jobId}`);
-        onComplete(await result.json());
-      } else if (data.status === 'failed') {
-        clearInterval(pollInterval);
+      // タイムアウトチェック
+      if (pollCount >= MAX_POLL_ATTEMPTS && data.status === 'researching') {
+        return; // ポーリング停止
       }
-    }, 10000); // 10秒ごとにポーリング
 
-    return () => clearInterval(pollInterval);
-  }, [jobId, onComplete]);
+      // 完了したら結果ページへ遷移
+      if (data.status === 'completed') {
+        router.push(`/research/result/${params.job_id}`);
+      }
+    };
+
+    pollStatus();
+    const interval = setInterval(pollStatus, 30000); // 30秒ごとにポーリング
+    return () => clearInterval(interval);
+  }, [params.job_id, router, pollCount]);
 
   return (
     <div>
-      <p>{getStatusText(status)}</p>
-      <div className="w-full bg-gray-200 rounded-full h-4">
-        <div
-          className="bg-blue-600 h-4 rounded-full"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      <p>{getStatusText(status?.status)}</p>
+      {status?.status === 'failed' && (
+        <button onClick={handleRetry}>もう一度分析を実行</button>
+      )}
     </div>
   );
 }
 ```
+
+### 一覧ページ（React Query使用）
+
+```typescript
+// apps/poc/phase1/src/app/research/list/page.tsx
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+
+export default function ListPage() {
+  const { data, refetch } = useQuery<ListResponse>({
+    queryKey: ['jobs', selectedStatus],
+    queryFn: async () => {
+      const res = await fetch(`/api/analyze/list?limit=50`);
+      return res.json();
+    },
+    refetchInterval: 60000, // 1分ごとに自動更新
+  });
+
+  return (
+    <div>
+      {data?.jobs.map((job) => (
+        <Link
+          key={job.job_id}
+          href={job.status === 'completed'
+            ? `/research/result/${job.job_id}`
+            : `/research/status/${job.job_id}`
+          }
+        >
+          {job.patent_number} - {statusLabels[job.status]}
+        </Link>
+      ))}
+    </div>
+  );
+}
+```
+
+:::info ポーリング仕様
+- **ステータスページ**: 30秒間隔、最大15分（30回）でタイムアウト
+- **一覧ページ**: 1分間隔で自動更新（React Query使用）
+:::
 
 ---
 
@@ -437,30 +622,53 @@ export function AnalysisProgress({ jobId, onComplete }) {
 ### Vercel環境変数
 
 ```bash
-# データベース（Prisma）
+# ===== データベース（Prisma） =====
+# DATABASE_URL: Prisma Client用（pgbouncer経由）
 DATABASE_URL=postgresql://postgres.[ref]:[password]@pooler.supabase.com:6543/postgres?schema=production&pgbouncer=true
+# DIRECT_URL: マイグレーション用（直接接続）
 DIRECT_URL=postgresql://postgres.[ref]:[password]@pooler.supabase.com:5432/postgres?schema=production
 
+# ===== LLMプロバイダー =====
+# LLM_PROVIDER: openai | claude（デフォルト: openai）
+LLM_PROVIDER=openai
 # OpenAI API
 OPENAI_API_KEY=sk-proj-xxxxx
 OPENAI_DEEP_RESEARCH_MODEL=o4-mini-deep-research-2025-06-26
+# Claude API（LLM_PROVIDER=claude の場合）
+ANTHROPIC_API_KEY=sk-ant-xxxxx
 
-# OpenAI Webhook
+# ===== 検索プロバイダー =====
+# SEARCH_PROVIDER: dummy | tavily（デフォルト: dummy）
+SEARCH_PROVIDER=tavily
+TAVILY_API_KEY=tvly-xxxxx
+
+# ===== モデル設定 =====
+# OpenAI: gpt-4o-mini | gpt-4o | o4-mini-deep-research-2025-06-26
+# Claude: claude-3-5-sonnet-20241022 | claude-3-opus-20240229
+MODEL_NAME=o4-mini-deep-research-2025-06-26
+MAX_TOKENS=2000
+TEMPERATURE=0.3
+
+# ===== OpenAI Webhook =====
 OPENAI_WEBHOOK_SECRET=whsec_xxxxx
 OPENAI_WEBHOOK_URL=https://ip-rich-poc-phase1.vercel.app/api/webhook/openai
 
-# Cron設定
+# ===== Cron設定 =====
 CRON_SECRET_KEY=your-secure-random-string
 MAX_CONCURRENT_JOBS=3
 
-# Basic認証
+# ===== Basic認証 =====
 BASIC_AUTH_USERNAME=patent
 BASIC_AUTH_PASSWORD=xxxxx
-SKIP_AUTH=false
+SKIP_AUTH=false  # 開発環境では true
 
-# Next.js
+# ===== Next.js =====
 NEXT_PUBLIC_APP_URL=https://ip-rich-poc-phase1.vercel.app
 ```
+
+:::tip プロバイダー切り替え
+`LLM_PROVIDER` と `SEARCH_PROVIDER` を変更することで、バックエンドの実装を変更せずにプロバイダーを切り替えられます。
+:::
 
 ### GitHub Secrets
 
@@ -504,19 +712,26 @@ Vercel:
 
 - [x] Supabase PostgreSQL + Prisma設定
 - [x] Next.js APIルート実装
-  - [x] /api/analyze/start
-  - [x] /api/analyze/status/[job_id]
-  - [x] /api/analyze/result/[job_id]
-  - [x] /api/analyze/list
-  - [x] /api/patent-search/schedule
-  - [x] /api/cron/check-and-do
-  - [x] /api/webhook/openai
+  - [x] /api/analyze/start（ジョブ作成）
+  - [x] /api/analyze/status/[job_id]（ステータス確認 + 自動保存）
+  - [x] /api/analyze/result/[job_id]（結果取得）
+  - [x] /api/analyze/list（一覧取得）
+  - [x] /api/analyze/retry/[job_id]（失敗ジョブのリトライ）
+  - [x] /api/patent-search/schedule（スケジュール登録）
+  - [x] /api/cron/check-and-do（バッチ処理）
+  - [x] /api/webhook/openai（Webhook受信）
 - [x] OpenAI Deep Research API統合
 - [x] Webhook署名検証
 - [x] GitHub Actions Cron設定
 - [x] Vercel Cron設定
-- [x] フロントエンドポーリング実装
+- [x] フロントエンド実装
+  - [x] 新規分析フォーム（/research）
+  - [x] 一覧ページ（/research/list）
+  - [x] ステータスページ（/research/status/[job_id]）
+  - [x] 結果ページ（/research/result/[job_id]）
+  - [x] リトライ機能
 - [x] 環境変数設定（Vercel）
+- [x] プロバイダー切り替え機能（LLM/Search）
 - [x] 本番デプロイ
 
 ---
