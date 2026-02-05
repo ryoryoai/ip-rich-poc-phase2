@@ -1,5 +1,5 @@
 -- Phase2 JP Patent Index schema (idempotent)
--- Source: apps/poc/phase2/docs/jp_index_schema.sql
+-- Source: docs/jp_index_schema.sql
 
 CREATE SCHEMA IF NOT EXISTS phase2;
 

@@ -4,36 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-An automated patent infringement investigation system with two main components:
-1. **Documentation Site** (`docs-site/`): Docusaurus-based documentation with AWS CloudFront and flexible authentication (none, basic, Cognito, IP restriction)
-2. **Patent Analysis System Phase2** (`apps/poc/phase2/`): FastAPI + SQLAlchemy backend with Supabase migrations and a Next.js frontend (`apps/poc/phase2/frontend/`)
+Patent infringement analysis system (Phase2 only):
+- FastAPI + SQLAlchemy backend (repo root)
+- Next.js frontend (`frontend/`)
+- Supabase migrations in `supabase/migrations/` (source of truth)
 
 ## Key Commands
 
-### Documentation Site (`docs-site/`)
+### API (repo root)
 
 ```bash
-cd docs-site
-npm install              # Install dependencies
-npm start                # Dev server on http://localhost:1919 (custom port!)
-npm run build            # Production build
-npm run serve            # Serve production build on http://localhost:1919
-npm run typecheck        # TypeScript type checking
-npm run format           # Format with Prettier
-npm run format:check     # Check Prettier formatting
-
-# PlantUML Diagrams
-npm run diagrams:generate  # Generate all diagrams
-npm run diagrams:current   # Generate current-workflow.svg
-npm run diagrams:automated # Generate automated-workflow.svg
-npm run diagrams:dataflow  # Generate data-flow.svg
-```
-
-### Phase2 API (`apps/poc/phase2/`)
-
-```bash
-cd apps/poc/phase2
-
 # Python venv
 python -m venv .venv
 .venv\Scripts\activate     # Windows
@@ -60,10 +40,10 @@ mypy app
 pytest
 ```
 
-### Phase2 Frontend (`apps/poc/phase2/frontend/`)
+### Frontend (`frontend/`)
 
 ```bash
-cd apps/poc/phase2/frontend
+cd frontend
 npm install
 npm run dev              # http://localhost:3002
 npm run build
@@ -72,29 +52,13 @@ npm run lint
 npm run type-check
 ```
 
-### Infrastructure (`infra/`)
-
-Use mise for consistent Terraform (1.9.8) and Node.js (20) versions:
-
-```bash
-cd infra
-mise trust              # Trust configuration
-mise install            # Install tools
-mise run lambda-install # Install Lambda@Edge dependencies (for Cognito auth)
-mise run init           # terraform init
-mise run plan           # terraform plan
-mise run apply          # terraform apply
-mise run validate       # terraform validate
-mise run fmt            # terraform fmt
-```
-
 ## Architecture
 
-### Phase2 Pipeline (`apps/poc/phase2/`)
+### Pipeline
 
-- **A: Fetch/Store/Normalize**: Retrieve patent data, normalize, and persist.
-- **B: Discovery**: Generate search seeds and rank candidate products.
-- **C: Analyze**: Decompose claims and assess infringement.
+- A: Fetch/Store/Normalize
+- B: Discovery
+- C: Analyze
 
 ### Storage
 
@@ -105,9 +69,8 @@ mise run fmt            # terraform fmt
 
 ### Port Configuration
 
-- **Docusaurus dev server**: Port **1919**
-- **Phase2 API**: `API_PORT` (default **8000**)
-- **Phase2 Frontend**: Port **3002**
+- Phase2 API: `API_PORT` (default **8000**)
+- Phase2 Frontend: Port **3002**
 
 ### Environment Variables (Phase2)
 
@@ -139,27 +102,20 @@ CRON_SECRET=your-secret
 
 This repo uses the production DB for dev/test. Avoid destructive DB operations and require explicit approval before running schema changes or deletes.
 
-### Terraform State Operations
-
-Per global CLAUDE.md: Avoid `terraform state rm/mv/import` without explicit user approval. Use standard Terraform workflow:
-1. Modify `.tf` files
-2. `mise run plan` to review changes
-3. `mise run apply` after approval
-
 ## Common Development Tasks
 
-- API endpoints: `apps/poc/phase2/app/api/v1/endpoints/`
-- DB models: `apps/poc/phase2/app/db/models.py`
-- Migrations: `supabase/migrations/` (source of truth); `apps/poc/phase2/alembic/` is legacy history
-- CLI pipeline: `apps/poc/phase2/app/cli.py`
-- Frontend: `apps/poc/phase2/frontend/`
+- API endpoints: `app/api/v1/endpoints/`
+- DB models: `app/db/models.py`
+- Migrations: `supabase/migrations/` (source of truth); `alembic/` is legacy history
+- CLI pipeline: `app/cli.py`
+- Frontend: `frontend/`
   - Supabase migration history alignment: `supabase/migrations/20251207091828_legacy.sql` and `20251207091940_legacy.sql` are placeholders to match remote history; do not delete unless remote history is updated.
   - Supabase CLI reads repo root `.env.local` and can fail to parse Vercel-created values. If `supabase link/db push` fails with an env parse error, temporarily move `.env.local` aside and rerun.
 
 ## Running Phase2 Locally
 
-1. Copy `apps/poc/phase2/.env.example` to `apps/poc/phase2/.env` and fill keys.
+1. Copy `.env.example` to `.env` and fill keys.
 2. Create venv and install dependencies.
 3. Apply Supabase migrations (`supabase/migrations/`).
 4. Start API server: `python -m app.cli serve`.
-5. Start frontend: `cd apps/poc/phase2/frontend && npm run dev`.
+5. Start frontend: `cd frontend && npm run dev`.

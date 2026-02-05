@@ -1,67 +1,60 @@
-# Dependencies
-node_modules/
-yarn.lock
-
-# Production build
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 build/
+develop-eggs/
 dist/
-.docusaurus/
-.cache-loader/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Terraform
-**/.terraform/
-**/.terraform.lock.hcl
-**/terraform.tfstate
-**/terraform.tfstate.backup
-**/terraform.tfvars
-**/lambda_build/
-**/lambda_function.zip
+# Virtual environments
+.venv/
+venv/
+ENV/
 
-# Environment variables
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local agent config
+.claude/
+
+# Environment
 .env
 .env.local
 .env.*.local
-.env.production.temp
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
+# Database
+*.db
+*.sqlite3
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-logs/
-*.log
+# Test
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# OS
-Thumbs.db
-.DS_Store
-nul
+# Raw data (large files)
+data/raw/
 
-# mise
-.mise.local.toml
+# Alembic
+alembic/versions/__pycache__/
 
-# Session notes and temp files
-ASIS.md
-TOBE.md
-SESSION_SUMMARY.md
-DEEP_RESEARCH_IMPLEMENTATION_PLAN.md
-NGROK_SETUP.md
-*.js
-!apps/*/
-!infra/
-
-# Temporary scripts
-**/migrate.js
-**/update_job.js
-.claude/
 .vercel
 .env*.local
-
-# Backups
-backups/

@@ -1,7 +1,7 @@
 # Phase2 マスタデータ運用手順（DB変更）
 
 作成日: 2026-02-05  
-対象: `apps/poc/phase2` / Supabase Postgres
+対象: リポジトリルート / Supabase Postgres
 
 ## 前提
 - **本番DBを開発/検証でも利用**する設計。  

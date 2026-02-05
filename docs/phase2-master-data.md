@@ -1,7 +1,7 @@
 # Phase2 会社・製品マスタ設計（MVP）
 
 作成日: 2026-02-05  
-対象: `apps/poc/phase2`（Supabase Postgres + Supabase Storage）
+対象: リポジトリルート（Supabase Postgres + Supabase Storage）
 
 ## 目的
 特許侵害調査に必要な会社・製品情報を継続収集し、証跡付きでDBに蓄積する。  
