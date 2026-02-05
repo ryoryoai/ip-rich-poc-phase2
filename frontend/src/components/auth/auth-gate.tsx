@@ -13,10 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-type AuthMode = "sign-in" | "sign-up";
 
 type AuthGateProps = {
   children: React.ReactNode;
@@ -27,12 +24,10 @@ export default function AuthGate({ children }: AuthGateProps) {
   const [status, setStatus] = useState<"loading" | "authed" | "unauth">(
     "loading"
   );
-  const [mode, setMode] = useState<AuthMode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
     if (!supabase) {
@@ -81,7 +76,6 @@ export default function AuthGate({ children }: AuthGateProps) {
     }
     setSubmitting(true);
     setError(null);
-    setInfo(null);
     try {
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
@@ -92,34 +86,6 @@ export default function AuthGate({ children }: AuthGateProps) {
       }
     } catch {
       setError("ログインに失敗しました。");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleSignUp = async () => {
-    if (!supabase) return;
-    if (!email.trim() || !password) {
-      setError("メールアドレスとパスワードを入力してください。");
-      return;
-    }
-    setSubmitting(true);
-    setError(null);
-    setInfo(null);
-    try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      if (signUpError) {
-        setError(signUpError.message);
-      } else if (!data.session) {
-        setInfo(
-          "確認メールを送信しました。メール内のリンクから登録を完了してください。"
-        );
-      }
-    } catch {
-      setError("新規登録に失敗しました。");
     } finally {
       setSubmitting(false);
     }
@@ -172,94 +138,42 @@ export default function AuthGate({ children }: AuthGateProps) {
           <CardDescription>Supabase Auth で認証します。</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Tabs
-            value={mode}
-            onValueChange={(value) => {
-              setMode(value as AuthMode);
-              setError(null);
-              setInfo(null);
-            }}
+          <div className="space-y-2">
+            <Label htmlFor="auth-email">メールアドレス</Label>
+            <Input
+              id="auth-email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="auth-password">パスワード</Label>
+            <Input
+              id="auth-password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </div>
+          <Button
+            type="button"
+            className="w-full"
+            disabled={!canSubmit}
+            onClick={handleSignIn}
           >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="sign-in">ログイン</TabsTrigger>
-              <TabsTrigger value="sign-up">新規登録</TabsTrigger>
-            </TabsList>
-            <TabsContent value="sign-in" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="auth-email">メールアドレス</Label>
-                <Input
-                  id="auth-email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="auth-password">パスワード</Label>
-                <Input
-                  id="auth-password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-              </div>
-              <Button
-                type="button"
-                className="w-full"
-                disabled={!canSubmit}
-                onClick={handleSignIn}
-              >
-                {submitting ? "ログイン中..." : "ログイン"}
-              </Button>
-            </TabsContent>
-            <TabsContent value="sign-up" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="auth-email-signup">メールアドレス</Label>
-                <Input
-                  id="auth-email-signup"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="auth-password-signup">パスワード</Label>
-                <Input
-                  id="auth-password-signup"
-                  type="password"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-              </div>
-              <Button
-                type="button"
-                className="w-full"
-                disabled={!canSubmit}
-                onClick={handleSignUp}
-              >
-                {submitting ? "登録中..." : "新規登録"}
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                登録後、メールの確認リンクをクリックして利用を開始してください。
-              </p>
-            </TabsContent>
-          </Tabs>
+            {submitting ? "ログイン中..." : "ログイン"}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            新規登録は無効です。必要な場合は管理者に連絡してください。
+          </p>
 
           {error && (
             <Alert variant="destructive">
               <AlertTitle>認証エラー</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {info && (
-            <Alert>
-              <AlertTitle>お知らせ</AlertTitle>
-              <AlertDescription>{info}</AlertDescription>
             </Alert>
           )}
         </CardContent>
