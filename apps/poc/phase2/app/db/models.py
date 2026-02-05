@@ -436,6 +436,66 @@ class IngestionJobItem(Base):
 
 
 # =============================================================================
+# AUTO COLLECTION (Company/Product ingestion and crawl jobs)
+# =============================================================================
+
+class CollectionJob(Base):
+    """Generic collection job for company/product ingestion."""
+
+    __tablename__ = "collection_jobs"
+    __table_args__ = (
+        Index("idx_collection_jobs_status", "status"),
+        Index("idx_collection_jobs_created_at", "created_at"),
+        {"schema": "phase2"},
+    )
+
+    job_id: uuid.UUID = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    job_type: str = Column(String(30), nullable=False)
+    status: str = Column(String(20), nullable=False, default="queued")
+    priority: int = Column(Integer, default=5, nullable=False)
+    retry_count: int = Column(Integer, default=0, nullable=False)
+    max_retries: int = Column(Integer, default=3, nullable=False)
+    error_code: Optional[str] = Column(String(50))
+    error_detail: Optional[str] = Column(Text)
+    metrics_json: Optional[dict] = Column(JSON)
+    created_at: datetime = Column(DateTime(timezone=True), default=utcnow)
+    started_at: Optional[datetime] = Column(DateTime(timezone=True))
+    finished_at: Optional[datetime] = Column(DateTime(timezone=True))
+
+    items = relationship("CollectionItem", back_populates="job", cascade="all, delete-orphan")
+
+
+class CollectionItem(Base):
+    """Collection item within a collection job."""
+
+    __tablename__ = "collection_items"
+    __table_args__ = (
+        Index("idx_collection_items_job", "job_id"),
+        Index("idx_collection_items_status", "status"),
+        {"schema": "phase2"},
+    )
+
+    item_id: uuid.UUID = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    job_id: uuid.UUID = Column(
+        UUID(as_uuid=True), ForeignKey("phase2.collection_jobs.job_id"), nullable=False
+    )
+    entity_type: str = Column(String(20), nullable=False)
+    entity_id: Optional[uuid.UUID] = Column(UUID(as_uuid=True))
+    source_type: Optional[str] = Column(String(30))
+    source_ref: Optional[str] = Column(Text)
+    status: str = Column(String(20), nullable=False, default="queued")
+    retry_count: int = Column(Integer, default=0, nullable=False)
+    error_code: Optional[str] = Column(String(50))
+    error_detail: Optional[str] = Column(Text)
+    payload_json: Optional[dict] = Column(JSON)
+    created_at: datetime = Column(DateTime(timezone=True), default=utcnow)
+    started_at: Optional[datetime] = Column(DateTime(timezone=True))
+    finished_at: Optional[datetime] = Column(DateTime(timezone=True))
+
+    job = relationship("CollectionJob", back_populates="items")
+
+
+# =============================================================================
 # COMPANY & PRODUCT DATA (From Phase1)
 # =============================================================================
 
@@ -468,6 +528,8 @@ class Company(Base):
     has_jp_entity: Optional[bool] = Column(Boolean, default=True)
     website_url: Optional[str] = Column(Text)
     contact_url: Optional[str] = Column(Text)
+    identity_type: str = Column(String(20), nullable=False, default="provisional")
+    identity_confidence: float = Column(Float, default=50)
     created_at: datetime = Column(DateTime(timezone=True), default=utcnow)
     updated_at: Optional[datetime] = Column(DateTime(timezone=True), onupdate=utcnow)
 
@@ -475,6 +537,7 @@ class Company(Base):
     aliases = relationship("CompanyAlias", back_populates="company", cascade="all, delete-orphan")
     identifiers = relationship("CompanyIdentifier", back_populates="company", cascade="all, delete-orphan")
     evidence_links = relationship("CompanyEvidenceLink", back_populates="company", cascade="all, delete-orphan")
+    field_values = relationship("CompanyFieldValue", back_populates="company", cascade="all, delete-orphan")
     products = relationship("Product", back_populates="company", cascade="all, delete-orphan")
     product_links = relationship("CompanyProductLink", back_populates="company", cascade="all, delete-orphan")
     patent_links = relationship("PatentCompanyLink", back_populates="company", cascade="all, delete-orphan")
@@ -533,6 +596,38 @@ class CompanyIdentifier(Base):
     source_evidence = relationship("Evidence", foreign_keys=[source_evidence_id])
 
 
+class CompanyFieldValue(Base):
+    """Field-level evidence/history for company attributes."""
+
+    __tablename__ = "company_field_values"
+    __table_args__ = (
+        Index("idx_company_field_values_company", "company_id"),
+        Index("idx_company_field_values_current", "company_id", "field_name", "is_current"),
+        {"schema": "phase2"},
+    )
+
+    id: uuid.UUID = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    company_id: uuid.UUID = Column(
+        UUID(as_uuid=True), ForeignKey("phase2.companies.id"), nullable=False
+    )
+    field_name: str = Column(String(64), nullable=False)
+    value_text: Optional[str] = Column(Text)
+    value_json: Optional[dict] = Column(JSON)
+    value_hash: Optional[str] = Column(String(64))
+    source_evidence_id: Optional[uuid.UUID] = Column(
+        UUID(as_uuid=True), ForeignKey("phase2.evidence.id")
+    )
+    source_type: Optional[str] = Column(String(30))
+    source_ref: Optional[str] = Column(Text)
+    confidence_score: Optional[float] = Column(Float)
+    captured_at: Optional[datetime] = Column(DateTime(timezone=True))
+    is_current: bool = Column(Boolean, default=True, nullable=False)
+    created_at: datetime = Column(DateTime(timezone=True), default=utcnow)
+
+    company = relationship("Company", back_populates="field_values")
+    source_evidence = relationship("Evidence", foreign_keys=[source_evidence_id])
+
+
 class Product(Base):
     """Product information."""
 
@@ -564,6 +659,7 @@ class Product(Base):
     identifiers = relationship("ProductIdentifier", back_populates="product", cascade="all, delete-orphan")
     evidence_links = relationship("ProductEvidenceLink", back_populates="product", cascade="all, delete-orphan")
     company_links = relationship("CompanyProductLink", back_populates="product", cascade="all, delete-orphan")
+    field_values = relationship("ProductFieldValue", back_populates="product", cascade="all, delete-orphan")
     versions = relationship("ProductVersion", back_populates="product", cascade="all, delete-orphan")
 
 
@@ -590,6 +686,38 @@ class ProductIdentifier(Base):
 
     # Relationships
     product = relationship("Product", back_populates="identifiers")
+    source_evidence = relationship("Evidence", foreign_keys=[source_evidence_id])
+
+
+class ProductFieldValue(Base):
+    """Field-level evidence/history for product attributes."""
+
+    __tablename__ = "product_field_values"
+    __table_args__ = (
+        Index("idx_product_field_values_product", "product_id"),
+        Index("idx_product_field_values_current", "product_id", "field_name", "is_current"),
+        {"schema": "phase2"},
+    )
+
+    id: uuid.UUID = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    product_id: uuid.UUID = Column(
+        UUID(as_uuid=True), ForeignKey("phase2.products.id"), nullable=False
+    )
+    field_name: str = Column(String(64), nullable=False)
+    value_text: Optional[str] = Column(Text)
+    value_json: Optional[dict] = Column(JSON)
+    value_hash: Optional[str] = Column(String(64))
+    source_evidence_id: Optional[uuid.UUID] = Column(
+        UUID(as_uuid=True), ForeignKey("phase2.evidence.id")
+    )
+    source_type: Optional[str] = Column(String(30))
+    source_ref: Optional[str] = Column(Text)
+    confidence_score: Optional[float] = Column(Float)
+    captured_at: Optional[datetime] = Column(DateTime(timezone=True))
+    is_current: bool = Column(Boolean, default=True, nullable=False)
+    created_at: datetime = Column(DateTime(timezone=True), default=utcnow)
+
+    product = relationship("Product", back_populates="field_values")
     source_evidence = relationship("Evidence", foreign_keys=[source_evidence_id])
 
 
