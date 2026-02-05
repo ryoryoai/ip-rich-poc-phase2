@@ -47,6 +47,8 @@ class CompanyResponse(BaseModel):
     name: str
     corporate_number: str | None = None
     normalized_name: str | None = None
+    identity_type: str | None = None
+    identity_confidence: float | None = None
     existing: bool = False
 
 
@@ -92,6 +94,8 @@ def create_company(
             name=existing.name,
             corporate_number=existing.corporate_number,
             normalized_name=existing.normalized_name,
+            identity_type=existing.identity_type,
+            identity_confidence=existing.identity_confidence,
             existing=True,
         )
 
@@ -139,6 +143,8 @@ def create_company(
         name=company.name,
         corporate_number=company.corporate_number,
         normalized_name=company.normalized_name,
+        identity_type=company.identity_type,
+        identity_confidence=company.identity_confidence,
         existing=False,
     )
 
@@ -208,6 +214,8 @@ def get_company(
         "name": company.name,
         "corporate_number": company.corporate_number,
         "normalized_name": company.normalized_name,
+        "identity_type": company.identity_type,
+        "identity_confidence": company.identity_confidence,
         "country": company.country,
         "legal_type": company.legal_type,
         "address_raw": company.address_raw,

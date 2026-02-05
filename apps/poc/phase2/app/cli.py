@@ -142,6 +142,257 @@ def ingest_run(
         typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
 
 
+@app.command("company-nta-import")
+def company_nta_import(
+    path: Annotated[Path, typer.Option(help="NTA CSV/ZIP path")],
+    run_type: Annotated[str, typer.Option(help="Run type: full|delta")] = "delta",
+    source_url: Annotated[Optional[str], typer.Option(help="Source URL (optional)")] = None,
+    encoding: Annotated[Optional[str], typer.Option(help="CSV encoding override")] = None,
+    dry_run: Annotated[bool, typer.Option(help="Dry run (no DB writes)")] = False,
+    limit: Annotated[Optional[int], typer.Option(help="Row limit for test runs")] = None,
+    priority: Annotated[int, typer.Option(help="Job priority (0-10)")] = 5,
+) -> None:
+    """Import NTA corporate number data into company master."""
+    import json
+
+    from app.db.session import get_db
+    from app.services.collection_service import CollectionService
+    from app.services.company_ingest import ingest_nta_file
+
+    with get_db() as db:
+        service = CollectionService(db)
+        job = service.create_job(
+            job_type=f"nta_{run_type}",
+            items=[
+                {
+                    "entity_type": "company",
+                    "source_type": "nta",
+                    "source_ref": str(path),
+                    "payload_json": {"run_type": run_type, "source_url": source_url},
+                }
+            ],
+            priority=priority,
+        )
+
+        def handler(handler_db, _item):
+            stats = ingest_nta_file(
+                handler_db,
+                path=path,
+                run_type=run_type,
+                source_url=source_url,
+                encoding=encoding,
+                dry_run=dry_run,
+                limit=limit,
+            )
+            return {"status": "succeeded", **stats.__dict__}
+
+        result = service.run_job(str(job.job_id), handler)
+        typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+@app.command("company-seed-patents")
+def company_seed_patents(
+    limit: Annotated[int, typer.Option(help="Max applicants to process")] = 500,
+    dry_run: Annotated[bool, typer.Option(help="Dry run (no DB writes)")] = False,
+) -> None:
+    """Seed companies from JP applicant names and create probabilistic links."""
+    import json
+
+    from app.db.session import get_db
+    from app.services.company_ingest import seed_companies_from_patents
+
+    with get_db() as db:
+        result = seed_companies_from_patents(db, limit=limit, dry_run=dry_run)
+        typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+@app.command("company-enrich-gbiz")
+def company_enrich_gbiz(
+    corporate_number: Annotated[str, typer.Option(help="Corporate number (13 digits)")],
+    company_id: Annotated[Optional[str], typer.Option(help="Company UUID override")] = None,
+    dry_run: Annotated[bool, typer.Option(help="Dry run (no DB writes)")] = False,
+) -> None:
+    """Enrich company using gBizINFO API (field map required)."""
+    import json
+
+    from app.db.session import get_db
+    from app.db.models import Company
+    from app.services.company_ingest import apply_company_enrichment
+    from app.services.company_sources import GbizinfoClient, extract_fields
+    from app.core.config import settings
+
+    if not settings.gbizinfo_field_map:
+        typer.echo("GBIZINFO_FIELD_MAP is required (JSON mapping)")
+        raise typer.Exit(1)
+
+    mapping = json.loads(settings.gbizinfo_field_map)
+    client = GbizinfoClient()
+    payload = client.fetch_by_corporate_number(corporate_number)
+    fields = extract_fields(payload, mapping)
+
+    with get_db() as db:
+        if company_id:
+            company = db.query(Company).filter(Company.id == company_id).first()
+        else:
+            company = db.query(Company).filter(Company.corporate_number == corporate_number).first()
+        if not company:
+            typer.echo("Company not found")
+            raise typer.Exit(1)
+
+        result = apply_company_enrichment(
+            db=db,
+            company=company,
+            fields=fields,
+            source_type="gbizinfo",
+            source_url=settings.gbizinfo_api_base_url,
+            payload=payload,
+            confidence=80,
+            dry_run=dry_run,
+        )
+        typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+@app.command("company-enrich-edinet")
+def company_enrich_edinet(
+    edinet_code: Annotated[str, typer.Option(help="EDINET code")],
+    company_id: Annotated[Optional[str], typer.Option(help="Company UUID override")] = None,
+    dry_run: Annotated[bool, typer.Option(help="Dry run (no DB writes)")] = False,
+) -> None:
+    """Enrich company using EDINET API (field map required)."""
+    import json
+
+    from app.db.session import get_db
+    from app.db.models import Company, CompanyIdentifier
+    from app.services.company_ingest import apply_company_enrichment
+    from app.services.company_sources import EdinetClient, extract_fields
+    from app.core.config import settings
+
+    if not settings.edinet_field_map:
+        typer.echo("EDINET_FIELD_MAP is required (JSON mapping)")
+        raise typer.Exit(1)
+
+    mapping = json.loads(settings.edinet_field_map)
+    client = EdinetClient()
+    payload = client.fetch(edinet_code)
+    fields = extract_fields(payload, mapping)
+
+    with get_db() as db:
+        company = None
+        if company_id:
+            company = db.query(Company).filter(Company.id == company_id).first()
+        if not company:
+            identifier = (
+                db.query(CompanyIdentifier)
+                .filter(
+                    CompanyIdentifier.id_type == "edinet",
+                    CompanyIdentifier.value == edinet_code,
+                )
+                .first()
+            )
+            if identifier:
+                company = identifier.company
+        if not company:
+            typer.echo("Company not found")
+            raise typer.Exit(1)
+
+        result = apply_company_enrichment(
+            db=db,
+            company=company,
+            fields=fields,
+            source_type="edinet",
+            source_url=settings.edinet_api_base_url,
+            payload=payload,
+            confidence=70,
+            dry_run=dry_run,
+        )
+        typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+@app.command("product-web-import")
+def product_web_import(
+    company_id: Annotated[str, typer.Option(help="Company UUID")],
+    urls: Annotated[str, typer.Option(help="Comma-separated product or list URLs")],
+    discover: Annotated[bool, typer.Option(help="Discover product links from list pages")] = False,
+    allow_pattern: Annotated[Optional[str], typer.Option(help="Regex to allow URLs")] = None,
+    deny_pattern: Annotated[Optional[str], typer.Option(help="Regex to deny URLs")] = None,
+    limit: Annotated[Optional[int], typer.Option(help="Max pages to process")] = None,
+    dry_run: Annotated[bool, typer.Option(help="Dry run (no DB writes)")] = False,
+) -> None:
+    """Import products from web pages (official site)."""
+    import json
+
+    from app.db.session import get_db
+    from app.services.product_ingest import ingest_product_urls
+
+    url_list = [u.strip() for u in urls.split(",") if u.strip()]
+    if not url_list:
+        typer.echo("No valid URLs provided")
+        raise typer.Exit(1)
+
+    with get_db() as db:
+        stats = ingest_product_urls(
+            db=db,
+            company_id=company_id,
+            urls=url_list,
+            discover=discover,
+            allow_pattern=allow_pattern,
+            deny_pattern=deny_pattern,
+            limit=limit,
+            dry_run=dry_run,
+        )
+        typer.echo(json.dumps(stats.__dict__, ensure_ascii=False, indent=2))
+
+
+@app.command("link-patents-by-name")
+def link_patents_by_name(
+    limit: Annotated[int, typer.Option(help="Max applicant links to process")] = 1000,
+    dry_run: Annotated[bool, typer.Option(help="Dry run (no DB writes)")] = False,
+) -> None:
+    """Create patent-company links based on name matching."""
+    import json
+
+    from app.db.session import get_db
+    from app.services.linking_service import link_patents_by_name as link_service
+
+    with get_db() as db:
+        result = link_service(db, limit=limit, dry_run=dry_run)
+        typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+@app.command("collection-metrics")
+def collection_metrics() -> None:
+    """Print collection job/item metrics."""
+    import json
+
+    from sqlalchemy import func
+
+    from app.db.session import get_db
+    from app.db.models import CollectionJob, CollectionItem
+
+    with get_db() as db:
+        job_counts = (
+            db.query(CollectionJob.status, func.count(CollectionJob.job_id))
+            .group_by(CollectionJob.status)
+            .all()
+        )
+        item_counts = (
+            db.query(CollectionItem.status, func.count(CollectionItem.item_id))
+            .group_by(CollectionItem.status)
+            .all()
+        )
+
+    typer.echo(
+        json.dumps(
+            {
+                "jobs": {status: count for status, count in job_counts},
+                "items": {status: count for status, count in item_counts},
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
 @app.command()
 def fetch(
     patent_number: Annotated[str, typer.Argument(help="Patent number (e.g., JP7410975B2, 特許第1234567号)")],

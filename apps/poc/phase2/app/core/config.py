@@ -80,6 +80,18 @@ class Settings(BaseSettings):
     jp_index_cache_ttl_seconds: int = 60
     jp_index_cache_max_entries: int = 1000
 
+    # Company data sources
+    nta_corporate_encoding: str = "utf-8"
+    gbizinfo_api_base_url: str | None = None
+    gbizinfo_api_key: str | None = None
+    gbizinfo_api_key_header: str = "X-API-KEY"
+    gbizinfo_field_map: str | None = None
+    edinet_api_base_url: str | None = None
+    edinet_api_key: str | None = None
+    edinet_api_key_header: str = "Subscription-Key"
+    edinet_field_map: str | None = None
+    collection_user_agent: str = "iprich-phase2/1.0"
+
     @field_validator("jp_index_export_max")
     @classmethod
     def validate_export_max(cls, value: int) -> int:
