@@ -1,0 +1,1 @@
+"""JP Patent Index module."""

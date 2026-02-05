@@ -1,0 +1,27 @@
+入力:
+raw_response_meta:
+{{raw_response_meta}}
+
+raw_payload:
+{{raw_payload}}
+
+あなたの仕事:
+- 書類のメタ情報を documents に抽出する。
+- ファイルがZIPやXMLの場合、保存済みのストレージキーやファイル名が入力に含まれていれば保持する。
+- 本文の解釈や要約はしない。
+
+出力JSON:
+{
+  "documents": [
+    {
+      "document_id": "string",
+      "document_type": "dispatch|application|office_action|other",
+      "document_name": "string|null",
+      "document_date": "YYYY-MM-DD|null",
+      "related_identifier": "string|null",
+      "storage_ref": { "kind": "blob|s3|gcs|local|unknown", "key": "string|null" },
+      "source_ref": { "raw_response_id": "string", "path": "string" }
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jp-patent-document kind-of-st16="B2" kind-of-jp="B9">
+  <bibliographic-data>
+    <publication-reference>
+      <document-id>
+        <country>JP</country>
+        <doc-number>1234567</doc-number>
+        <kind>B2</kind>
+        <date>20260101</date>
+      </document-id>
+    </publication-reference>
+  </bibliographic-data>
+  <claims>
+    <claim num="1">
+      <claim-text>【請求項１】
+装置であって、
+部材Aと、
+部材Bと、
+を備えることを特徴とする装置。</claim-text>
+    </claim>
+    <claim num="2">
+      <claim-text>【請求項２】請求項１に記載の装置。</claim-text>
+    </claim>
+  </claims>
+</jp-patent-document>

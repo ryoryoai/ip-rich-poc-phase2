@@ -21,6 +21,7 @@ dist/
 .env
 .env.local
 .env.*.local
+.env.production.temp
 
 # IDE
 .vscode/
@@ -40,6 +41,7 @@ logs/
 # OS
 Thumbs.db
 .DS_Store
+nul
 
 # mise
 .mise.local.toml
@@ -59,3 +61,7 @@ NGROK_SETUP.md
 **/update_job.js
 .claude/
 .vercel
+.env*.local
+
+# Backups
+backups/

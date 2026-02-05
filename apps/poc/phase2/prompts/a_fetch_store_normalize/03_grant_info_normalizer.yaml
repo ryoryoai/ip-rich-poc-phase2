@@ -1,0 +1,41 @@
+id: "03_grant_info_normalizer"
+name: "Grant Info Normalizer"
+description: "登録情報を正規化する"
+pipeline: "A"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  raw_response_meta:
+  {{raw_response_meta}}
+
+  raw_payload:
+  {{raw_payload}}
+
+  あなたの仕事:
+  - 登録日、存続期間、年金情報などを抽出・正規化する。
+  - 入力に存在しない情報は作らない。
+
+  出力JSON:
+  {
+    "grant_date": "YYYY-MM-DD|null",
+    "registration_number": "string|null",
+    "expiration_date": "YYYY-MM-DD|null",
+    "maintenance_fees": [
+      { "year": 0, "paid_date": "YYYY-MM-DD|null", "status": "paid|due|overdue|unknown" }
+    ],
+    "source_ref": { "raw_response_id": "string", "path": "string" },
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    grant_date:
+      type: string
+    registration_number:
+      type: string
+    expiration_date:
+      type: string
+    maintenance_fees:
+      type: array
+    errors:
+      type: array

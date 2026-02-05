@@ -16,13 +16,13 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "アーキテクチャ",
-      items: ["architecture/phase1"],
+      items: ["architecture/phase2"],
     },
     {
       type: "category",
       label: "開発計画",
       items: [
-        "phase1-development",
+        "phase2-development",
       ],
     },
   ],

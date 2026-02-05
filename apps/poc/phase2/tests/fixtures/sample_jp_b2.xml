@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<patent-document country="JP" doc-number="1234567" kind="B2">
+  <bibliographic-data>
+    <publication-reference>
+      <document-id>
+        <country>JP</country>
+        <doc-number>1234567</doc-number>
+        <kind>B2</kind>
+        <date>20230101</date>
+      </document-id>
+    </publication-reference>
+    <invention-title>サンプル発明の名称</invention-title>
+  </bibliographic-data>
+  <claims>
+    <claim num="1">
+      <claim-text>
+        物品を製造する方法であって、
+        第1の工程と、
+        第2の工程と、
+        を含むことを特徴とする方法。
+      </claim-text>
+    </claim>
+    <claim num="2">
+      <claim-text>
+        前記第1の工程は、特定の条件下で行われることを特徴とする、請求項1に記載の方法。
+      </claim-text>
+    </claim>
+  </claims>
+</patent-document>

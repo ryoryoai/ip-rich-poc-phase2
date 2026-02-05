@@ -1,0 +1,39 @@
+id: "07_poll_state_updater"
+name: "Poll State Updater"
+description: "ポーリング状態を更新する"
+pipeline: "A"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  current_poll_state:
+  {{current_poll_state}}
+
+  fetch_results:
+  {{fetch_results}}
+
+  あなたの仕事:
+  - 今回の取得結果を反映して、次回のポーリングに必要な状態を更新する。
+  - 変化があった項目、次回チェック推奨日を記録する。
+
+  出力JSON:
+  {
+    "updated_poll_state": {
+      "last_checked_at": "YYYY-MM-DDTHH:MM:SSZ",
+      "next_check_at": "YYYY-MM-DDTHH:MM:SSZ",
+      "status_hash": "string",
+      "detected_changes": ["string"],
+      "watch_priorities": {
+        "status": 0,
+        "citations": 0,
+        "documents": 0
+      }
+    },
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    updated_poll_state:
+      type: object
+    errors:
+      type: array

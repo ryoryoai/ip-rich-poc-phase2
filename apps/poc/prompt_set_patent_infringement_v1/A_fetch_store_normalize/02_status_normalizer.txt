@@ -1,0 +1,44 @@
+入力:
+raw_response_meta:
+{{raw_response_meta}}
+
+raw_payload:
+{{raw_payload}}
+
+あなたの仕事:
+- raw_payload に含まれる経過情報から、手続や通知等のイベントを抽出し status_events に正規化する。
+- raw_payload に含まれる当事者情報があれば parties に抽出する。
+- raw_payload から判別できる番号（出願、公開、登録など）を identifiers に抽出する。
+- 入力に存在しない情報は作らない。見つからない場合は空配列にする。
+- 日付は可能なら ISO 8601 に正規化する。不明なら null。
+
+出力JSON:
+{
+  "status_events": [
+    {
+      "event_id": "string",
+      "event_date": "YYYY-MM-DD",
+      "event_type": "string",
+      "event_code": "string|null",
+      "description": "string|null",
+      "source_ref": { "raw_response_id": "string", "path": "string" }
+    }
+  ],
+  "parties": [
+    {
+      "party_id": "string",
+      "role": "applicant|inventor|agent|assignee|other",
+      "name": "string",
+      "name_normalized": "string|null",
+      "source_ref": { "raw_response_id": "string", "path": "string" }
+    }
+  ],
+  "identifiers": [
+    {
+      "kind": "application|publication|grant|pct|other",
+      "value": "string",
+      "source_ref": { "raw_response_id": "string", "path": "string" }
+    }
+  ],
+  "errors": []
+}

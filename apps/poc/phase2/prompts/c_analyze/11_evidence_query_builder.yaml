@@ -1,0 +1,36 @@
+id: "11_evidence_query_builder"
+name: "Evidence Query Builder"
+description: "証拠収集用クエリを生成する"
+pipeline: "C"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  claim_elements:
+  {{claim_elements}}
+
+  target_product:
+  {{target_product}}
+
+  あなたの仕事:
+  - 各要素について、製品が満たすかどうかを検証するための検索クエリを生成する。
+  - 検索対象（マニュアル、仕様書、Webページ等）を提案する。
+
+  出力JSON:
+  {
+    "queries": [
+      {
+        "element_no": 0,
+        "query_text": "string",
+        "suggested_sources": ["manual|spec|support|developer_doc|teardown|network_capture|web|other"],
+        "purpose": "string"
+      }
+    ],
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    queries:
+      type: array
+    errors:
+      type: array

@@ -1,0 +1,45 @@
+id: "10_claim_element_extractor"
+name: "Claim Element Extractor"
+description: "請求項を要素に分解する"
+pipeline: "C"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  claim:
+  {{claim}}
+
+  分解ルール:
+  - 1つの要素は検証可能な最小単位にする。
+  - 要素は element_no で 1,2,3... と連番にする。
+  - quote_text は請求項からの抜粋をそのまま入れる。
+  - 解釈が必要な語は key_terms に列挙し、term_construction_needed=true にする。
+  - 不明なら unknown を使う。
+
+  出力JSON:
+  {
+    "claim_id": "string",
+    "claim_no": 0,
+    "elements": [
+      {
+        "element_no": 0,
+        "quote_text": "string",
+        "plain_description": "string",
+        "key_terms": ["string"],
+        "term_construction_needed": true,
+        "depends_on": [0],
+        "errors": []
+      }
+    ],
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    claim_id:
+      type: string
+    claim_no:
+      type: integer
+    elements:
+      type: array
+    errors:
+      type: array

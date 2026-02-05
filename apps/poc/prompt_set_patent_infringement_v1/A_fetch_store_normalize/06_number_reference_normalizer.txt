@@ -1,0 +1,23 @@
+入力:
+raw_response_meta:
+{{raw_response_meta}}
+
+raw_payload:
+{{raw_payload}}
+
+あなたの仕事:
+- 番号の相互関係を relations に正規化する。
+- 出力は関係の集合。重複は除去する。
+
+出力JSON:
+{
+  "relations": [
+    {
+      "from": { "kind": "application|publication|grant|pct|other", "value": "string" },
+      "to": { "kind": "application|publication|grant|pct|other", "value": "string" },
+      "relation_type": "same_case|derived|unknown",
+      "source_ref": { "raw_response_id": "string", "path": "string" }
+    }
+  ],
+  "errors": []
+}

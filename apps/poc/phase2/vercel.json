@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/batch-analyze",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/poll-patents",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}

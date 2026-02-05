@@ -1,0 +1,43 @@
+id: "14_claim_decision_aggregator"
+name: "Claim Decision Aggregator"
+description: "請求項レベルの判定を集約"
+pipeline: "C"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  claim_id:
+  {{claim_id}}
+
+  element_assessments:
+  {{element_assessments}}
+
+  集約ルール:
+  - not_satisfied が1つでもあれば literal_status=fail
+  - not_satisfied が0で unknown が0なら literal_status=pass
+  - not_satisfied が0で unknown が1つ以上なら literal_status=needs_evidence
+  - depends_on_construction が含まれる場合は literal_status=needs_construction
+
+  出力JSON:
+  {
+    "claim_id": "string",
+    "literal_status": "pass|fail|needs_evidence|needs_construction",
+    "blocking_elements": [0],
+    "summary": "string",
+    "next_action": "proceed|collect_more_evidence|term_construction_review|drop",
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    claim_id:
+      type: string
+    literal_status:
+      type: string
+    blocking_elements:
+      type: array
+    summary:
+      type: string
+    next_action:
+      type: string
+    errors:
+      type: array

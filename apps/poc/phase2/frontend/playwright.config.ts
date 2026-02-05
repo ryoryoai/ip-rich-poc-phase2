@@ -17,11 +17,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // webServer disabled - start servers manually before running tests
-  // webServer: {
-  //   command: 'npm run dev',
-  //   url: 'http://localhost:3002',
-  //   reuseExistingServer: !process.env.CI,
-  //   timeout: 120 * 1000,
-  // },
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3002',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
 });

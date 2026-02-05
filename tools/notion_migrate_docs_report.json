@@ -1,0 +1,82 @@
+[
+  {
+    "file": "docs/architecture/phase2.md",
+    "title": "Phase 2 アーキテクチャ",
+    "page_id": "2fd09949-ce02-81fe-a565-c41c4c54a638"
+  },
+  {
+    "file": "docs/diagrams/README.md",
+    "title": "README",
+    "page_id": "2fd09949-ce02-812a-830e-cf23a82b2520"
+  },
+  {
+    "file": "docs/environments.md",
+    "title": "環境情報",
+    "page_id": "2fd09949-ce02-811f-88bd-cbf547ee2336"
+  },
+  {
+    "file": "docs/intro.md",
+    "title": "プロジェクト概要",
+    "page_id": "2fd09949-ce02-81b2-ba6e-e7ac854167f2"
+  },
+  {
+    "file": "docs/phase2-development.md",
+    "title": "Phase 2 開発詳細",
+    "page_id": "2fd09949-ce02-81d0-8c3c-d89dd45af0ad"
+  },
+  {
+    "file": "docs/workflow/infringement-analysis.md",
+    "title": "侵害調査",
+    "page_id": "2fd09949-ce02-81fc-8424-e66618b99e00"
+  },
+  {
+    "file": "docs/workflow/overview.md",
+    "title": "全体概要",
+    "page_id": "2fd09949-ce02-814b-96da-e7cd319603df"
+  },
+  {
+    "file": "docs/workflow/revenue-estimation.md",
+    "title": "売上推定",
+    "page_id": "2fd09949-ce02-81e7-9d97-cfb149fd3817"
+  },
+  {
+    "file": "versioned_docs/version-0.1/architecture/phase2.md",
+    "title": "Phase 2 アーキテクチャ",
+    "page_id": "2fd09949-ce02-813d-be9d-f0569a88edd4"
+  },
+  {
+    "file": "versioned_docs/version-0.1/diagrams/README.md",
+    "title": "README",
+    "page_id": "2fd09949-ce02-8114-a1c3-e274ab4f3c6e"
+  },
+  {
+    "file": "versioned_docs/version-0.1/environments.md",
+    "title": "環境情報",
+    "page_id": "2fd09949-ce02-8196-a9d8-fce9e18766f0"
+  },
+  {
+    "file": "versioned_docs/version-0.1/intro.md",
+    "title": "プロジェクト概要",
+    "page_id": "2fd09949-ce02-8135-9714-fbdfea26fd72"
+  },
+  {
+    "file": "versioned_docs/version-0.1/phase2-development.md",
+    "title": "Phase 2 開発詳細",
+    "page_id": "2fd09949-ce02-812b-aa8d-cc85444c5f29"
+  },
+  {
+    "file": "versioned_docs/version-0.1/workflow/infringement-analysis.md",
+    "title": "侵害調査",
+    "page_id": "2fd09949-ce02-81f1-9bf0-de357f7dafd8"
+  },
+  {
+    "file": "versioned_docs/version-0.1/workflow/overview.md",
+    "title": "全体概要",
+    "page_id": "2fd09949-ce02-81d5-b140-d56688ce8275"
+  },
+  {
+    "file": "versioned_docs/version-0.1/workflow/revenue-estimation.md",
+    "title": "売上推定",
+    "page_id": "2fd09949-ce02-8159-80da-ec1370a5b5e7"
+  }
+]

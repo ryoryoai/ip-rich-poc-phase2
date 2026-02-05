@@ -1,0 +1,117 @@
+name: Patent Analysis
+
+on:
+  # Manual trigger with inputs
+  workflow_dispatch:
+    inputs:
+      patent_id:
+        description: 'Patent ID (e.g., JP1234567B2)'
+        required: true
+        type: string
+      pipeline:
+        description: 'Pipeline to run'
+        required: true
+        type: choice
+        options:
+          - A
+          - B
+          - C
+          - full
+        default: C
+      target_product:
+        description: 'Target product (optional)'
+        required: false
+        type: string
+
+  # Scheduled runs
+  schedule:
+    # Run batch analysis every 6 hours
+    - cron: '0 */6 * * *'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        working-directory: apps/poc/phase2
+        run: |
+          pip install -e ".[dev]"
+
+      - name: Run analysis (manual)
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: apps/poc/phase2
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LLM_PROVIDER: ${{ secrets.LLM_PROVIDER || 'openai' }}
+        run: |
+          python -c "
+          from app.db.session import get_db
+          from app.services import AnalysisService
+
+          patent_id = '${{ inputs.patent_id }}'
+          pipeline = '${{ inputs.pipeline }}'
+          target_product = '${{ inputs.target_product }}' or None
+
+          with get_db() as db:
+              service = AnalysisService(db)
+              job = service.create_job(
+                  patent_id=patent_id,
+                  pipeline=pipeline,
+                  target_product=target_product,
+              )
+              db.commit()
+
+              job = service.run_job(job.id)
+              db.commit()
+
+              print(f'Job {job.id} completed with status: {job.status}')
+          "
+
+      - name: Run batch analysis (scheduled)
+        if: github.event_name == 'schedule'
+        working-directory: apps/poc/phase2
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LLM_PROVIDER: ${{ secrets.LLM_PROVIDER || 'openai' }}
+        run: |
+          python -c "
+          from app.db.session import get_db
+          from app.db.models import AnalysisJob
+          from app.services import AnalysisService
+
+          with get_db() as db:
+              pending_jobs = (
+                  db.query(AnalysisJob)
+                  .filter(AnalysisJob.status == 'pending')
+                  .limit(5)
+                  .all()
+              )
+
+              if not pending_jobs:
+                  print('No pending jobs')
+                  exit(0)
+
+              service = AnalysisService(db)
+              for job in pending_jobs:
+                  try:
+                      service.run_job(job.id)
+                      db.commit()
+                      print(f'Job {job.id} completed')
+                  except Exception as e:
+                      print(f'Job {job.id} failed: {e}')
+                      db.rollback()
+          "

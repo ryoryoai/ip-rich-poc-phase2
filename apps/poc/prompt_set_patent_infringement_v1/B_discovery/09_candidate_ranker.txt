@@ -1,0 +1,24 @@
+入力:
+case_context:
+{{case_context}}
+
+candidates:
+{{candidates}}
+
+あなたの仕事:
+- candidates を優先度順に並べ替える。
+- 根拠が薄いものを上位にしない。
+- スコアは説明可能であること。
+
+出力JSON:
+{
+  "ranked": [
+    {
+      "candidate_id": "string",
+      "score": 0.0,
+      "reasons": ["string"],
+      "recommended_next_step": "fetch_api_details|analyze_claims|drop|needs_more_search"
+    }
+  ],
+  "errors": []
+}

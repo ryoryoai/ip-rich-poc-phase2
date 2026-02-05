@@ -1,0 +1,38 @@
+id: "05_documents_metadata_normalizer"
+name: "Documents Metadata Normalizer"
+description: "書類メタデータを正規化する"
+pipeline: "A"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  raw_response_meta:
+  {{raw_response_meta}}
+
+  raw_payload:
+  {{raw_payload}}
+
+  あなたの仕事:
+  - 書類一覧（明細書、意見書、拒絶理由通知など）のメタデータを正規化する。
+  - 各書類の種別、日付、ページ数などを抽出する。
+
+  出力JSON:
+  {
+    "documents": [
+      {
+        "document_id": "string",
+        "document_type": "specification|claims|abstract|drawings|office_action|response|amendment|other",
+        "document_date": "YYYY-MM-DD|null",
+        "page_count": 0,
+        "file_reference": "string|null",
+        "source_ref": { "raw_response_id": "string", "path": "string" }
+      }
+    ],
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    documents:
+      type: array
+    errors:
+      type: array

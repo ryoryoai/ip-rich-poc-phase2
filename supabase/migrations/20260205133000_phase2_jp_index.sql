@@ -1,0 +1,2 @@
+-- Placeholder migration to align with remote history.
+-- JP Index schema already included in 20260205100000_phase2_schema_baseline.sql.

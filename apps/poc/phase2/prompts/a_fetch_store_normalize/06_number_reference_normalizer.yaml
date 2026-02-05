@@ -1,0 +1,37 @@
+id: "06_number_reference_normalizer"
+name: "Number Reference Normalizer"
+description: "番号参照を正規化する"
+pipeline: "A"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  raw_response_meta:
+  {{raw_response_meta}}
+
+  raw_payload:
+  {{raw_payload}}
+
+  あなたの仕事:
+  - 出願番号、公開番号、登録番号、PCT番号などの相互参照を整理する。
+  - 優先権情報も含める。
+
+  出力JSON:
+  {
+    "number_references": [
+      {
+        "kind": "application|publication|grant|pct|priority|divisional|continuation",
+        "country": "string",
+        "number": "string",
+        "date": "YYYY-MM-DD|null",
+        "source_ref": { "raw_response_id": "string", "path": "string" }
+      }
+    ],
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    number_references:
+      type: array
+    errors:
+      type: array

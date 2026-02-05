@@ -1,0 +1,3 @@
+-- Legacy migration placeholder.
+-- This migration was already applied on the remote Supabase project.
+-- The original SQL was not available in this repo at the time of sync.

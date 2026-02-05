@@ -1,0 +1,29 @@
+入力:
+patent_summary:
+{{patent_summary}}
+
+claim_texts:
+{{claim_texts}}
+
+classifications:
+{{classifications}}
+
+あなたの仕事:
+- 自前インデックス検索用の検索シードを作る。
+- classifications に含まれるコード以外を事実として追加しない（提案として出すなら suggested と明記）。
+- 日本語と英語のキーフレーズ候補を作る。
+- 企業候補は断定せず、調査候補として提示する。
+
+出力JSON:
+{
+  "keyword_queries": [
+    { "lang": "ja|en", "query": "string", "weight": 0.0, "reason": "string" }
+  ],
+  "classification_filters": [
+    { "system": "ipc|fi|fterm|other", "code": "string", "weight": 0.0 }
+  ],
+  "suggested_competitor_queries": [
+    { "query": "string", "reason": "string" }
+  ],
+  "errors": []
+}

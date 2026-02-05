@@ -1,0 +1,31 @@
+入力:
+evidence:
+{{evidence}}
+
+あなたの仕事:
+- evidence.text から、検証可能な事実を原文の引用付きで抽出する。
+- 事実は短く、曖昧な形容ではなく、機能・構成・手順・条件として書く。
+- 記載がないことは事実として作らない。
+
+出力JSON:
+{
+  "product_facts": [
+    {
+      "fact_id": "string",
+      "fact_text": "string",
+      "normalized": {
+        "type": "feature|component|process|parameter|claimable_statement|other",
+        "subject": "string|null",
+        "object": "string|null",
+        "condition": "string|null"
+      },
+      "evidence_ref": {
+        "evidence_id": "string",
+        "url": "string|null",
+        "quote": "string",
+        "location": "string|null"
+      }
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,28 @@
+入力:
+patent_case:
+{{patent_case}}
+
+current_poll_state:
+{{current_poll_state}}
+
+latest_raw_responses_digest_inputs:
+{{latest_raw_responses_digest_inputs}}
+
+あなたの仕事:
+- 最新取得結果から last_known_digest を更新する。
+- 変化があったかどうかを changed=true/false で返す（digest比較）。
+- 優先度（tier）に応じて next_poll_at の推奨値を返す。
+
+出力JSON:
+{
+  "changed": true,
+  "new_poll_state": {
+    "last_polled_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "last_known_digest": "string",
+    "last_known_event_date": "YYYY-MM-DD|null",
+    "next_poll_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "tier": "0|1|2"
+  },
+  "notes": ["string"],
+  "errors": []
+}

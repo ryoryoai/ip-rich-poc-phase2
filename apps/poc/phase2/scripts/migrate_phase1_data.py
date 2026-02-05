@@ -111,7 +111,7 @@ def check_phase2_data():
 
         if not exists:
             print("[X] phase2.analysis_jobs テーブルが存在しません")
-            print("   alembic upgrade head を実行してください")
+            print("   supabase/migrations を適用してください")
             return False
 
         # Get count

@@ -1,0 +1,48 @@
+id: "13_element_assessment"
+name: "Element Assessment"
+description: "要素ごとの充足判定"
+pipeline: "C"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  claim_element:
+  {{claim_element}}
+
+  product_facts:
+  {{product_facts}}
+
+  判定ルール:
+  - satisfied: 要件を満たすと読める事実が evidence 付きで存在する。
+  - not_satisfied: 要件と矛盾する事実が evidence 付きで存在する、または要件を満たさないことが明確に示されている。
+  - unknown: どちらとも言えない。情報不足。
+  - depends_on_construction: 用語解釈や条件解釈で結論が変わる。
+
+  出力JSON:
+  {
+    "element_no": 0,
+    "status": "satisfied|not_satisfied|unknown|depends_on_construction",
+    "confidence": 0.0,
+    "rationale": "string",
+    "supporting_evidence": [
+      { "evidence_id": "string", "quote": "string", "url": "string|null" }
+    ],
+    "missing_information": ["string"],
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    element_no:
+      type: integer
+    status:
+      type: string
+    confidence:
+      type: number
+    rationale:
+      type: string
+    supporting_evidence:
+      type: array
+    missing_information:
+      type: array
+    errors:
+      type: array

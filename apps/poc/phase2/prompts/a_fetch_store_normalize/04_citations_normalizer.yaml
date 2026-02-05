@@ -1,0 +1,38 @@
+id: "04_citations_normalizer"
+name: "Citations Normalizer"
+description: "引用文献情報を正規化する"
+pipeline: "A"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  raw_response_meta:
+  {{raw_response_meta}}
+
+  raw_payload:
+  {{raw_payload}}
+
+  あなたの仕事:
+  - 引用文献（被引用含む）を抽出・正規化する。
+  - 引用種別（審査官引用、出願人引用など）を識別する。
+
+  出力JSON:
+  {
+    "citations": [
+      {
+        "citation_id": "string",
+        "direction": "citing|cited_by",
+        "cited_doc": { "country": "string", "doc_number": "string", "kind": "string|null" },
+        "citation_type": "examiner|applicant|third_party|unknown",
+        "relevance": "X|Y|A|D|unknown",
+        "source_ref": { "raw_response_id": "string", "path": "string" }
+      }
+    ],
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    citations:
+      type: array
+    errors:
+      type: array

@@ -1,0 +1,21 @@
+入力:
+case_context:
+{{case_context}}
+
+claim_decisions:
+{{claim_decisions}}
+
+あなたの仕事:
+- pass の請求項が1つでもあれば proceed=true。
+- pass がない場合は proceed=false とし、次に何をすれば進めるかを整理する。
+
+出力JSON:
+{
+  "proceed": true,
+  "best_claims": [
+    { "claim_id": "string", "reason": "string" }
+  ],
+  "risks": ["string"],
+  "recommended_next_steps": ["string"],
+  "errors": []
+}

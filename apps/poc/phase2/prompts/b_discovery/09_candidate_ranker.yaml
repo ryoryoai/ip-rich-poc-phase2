@@ -1,0 +1,38 @@
+id: "09_candidate_ranker"
+name: "Candidate Ranker"
+description: "候補をランキングする"
+pipeline: "B"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  target_patent:
+  {{target_patent}}
+
+  candidates:
+  {{candidates}}
+
+  あなたの仕事:
+  - 候補を関連度順にランキングする。
+  - スコアと理由を付与する。
+  - 上位候補のみ詳細調査を推奨する。
+
+  出力JSON:
+  {
+    "ranked_candidates": [
+      {
+        "candidate_id": "string",
+        "rank": 0,
+        "score": 0.0,
+        "relevance_reason": "string",
+        "recommended_for_analysis": true
+      }
+    ],
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    ranked_candidates:
+      type: array
+    errors:
+      type: array

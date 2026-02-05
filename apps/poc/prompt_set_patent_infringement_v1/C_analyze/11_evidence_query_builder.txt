@@ -1,0 +1,26 @@
+入力:
+target:
+{{target}}
+
+claim_elements:
+{{claim_elements}}
+
+あなたの仕事:
+- 各要素を検証するための検索クエリを作る。
+- 公式資料（マニュアル、仕様書、リリースノート、技術資料）に当たりやすいクエリを優先する。
+- クエリは日本語と英語の両方を作ってよい。
+- 断定は禁止。探索用クエリを出すだけ。
+
+出力JSON:
+{
+  "queries": [
+    {
+      "element_no": 0,
+      "lang": "ja|en",
+      "query": "string",
+      "priority": 0,
+      "expected_evidence_type": "manual|spec|datasheet|release_note|support|developer_doc|other"
+    }
+  ],
+  "errors": []
+}

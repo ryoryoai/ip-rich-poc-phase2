@@ -1,0 +1,40 @@
+id: "12_product_fact_extractor"
+name: "Product Fact Extractor"
+description: "製品から事実を抽出する"
+pipeline: "C"
+system_prompt: "{{common_system_prompt}}"
+user_prompt: |
+  入力:
+  evidence_documents:
+  {{evidence_documents}}
+
+  target_elements:
+  {{target_elements}}
+
+  あなたの仕事:
+  - evidence_documents から、各要素に関連する事実を抽出する。
+  - 事実は引用テキストと出典を必ず付ける。
+  - 事実がない場合は空配列。推測は含めない。
+
+  出力JSON:
+  {
+    "product_facts": [
+      {
+        "fact_id": "string",
+        "related_element_nos": [0],
+        "fact_text": "string",
+        "quote": "string",
+        "evidence_id": "string",
+        "url": "string|null",
+        "confidence": 0.0
+      }
+    ],
+    "errors": []
+  }
+output_schema:
+  type: object
+  properties:
+    product_facts:
+      type: array
+    errors:
+      type: array

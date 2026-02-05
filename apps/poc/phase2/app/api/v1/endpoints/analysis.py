@@ -22,6 +22,8 @@ class StartAnalysisRequest(BaseModel):
 
     patent_id: str
     target_product: str | None = None
+    company_id: str | None = None
+    product_id: str | None = None
     pipeline: Literal["A", "B", "C", "full"] = "C"
 
 
@@ -109,10 +111,15 @@ def start_analysis(
     service = AnalysisService(db)
 
     try:
+        company_uuid = uuid.UUID(request.company_id) if request.company_id else None
+        product_uuid = uuid.UUID(request.product_id) if request.product_id else None
+
         job = service.create_job(
             patent_id=request.patent_id,
             pipeline=request.pipeline,
             target_product=request.target_product,
+            company_id=company_uuid,
+            product_id=product_uuid,
         )
         db.commit()
 
