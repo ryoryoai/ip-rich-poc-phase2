@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/cron/:path*",
+      "destination": "https://phase2-api.vercel.app/api/cron/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://phase2-api.vercel.app/:path*"
+    }
+  ]
+}
