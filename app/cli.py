@@ -228,6 +228,107 @@ def company_nta_import(
         typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
 
 
+@app.command("company-gbizinfo-import")
+def company_gbizinfo_import(
+    path: Annotated[Path, typer.Option(help="gBizINFO JSON/ZIP path")],
+    run_type: Annotated[str, typer.Option(help="Run type: full|delta")] = "full",
+    source_url: Annotated[Optional[str], typer.Option(help="Source URL (optional)")] = None,
+    dry_run: Annotated[bool, typer.Option(help="Dry run (no DB writes)")] = False,
+    limit: Annotated[Optional[int], typer.Option(help="Record limit for test runs")] = None,
+    priority: Annotated[int, typer.Option(help="Job priority (0-10)")] = 5,
+    create_missing: Annotated[
+        bool, typer.Option(help="Create company if missing")
+    ] = False,
+    overwrite: Annotated[
+        bool, typer.Option(help="Overwrite existing company fields")
+    ] = False,
+    include_extra_fields: Annotated[
+        bool, typer.Option(help="Record extra fields (industry, business_items, etc.)")
+    ] = False,
+    include_patent: Annotated[
+        bool, typer.Option(help="Record patent list (large)")
+    ] = False,
+    include_subsidy: Annotated[
+        bool, typer.Option(help="Record subsidy list (large)")
+    ] = False,
+    batch_size: Annotated[int, typer.Option(help="DB commit batch size")] = 500,
+    hash_content: Annotated[
+        bool, typer.Option(help="Compute file hash for evidence (slow on large files)")
+    ] = False,
+) -> None:
+    """Import gBizINFO bulk JSON into company master."""
+    import json
+
+    from app.db.session import get_db
+    from app.services.collection_service import CollectionService
+    from app.services.company_ingest import ingest_gbizinfo_path
+
+    with get_db() as db:
+        if dry_run:
+            stats = ingest_gbizinfo_path(
+                db,
+                path=path,
+                run_type=run_type,
+                source_url=source_url,
+                dry_run=True,
+                limit=limit,
+                batch_size=batch_size,
+                create_missing=create_missing,
+                overwrite=overwrite,
+                include_extra_fields=include_extra_fields,
+                include_patent=include_patent,
+                include_subsidy=include_subsidy,
+                hash_content=hash_content,
+            )
+            typer.echo(json.dumps({"status": "dry_run", **stats.__dict__}, ensure_ascii=False, indent=2))
+            return
+
+        service = CollectionService(db)
+        job = service.create_job(
+            job_type=f"gbizinfo_{run_type}",
+            items=[
+                {
+                    "entity_type": "company",
+                    "source_type": "gbizinfo",
+                    "source_ref": str(path),
+                    "payload_json": {
+                        "run_type": run_type,
+                        "source_url": source_url,
+                        "create_missing": create_missing,
+                        "overwrite": overwrite,
+                        "include_extra_fields": include_extra_fields,
+                        "include_patent": include_patent,
+                        "include_subsidy": include_subsidy,
+                        "batch_size": batch_size,
+                        "hash_content": hash_content,
+                    },
+                }
+            ],
+            priority=priority,
+        )
+
+        def handler(handler_db, _item):
+            stats = ingest_gbizinfo_path(
+                handler_db,
+                path=path,
+                run_type=run_type,
+                source_url=source_url,
+                dry_run=False,
+                limit=limit,
+                batch_size=batch_size,
+                create_missing=create_missing,
+                overwrite=overwrite,
+                include_extra_fields=include_extra_fields,
+                include_patent=include_patent,
+                include_subsidy=include_subsidy,
+                hash_content=hash_content,
+            )
+            return {"status": "succeeded", **stats.__dict__}
+
+        result = service.run_job(str(job.job_id), handler)
+        typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
+
+
 @app.command("company-seed-patents")
 def company_seed_patents(
     limit: Annotated[int, typer.Option(help="Max applicants to process")] = 500,

@@ -7,6 +7,7 @@ import hashlib
 import io
 import json
 import zipfile
+import codecs
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -55,6 +56,16 @@ class NtaIngestStats:
     created: int = 0
     updated: int = 0
     skipped: int = 0
+    errors: int = 0
+
+
+@dataclass
+class GbizinfoIngestStats:
+    processed: int = 0
+    created: int = 0
+    updated: int = 0
+    skipped: int = 0
+    skipped_missing: int = 0
     errors: int = 0
 
 
@@ -107,10 +118,10 @@ def _get_first_value(row: dict, candidates: list[str]) -> str | None:
     return None
 
 
-def _hash_value(value: str | dict | None) -> str | None:
+def _hash_value(value: str | dict | list | None) -> str | None:
     if value is None:
         return None
-    if isinstance(value, dict):
+    if isinstance(value, (dict, list)):
         payload = json.dumps(value, ensure_ascii=False, sort_keys=True).encode("utf-8")
     else:
         payload = str(value).encode("utf-8")
@@ -121,14 +132,18 @@ def _record_company_field(
     db: Session,
     company_id: uuid.UUID,
     field_name: str,
-    value: str | dict | None,
+    value: str | dict | list | None,
     evidence_id: uuid.UUID | None,
     source_type: str,
     source_ref: str | None,
     confidence: float | None,
     captured_at: datetime | None,
 ) -> None:
-    if value is None or (isinstance(value, str) and not value.strip()):
+    if value is None:
+        return
+    if isinstance(value, str) and not value.strip():
+        return
+    if isinstance(value, (dict, list)) and not value:
         return
 
     value_hash = _hash_value(value)
@@ -162,7 +177,7 @@ def _record_company_field(
             company_id=company_id,
             field_name=field_name,
             value_text=value if isinstance(value, str) else None,
-            value_json=value if isinstance(value, dict) else None,
+            value_json=value if isinstance(value, (dict, list)) else None,
             value_hash=value_hash,
             source_evidence_id=evidence_id,
             source_type=source_type,
@@ -409,6 +424,313 @@ def ingest_nta_file(
     return stats
 
 
+def _normalize_corporate_number(value: str | None) -> str | None:
+    if value is None:
+        return None
+    digits = "".join(ch for ch in str(value) if ch.isdigit())
+    if len(digits) != 13:
+        return None
+    return digits
+
+
+def _clean_text(value: object | None) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        cleaned = value.strip()
+        return cleaned or None
+    cleaned = str(value).strip()
+    return cleaned or None
+
+
+def _is_empty_text(value: object | None) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str) and not value.strip():
+        return True
+    return False
+
+
+def _iter_json_array(file_obj: io.BufferedReader, chunk_size: int = 1024 * 1024) -> Iterable[dict]:
+    decoder = json.JSONDecoder()
+    buffer = ""
+    utf8_decoder = codecs.getincrementaldecoder("utf-8")()
+
+    while True:
+        chunk = file_obj.read(chunk_size)
+        if not chunk:
+            return
+        buffer += utf8_decoder.decode(chunk)
+        idx = buffer.find("[")
+        if idx != -1:
+            buffer = buffer[idx + 1 :]
+            break
+
+    while True:
+        buffer = buffer.lstrip()
+        if not buffer:
+            chunk = file_obj.read(chunk_size)
+            if not chunk:
+                return
+            buffer += utf8_decoder.decode(chunk)
+            continue
+        if buffer[0] == "]":
+            return
+        try:
+            obj, idx = decoder.raw_decode(buffer)
+        except json.JSONDecodeError:
+            chunk = file_obj.read(chunk_size)
+            if not chunk:
+                raise
+            buffer += utf8_decoder.decode(chunk)
+            continue
+        yield obj
+        buffer = buffer[idx:]
+        buffer = buffer.lstrip()
+        if buffer.startswith(","):
+            buffer = buffer[1:]
+
+
+def _iter_gbizinfo_records(path: Path) -> Iterable[tuple[str, dict]]:
+    suffix = path.suffix.lower()
+    if suffix == ".zip":
+        with zipfile.ZipFile(path) as zf:
+            json_names = [name for name in zf.namelist() if name.lower().endswith(".json")]
+            if not json_names:
+                raise ValueError("ZIP does not contain JSON files")
+            for name in sorted(json_names):
+                with zf.open(name) as entry:
+                    for record in _iter_json_array(entry):
+                        yield name, record
+        return
+
+    if suffix == ".json":
+        with path.open("rb") as f:
+            for record in _iter_json_array(f):
+                yield path.name, record
+        return
+
+    if suffix == ".jsonl":
+        with path.open("r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                yield path.name, json.loads(line)
+        return
+
+    raise ValueError("Unsupported file type (expected .json, .jsonl, or .zip)")
+
+
+def _build_gbizinfo_field_values(
+    record: dict,
+    include_extra_fields: bool,
+    include_patent: bool,
+    include_subsidy: bool,
+) -> dict[str, object]:
+    fields: dict[str, object] = {
+        "name": _clean_text(record.get("name")),
+        "corporate_number": _normalize_corporate_number(record.get("corporate_number")),
+        "address_raw": _clean_text(record.get("location")),
+        "status": _clean_text(record.get("status")),
+        "business_description": _clean_text(record.get("business_summary")),
+        "website_url": _clean_text(record.get("company_url")),
+    }
+
+    if include_extra_fields:
+        fields.update(
+            {
+                "kana": _clean_text(record.get("kana")),
+                "name_en": _clean_text(record.get("name_en")),
+                "postal_code": _clean_text(record.get("postal_code")),
+                "process": _clean_text(record.get("process")),
+                "aggregated_year": _clean_text(record.get("aggregated_year")),
+                "close_date": record.get("close_date"),
+                "close_cause": _clean_text(record.get("close_cause")),
+                "kind": _clean_text(record.get("kind")),
+                "representative_name": _clean_text(record.get("representative_name")),
+                "capital_stock": _clean_text(record.get("capital_stock")),
+                "employee_number": _clean_text(record.get("employee_number")),
+                "company_size_male": _clean_text(record.get("company_size_male")),
+                "company_size_female": _clean_text(record.get("company_size_female")),
+                "founding_year": _clean_text(record.get("founding_year")),
+                "date_of_establishment": _clean_text(record.get("date_of_establishment")),
+                "qualification_grade": _clean_text(record.get("qualification_grade")),
+                "industry": record.get("industry"),
+                "business_items": record.get("business_items"),
+                "update_date": _clean_text(record.get("update_date")),
+                "meta_data": record.get("meta-data"),
+            }
+        )
+
+    if include_patent:
+        fields["patent"] = record.get("patent")
+
+    if include_subsidy:
+        fields["subsidy"] = record.get("subsidy")
+
+    return fields
+
+
+def _apply_gbizinfo_updates(
+    company: Company,
+    record: dict,
+    overwrite: bool,
+) -> bool:
+    updated = False
+
+    if overwrite:
+        name = _clean_text(record.get("name"))
+        if name and company.name != name:
+            company.name = name
+            company.normalized_name = normalize_company_name(name)
+            updated = True
+
+    updates = {
+        "address_raw": _clean_text(record.get("location")),
+        "status": _clean_text(record.get("status")),
+        "business_description": _clean_text(record.get("business_summary")),
+        "website_url": _clean_text(record.get("company_url")),
+    }
+
+    for field_name, value in updates.items():
+        if value is None:
+            continue
+        current_value = getattr(company, field_name)
+        if not overwrite and not _is_empty_text(current_value):
+            continue
+        if current_value != value:
+            setattr(company, field_name, value)
+            updated = True
+
+    return updated
+
+
+def ingest_gbizinfo_path(
+    db: Session,
+    path: Path,
+    run_type: str,
+    source_url: str | None = None,
+    dry_run: bool = False,
+    limit: int | None = None,
+    batch_size: int = 500,
+    create_missing: bool = False,
+    overwrite: bool = False,
+    include_extra_fields: bool = False,
+    include_patent: bool = False,
+    include_subsidy: bool = False,
+    hash_content: bool = False,
+) -> GbizinfoIngestStats:
+    """Ingest gBizINFO JSON/ZIP into company master."""
+    stats = GbizinfoIngestStats()
+
+    evidence = None
+    if not dry_run:
+        content_hash = calculate_sha256(path) if hash_content and path.exists() else None
+        evidence = _build_evidence(
+            db=db,
+            source_type="gbizinfo",
+            source_url=source_url or str(path),
+            title=f"gBizINFO data ({run_type})",
+            content_hash=content_hash,
+            content_type="application/json",
+        )
+
+    for source_ref, record in _iter_gbizinfo_records(path):
+        if limit and stats.processed >= limit:
+            break
+        stats.processed += 1
+
+        corporate_number = None
+        try:
+            corporate_number = _normalize_corporate_number(record.get("corporate_number"))
+            name = _clean_text(record.get("name"))
+            if not corporate_number or not name:
+                stats.skipped += 1
+                continue
+
+            company = (
+                db.query(Company)
+                .filter(Company.corporate_number == corporate_number)
+                .first()
+            )
+
+            created = False
+            updated = False
+
+            if not company:
+                if not create_missing:
+                    stats.skipped_missing += 1
+                    continue
+                company = Company(
+                    name=name,
+                    corporate_number=corporate_number,
+                    country="JP",
+                    normalized_name=normalize_company_name(name),
+                    address_raw=_clean_text(record.get("location")),
+                    status=_clean_text(record.get("status")),
+                    business_description=_clean_text(record.get("business_summary")),
+                    website_url=_clean_text(record.get("company_url")),
+                    identity_type="confirmed",
+                    identity_confidence=90,
+                )
+                if not dry_run:
+                    db.add(company)
+                    db.flush()
+                created = True
+                updated = True
+            else:
+                updated = _apply_gbizinfo_updates(company, record, overwrite=overwrite)
+                if updated and not dry_run:
+                    db.add(company)
+
+            if created:
+                stats.created += 1
+            elif updated:
+                stats.updated += 1
+            else:
+                stats.skipped += 1
+
+            if dry_run:
+                continue
+
+            fields = _build_gbizinfo_field_values(
+                record,
+                include_extra_fields=include_extra_fields,
+                include_patent=include_patent,
+                include_subsidy=include_subsidy,
+            )
+            for field_name, value in fields.items():
+                _record_company_field(
+                    db,
+                    company_id=company.id,
+                    field_name=field_name,
+                    value=value,
+                    evidence_id=evidence.id if evidence else None,
+                    source_type="gbizinfo",
+                    source_ref=source_ref,
+                    confidence=80,
+                    captured_at=datetime.now(timezone.utc),
+                )
+
+            if stats.processed % batch_size == 0:
+                db.commit()
+
+        except Exception:  # noqa: BLE001
+            stats.errors += 1
+            if not dry_run:
+                db.rollback()
+            logger.exception(
+                "gBizINFO record failed",
+                corporate_number=corporate_number,
+                source_ref=source_ref,
+            )
+
+    if not dry_run:
+        db.commit()
+    return stats
+
+
 def seed_companies_from_patents(
     db: Session,
     limit: int = 500,
@@ -542,7 +864,7 @@ def apply_company_enrichment(
             db,
             company_id=company.id,
             field_name=field_name,
-            value=value if isinstance(value, (str, dict)) else str(value),
+            value=value if isinstance(value, (str, dict, list)) else str(value),
             evidence_id=evidence.id if evidence else None,
             source_type=source_type,
             source_ref=source_url,
