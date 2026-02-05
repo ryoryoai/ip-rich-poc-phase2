@@ -8,6 +8,44 @@ import uvicorn
 
 from app.core import settings, get_logger
 
+
+def _load_field_map(
+    env_value: str | None,
+    file_path: Optional[Path],
+    label: str,
+) -> dict:
+    import json
+
+    if file_path:
+        try:
+            return json.loads(file_path.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001
+            typer.echo(f"{label} field map file load failed: {exc}")
+            raise typer.Exit(1)
+
+    if not env_value:
+        typer.echo(f"{label} field map is required (set env or --field-map-file)")
+        raise typer.Exit(1)
+
+    env_value = env_value.strip()
+    if env_value.startswith("{"):
+        try:
+            return json.loads(env_value)
+        except Exception as exc:  # noqa: BLE001
+            typer.echo(f"{label} field map JSON invalid: {exc}")
+            raise typer.Exit(1)
+
+    candidate = Path(env_value)
+    if candidate.exists():
+        try:
+            return json.loads(candidate.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001
+            typer.echo(f"{label} field map file load failed: {exc}")
+            raise typer.Exit(1)
+
+    typer.echo(f"{label} field map is required (set env or --field-map-file)")
+    raise typer.Exit(1)
+
 app = typer.Typer(help="Phase2 Patent Storage CLI")
 logger = get_logger(__name__)
 
@@ -210,6 +248,9 @@ def company_seed_patents(
 def company_enrich_gbiz(
     corporate_number: Annotated[str, typer.Option(help="Corporate number (13 digits)")],
     company_id: Annotated[Optional[str], typer.Option(help="Company UUID override")] = None,
+    field_map_file: Annotated[
+        Optional[Path], typer.Option(help="Field map JSON file path")
+    ] = None,
     dry_run: Annotated[bool, typer.Option(help="Dry run (no DB writes)")] = False,
 ) -> None:
     """Enrich company using gBizINFO API (field map required)."""
@@ -221,11 +262,7 @@ def company_enrich_gbiz(
     from app.services.company_sources import GbizinfoClient, extract_fields
     from app.core.config import settings
 
-    if not settings.gbizinfo_field_map:
-        typer.echo("GBIZINFO_FIELD_MAP is required (JSON mapping)")
-        raise typer.Exit(1)
-
-    mapping = json.loads(settings.gbizinfo_field_map)
+    mapping = _load_field_map(settings.gbizinfo_field_map, field_map_file, "GBIZINFO")
     client = GbizinfoClient()
     payload = client.fetch_by_corporate_number(corporate_number)
     fields = extract_fields(payload, mapping)
@@ -256,6 +293,9 @@ def company_enrich_gbiz(
 def company_enrich_edinet(
     edinet_code: Annotated[str, typer.Option(help="EDINET code")],
     company_id: Annotated[Optional[str], typer.Option(help="Company UUID override")] = None,
+    field_map_file: Annotated[
+        Optional[Path], typer.Option(help="Field map JSON file path")
+    ] = None,
     dry_run: Annotated[bool, typer.Option(help="Dry run (no DB writes)")] = False,
 ) -> None:
     """Enrich company using EDINET API (field map required)."""
@@ -267,11 +307,7 @@ def company_enrich_edinet(
     from app.services.company_sources import EdinetClient, extract_fields
     from app.core.config import settings
 
-    if not settings.edinet_field_map:
-        typer.echo("EDINET_FIELD_MAP is required (JSON mapping)")
-        raise typer.Exit(1)
-
-    mapping = json.loads(settings.edinet_field_map)
+    mapping = _load_field_map(settings.edinet_field_map, field_map_file, "EDINET")
     client = EdinetClient()
     payload = client.fetch(edinet_code)
     fields = extract_fields(payload, mapping)

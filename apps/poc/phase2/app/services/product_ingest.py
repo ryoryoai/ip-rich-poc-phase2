@@ -168,6 +168,48 @@ def _extract_meta(doc, key: str, attr: str = "name") -> str | None:
     return None
 
 
+def _extract_json_ld_products(doc) -> list[dict]:
+    nodes = doc.xpath("//script[@type='application/ld+json']/text()")
+    products: list[dict] = []
+
+    def collect(obj: object) -> None:
+        if isinstance(obj, dict):
+            if obj.get("@type") in {"Product", "ProductModel"}:
+                products.append(obj)
+            for value in obj.values():
+                collect(value)
+        elif isinstance(obj, list):
+            for item in obj:
+                collect(item)
+
+    for node in nodes:
+        try:
+            data = json.loads(node)
+        except json.JSONDecodeError:
+            continue
+        collect(data)
+
+    return products
+
+
+def _extract_product_from_json_ld(products: list[dict]) -> dict[str, str | None]:
+    if not products:
+        return {}
+    item = products[0]
+    brand = item.get("brand")
+    if isinstance(brand, dict):
+        brand = brand.get("name")
+    model = item.get("model") or item.get("mpn") or item.get("sku")
+    category = item.get("category")
+    return {
+        "name": item.get("name"),
+        "description": item.get("description"),
+        "brand_name": brand if isinstance(brand, str) else None,
+        "model_number": model if isinstance(model, str) else None,
+        "category_path": category if isinstance(category, str) else None,
+    }
+
+
 def _extract_breadcrumbs(doc) -> str | None:
     crumbs = doc.xpath("//nav[contains(@class,'breadcrumb')]//li")
     if not crumbs:
@@ -198,24 +240,32 @@ def extract_product_fields(html: str, url: str) -> dict[str, str | None]:
     doc = lxml_html.fromstring(html)
     doc.make_links_absolute(url)
 
+    json_ld_fields = _extract_product_from_json_ld(_extract_json_ld_products(doc))
+
     h1_nodes = doc.xpath("//h1")
     h1 = h1_nodes[0].text_content().strip() if h1_nodes else None
     og_title = _extract_meta(doc, "og:title", attr="property")
     title = (doc.findtext(".//title") or "").strip()
-    name = h1 or og_title or title or None
+    name = json_ld_fields.get("name") or h1 or og_title or title or None
 
     meta_desc = _extract_meta(doc, "description")
     paragraphs = [p.text_content().strip() for p in doc.xpath("//p") if p.text_content().strip()]
-    description = meta_desc or (paragraphs[0] if paragraphs else None)
+    description = (
+        json_ld_fields.get("description")
+        or meta_desc
+        or (paragraphs[0] if paragraphs else None)
+    )
 
     text_blob = _extract_text(doc)
     model_match = MODEL_PATTERN.search(text_blob)
-    model_number = model_match.group(0) if model_match else None
+    model_number = json_ld_fields.get("model_number") or (model_match.group(0) if model_match else None)
 
-    brand = _extract_meta(doc, "og:site_name", attr="property") or _extract_meta(
-        doc, "application-name"
+    brand = (
+        json_ld_fields.get("brand_name")
+        or _extract_meta(doc, "og:site_name", attr="property")
+        or _extract_meta(doc, "application-name")
     )
-    category_path = _extract_breadcrumbs(doc)
+    category_path = json_ld_fields.get("category_path") or _extract_breadcrumbs(doc)
     sale_region = _infer_region(url)
     status = _infer_status(text_blob)
 
