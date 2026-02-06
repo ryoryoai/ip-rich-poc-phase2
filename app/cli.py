@@ -5,6 +5,7 @@ from typing import Annotated, Optional
 
 import typer
 import uvicorn
+import httpx
 
 from app.core import settings, get_logger
 
@@ -78,8 +79,8 @@ def ingest(
         Optional[str],
         typer.Option(help="Supabase bucket override (optional)"),
     ] = None,
-) -> None:
-    """Ingest raw XML/ZIP files into storage."""
+    ) -> None:
+        """Ingest raw XML/ZIP files into storage."""
     from app.ingest.raw_storage import ingest_files
 
     logger.info("Starting ingest", path=str(path), source=source)
@@ -87,6 +88,68 @@ def ingest(
     typer.echo(
         f"Ingested {result['ingested']} files, skipped {result['skipped']} duplicates"
     )
+
+
+@app.command("auth-approve-user")
+def auth_approve_user(
+    email: Annotated[str, typer.Option(help="Target user email")],
+    approved: Annotated[bool, typer.Option(help="Set approval flag")] = True,
+    role: Annotated[Optional[str], typer.Option(help="Set role (optional)")] = None,
+) -> None:
+    """Approve or revoke a Supabase user."""
+    if not settings.supabase_url or not settings.supabase_service_role_key:
+        typer.echo("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required")
+        raise typer.Exit(1)
+
+    base_url = settings.supabase_url.rstrip("/")
+    headers = {
+        "Authorization": f"Bearer {settings.supabase_service_role_key}",
+        "apikey": settings.supabase_service_role_key,
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = httpx.get(
+            f"{base_url}/auth/v1/admin/users",
+            headers=headers,
+            params={"email": email},
+            timeout=10.0,
+        )
+        response.raise_for_status()
+    except httpx.HTTPError as exc:
+        typer.echo(f"Failed to lookup user: {exc}")
+        raise typer.Exit(1) from exc
+
+    payload = response.json()
+    users = payload.get("users") or []
+    if not users:
+        typer.echo("User not found")
+        raise typer.Exit(1)
+
+    user = users[0]
+    user_id = user.get("id")
+    if not user_id:
+        typer.echo("User id missing in response")
+        raise typer.Exit(1)
+
+    app_metadata = user.get("app_metadata") or {}
+    app_metadata["approved"] = approved
+    if role is not None:
+        app_metadata["role"] = role
+
+    try:
+        update = httpx.put(
+            f"{base_url}/auth/v1/admin/users/{user_id}",
+            headers=headers,
+            json={"app_metadata": app_metadata},
+            timeout=10.0,
+        )
+        update.raise_for_status()
+    except httpx.HTTPError as exc:
+        typer.echo(f"Failed to update user: {exc}")
+        raise typer.Exit(1) from exc
+
+    typer.echo(f"Updated user {email}: approved={approved}" + (f", role={role}" if role else ""))
 
 
 @app.command()

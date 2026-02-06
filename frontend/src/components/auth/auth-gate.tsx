@@ -28,6 +28,8 @@ export default function AuthGate({ children }: AuthGateProps) {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<"sign-in" | "sign-up">("sign-in");
 
   useEffect(() => {
     if (!supabase) {
@@ -64,6 +66,12 @@ export default function AuthGate({ children }: AuthGateProps) {
     };
   }, []);
 
+  const isApproved = useMemo(() => {
+    if (!session) return false;
+    const appMetadata = session.user?.app_metadata ?? {};
+    return appMetadata.role === "admin" || appMetadata.approved === true;
+  }, [session]);
+
   const canSubmit = useMemo(() => {
     return email.trim().length > 0 && password.length > 0 && !submitting;
   }, [email, password, submitting]);
@@ -76,6 +84,7 @@ export default function AuthGate({ children }: AuthGateProps) {
     }
     setSubmitting(true);
     setError(null);
+    setNotice(null);
     try {
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
@@ -86,6 +95,68 @@ export default function AuthGate({ children }: AuthGateProps) {
       }
     } catch {
       setError("ログインに失敗しました。");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (!supabase) return;
+    if (!email.trim() || !password) {
+      setError("メールアドレスとパスワードを入力してください。");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (signUpError) {
+        setError(signUpError.message);
+      } else {
+        setNotice("申請を受け付けました。管理者の承認をお待ちください。");
+      }
+    } catch {
+      setError("新規登録に失敗しました。");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    if (!supabase) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const { data, error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        setError("セッションの更新に失敗しました。");
+        return;
+      }
+      if (data.session) {
+        setSession(data.session);
+        setStatus("authed");
+      }
+    } catch {
+      setError("セッションの更新に失敗しました。");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    if (!supabase) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await supabase.auth.signOut();
+      setStatus("unauth");
+      setSession(null);
+    } catch {
+      setError("ログアウトに失敗しました。");
     } finally {
       setSubmitting(false);
     }
@@ -126,16 +197,67 @@ export default function AuthGate({ children }: AuthGateProps) {
     );
   }
 
-  if (status === "authed" && session) {
+  if (status === "authed" && session && isApproved) {
     return <>{children}</>;
+  }
+
+  if (status === "authed" && session && !isApproved) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-lg">
+          <CardHeader>
+            <CardTitle>承認待ち</CardTitle>
+            <CardDescription>
+              アカウント申請は受け付けました。管理者の承認後に利用できます。
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              申請中のメール: {session.user.email ?? "不明"}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                type="button"
+                className="w-full"
+                disabled={submitting}
+                onClick={handleRefresh}
+              >
+                {submitting ? "更新中..." : "承認状態を更新"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled={submitting}
+                onClick={handleSignOut}
+              >
+                ログアウト
+              </Button>
+            </div>
+            {error && (
+              <Alert variant="destructive">
+                <AlertTitle>認証エラー</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Phase2 にログイン</CardTitle>
-          <CardDescription>Supabase Auth で認証します。</CardDescription>
+          <CardTitle>
+            {authMode === "sign-in" ? "Phase2 にログイン" : "新規登録（申請）"}
+          </CardTitle>
+          <CardDescription>
+            {authMode === "sign-in"
+              ? "Supabase Auth で認証します。"
+              : "登録後に管理者の承認が必要です。"}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -162,13 +284,41 @@ export default function AuthGate({ children }: AuthGateProps) {
             type="button"
             className="w-full"
             disabled={!canSubmit}
-            onClick={handleSignIn}
+            onClick={authMode === "sign-in" ? handleSignIn : handleSignUp}
           >
-            {submitting ? "ログイン中..." : "ログイン"}
+            {submitting
+              ? authMode === "sign-in"
+                ? "ログイン中..."
+                : "申請中..."
+              : authMode === "sign-in"
+                ? "ログイン"
+                : "申請する"}
           </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full text-xs"
+            onClick={() => {
+              setAuthMode(authMode === "sign-in" ? "sign-up" : "sign-in");
+              setError(null);
+              setNotice(null);
+            }}
+          >
+            {authMode === "sign-in"
+              ? "新規登録（申請）に切り替える"
+              : "ログインに切り替える"}
+          </Button>
+
           <p className="text-xs text-muted-foreground">
-            新規登録は無効です。必要な場合は管理者に連絡してください。
+            新規登録は承認制です。承認後にログインできます。
           </p>
+
+          {notice && (
+            <Alert>
+              <AlertTitle>受付完了</AlertTitle>
+              <AlertDescription>{notice}</AlertDescription>
+            </Alert>
+          )}
 
           {error && (
             <Alert variant="destructive">

@@ -51,6 +51,7 @@ ANTHROPIC_API_KEY=sk-ant-xxx
 
 # Supabase Storage
 SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 SUPABASE_STORAGE_BUCKET=evidence
 SUPABASE_PATENT_RAW_BUCKET=patent-raw
@@ -65,6 +66,9 @@ CRON_SECRET=your-secret
 
 # Safety (explicit approval required for schema changes)
 ALLOW_SCHEMA_INIT=false
+
+# Auth (API requires Supabase access token)
+AUTH_ENABLED=true
 
 # JP Index export controls (optional)
 JP_INDEX_EXPORT_ENABLED=true
@@ -98,6 +102,7 @@ python -m app.cli jp-index-import --path ./data/jp_index.jsonl --run-type delta 
 # Ingestion jobs (local_path hint required for now)
 python -m app.cli ingest-job --numbers "JP1234567B2" --local-path ./data/raw/sample.xml
 python -m app.cli ingest-run --job-id <job_id> --storage supabase
+python -m app.cli auth-approve-user --email user@example.com --approved true
 ```
 
 ## API エンドポイント
@@ -149,6 +154,10 @@ Vercel Dashboard > Settings > Environment Variables:
 - `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
 - `LLM_PROVIDER`
 - `CRON_SECRET`
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `AUTH_ENABLED`
 
 ### 3. Vercel Cron
 

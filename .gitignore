@@ -58,3 +58,7 @@ alembic/versions/__pycache__/
 
 .vercel
 .env*.local
+
+# Keep frontend source lib folder tracked
+!frontend/src/lib/
+!frontend/src/lib/**

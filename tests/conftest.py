@@ -16,6 +16,7 @@ os.environ["ALLOW_SCHEMA_INIT"] = "true"
 os.environ["JP_INDEX_RATE_LIMIT_PER_MINUTE"] = "0"
 os.environ["JP_INDEX_CACHE_TTL_SECONDS"] = "0"
 os.environ["JP_INDEX_CACHE_MAX_ENTRIES"] = "0"
+os.environ["AUTH_ENABLED"] = "false"
 
 # Initialize SQLite schema for tests
 from app.main import init_database  # noqa: E402
