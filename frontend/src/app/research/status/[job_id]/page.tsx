@@ -65,6 +65,7 @@ export default function JobStatusPage() {
     pending: "待機中",
     researching: "リサーチ中",
     analyzing: "分析中",
+    running: "分析中", // legacy
     completed: "完了",
     failed: "失敗",
   };
@@ -73,6 +74,7 @@ export default function JobStatusPage() {
     pending: "text-yellow-600",
     researching: "text-blue-600",
     analyzing: "text-purple-600",
+    running: "text-purple-600", // legacy
     completed: "text-green-600",
     failed: "text-red-600",
   };
@@ -150,7 +152,7 @@ export default function JobStatusPage() {
               </div>
             )}
 
-            {(job.status === "pending" || job.status === "researching" || job.status === "analyzing") && (
+            {(job.status === "pending" || job.status === "researching" || job.status === "analyzing" || job.status === "running") && (
               <div className="mt-6 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                 <p className="mt-2 text-muted-foreground">処理中…</p>

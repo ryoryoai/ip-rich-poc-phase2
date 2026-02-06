@@ -1,6 +1,5 @@
 """Cron endpoints for scheduled tasks."""
 
-import os
 from datetime import datetime, timezone
 from typing import Annotated
 
@@ -9,23 +8,22 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
-from app.core import get_logger
+from app.core import get_logger, settings
 
 router = APIRouter()
 logger = get_logger(__name__)
 
-CRON_SECRET = os.getenv("CRON_SECRET", "")
-MAX_CONCURRENT_JOBS = int(os.getenv("MAX_CONCURRENT_JOBS", "3"))
+MAX_CONCURRENT_JOBS = settings.max_concurrent_jobs
 
 
 def verify_cron_secret(
     authorization: Annotated[str | None, Header()] = None,
 ) -> None:
     """Verify the cron secret from Authorization header."""
-    if not CRON_SECRET:
-        return  # Skip verification if not configured
+    if not settings.cron_secret:
+        raise HTTPException(status_code=503, detail="CRON_SECRET is not configured")
 
-    expected = f"Bearer {CRON_SECRET}"
+    expected = f"Bearer {settings.cron_secret}"
     if authorization != expected:
         raise HTTPException(status_code=401, detail="Invalid cron secret")
 
@@ -59,15 +57,16 @@ def batch_analyze(
     # 1. Check currently running jobs
     running_jobs = (
         db.query(AnalysisJob)
-        .filter(AnalysisJob.status.in_(["researching", "analyzing"]))
+        .filter(AnalysisJob.status.in_(["researching", "analyzing", "running"]))  # running = legacy
         .all()
     )
     results["checked_running"] = len(running_jobs)
 
     for job in running_jobs:
         # If job has been running for more than 30 minutes, mark as failed
-        if job.started_at:
-            elapsed = (datetime.now(timezone.utc) - job.started_at).total_seconds()
+        started_at = job.started_at or job.queued_at
+        if started_at:
+            elapsed = (datetime.now(timezone.utc) - started_at).total_seconds()
             if elapsed > 1800:  # 30 minutes
                 logger.warning(
                     f"Job {job.id} timed out after {elapsed}s",
@@ -85,7 +84,7 @@ def batch_analyze(
     # 2. Count active jobs for concurrency check
     active_count = (
         db.query(AnalysisJob)
-        .filter(AnalysisJob.status.in_(["researching", "analyzing"]))
+        .filter(AnalysisJob.status.in_(["researching", "analyzing", "running"]))  # running = legacy
         .count()
     )
 
@@ -123,6 +122,8 @@ def batch_analyze(
             job.status = "analyzing"
             job.started_at = datetime.now(timezone.utc)
             job.queued_at = datetime.now(timezone.utc)
+            job.completed_at = None
+            job.current_stage = None
             db.commit()
 
             service.run_job(job.id)

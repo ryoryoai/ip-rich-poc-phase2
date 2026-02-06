@@ -35,6 +35,7 @@ dev = [
     "ruff>=0.8.0",
     "mypy>=1.13.0",
     "types-lxml>=2024.11.0",
+    "testcontainers[postgres]>=4.0.0",
 ]
 
 [project.scripts]

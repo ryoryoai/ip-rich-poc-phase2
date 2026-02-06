@@ -99,3 +99,20 @@ def require_approved_user(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="User is pending approval",
     )
+
+
+def require_admin_user(
+    user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Ensure the user is an admin."""
+    if not settings.auth_enabled:
+        return user
+
+    app_metadata = user.get("app_metadata") or {}
+    if app_metadata.get("role") == "admin":
+        return user
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Admin access required",
+    )

@@ -37,6 +37,8 @@ export interface ClaimResponse {
   patent_id: string;
   claim_no: number;
   claim_text: string;
+  text_raw: string | null;
+  text_norm: string | null;
 }
 
 export interface ApiError {
@@ -62,6 +64,25 @@ export async function getClaim(
 ): Promise<ClaimResponse> {
   const response = await fetchApi(
     `/v1/patents/${encodeURIComponent(patentId)}/claims/${claimNo}`
+  );
+  if (!response.ok) {
+    const error: ApiError = await response.json();
+    throw new Error(error.detail);
+  }
+  return response.json();
+}
+
+export interface ClaimListResponse {
+  patent_id: string;
+  version_id: string | null;
+  claims: ClaimResponse[];
+}
+
+export async function getPatentClaims(
+  patentId: string
+): Promise<ClaimListResponse> {
+  const response = await fetchApi(
+    `/v1/patents/${encodeURIComponent(patentId)}/claims`
   );
   if (!response.ok) {
     const error: ApiError = await response.json();
@@ -265,6 +286,7 @@ export interface StartAnalysisRequest {
   company_id?: string;
   product_id?: string;
   pipeline: "A" | "B" | "C" | "full";
+  claim_nos?: number[];
 }
 
 export interface StartAnalysisResponse {
@@ -284,6 +306,7 @@ export interface JobStatusResponse {
   created_at: string;
   started_at: string | null;
   completed_at: string | null;
+  claim_nos: number[] | null;
 }
 
 export interface StageResult {
@@ -654,4 +677,159 @@ export async function searchKeywords(
   }
   const data = await response.json();
   return data.results as KeywordSearchResult[];
+}
+
+// =============================================================================
+// Case Management API
+// =============================================================================
+
+export interface CaseItem {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  assignee_id: string | null;
+  patent_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CaseListResponse {
+  cases: CaseItem[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export interface CaseTarget {
+  id: string;
+  target_type: string;
+  target_id: string;
+  created_at: string;
+}
+
+export interface CaseMatchItem {
+  id: string;
+  match_candidate_id: string;
+  reviewer_note: string | null;
+  score_total: number | null;
+  product_name: string | null;
+  company_name: string | null;
+  status: string | null;
+  created_at: string;
+}
+
+export interface CaseDetailResponse {
+  case: CaseItem;
+  targets: CaseTarget[];
+  matches: CaseMatchItem[];
+}
+
+export async function getCases(params: {
+  status?: string;
+  page?: number;
+  per_page?: number;
+} = {}): Promise<CaseListResponse> {
+  const query = new URLSearchParams();
+  if (params.status) query.append("status", params.status);
+  if (params.page) query.append("page", String(params.page));
+  if (params.per_page) query.append("per_page", String(params.per_page));
+  const response = await fetchApi(`/v1/cases?${query.toString()}`);
+  if (!response.ok) {
+    const error: ApiError = await response.json();
+    throw new Error(error.detail);
+  }
+  return response.json();
+}
+
+export async function getCase(caseId: string): Promise<CaseDetailResponse> {
+  const response = await fetchApi(`/v1/cases/${caseId}`);
+  if (!response.ok) {
+    const error: ApiError = await response.json();
+    throw new Error(error.detail);
+  }
+  return response.json();
+}
+
+export async function createCase(request: {
+  title: string;
+  description?: string;
+  patent_id?: string;
+}): Promise<CaseItem> {
+  const response = await fetchApi("/v1/cases", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+  if (!response.ok) {
+    const error: ApiError = await response.json();
+    throw new Error(error.detail);
+  }
+  return response.json();
+}
+
+export async function updateCase(
+  caseId: string,
+  request: { title?: string; description?: string; status?: string }
+): Promise<CaseItem> {
+  const response = await fetchApi(`/v1/cases/${caseId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+  if (!response.ok) {
+    const error: ApiError = await response.json();
+    throw new Error(error.detail);
+  }
+  return response.json();
+}
+
+// =============================================================================
+// Match Candidate API
+// =============================================================================
+
+export interface MatchItem {
+  id: string;
+  patent_id: string;
+  product_id: string | null;
+  company_id: string | null;
+  product_name: string | null;
+  company_name: string | null;
+  score_total: number | null;
+  score_coverage: number | null;
+  score_evidence_quality: number | null;
+  score_blackbox_penalty: number | null;
+  score_legal_status: number | null;
+  logic_version: string | null;
+  analysis_job_id: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MatchListResponse {
+  matches: MatchItem[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export async function getMatches(params: {
+  patent_id?: string;
+  product_id?: string;
+  company_id?: string;
+  status?: string;
+  page?: number;
+  per_page?: number;
+} = {}): Promise<MatchListResponse> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) query.append(key, String(value));
+  });
+  const response = await fetchApi(`/v1/matches?${query.toString()}`);
+  if (!response.ok) {
+    const error: ApiError = await response.json();
+    throw new Error(error.detail);
+  }
+  return response.json();
 }

@@ -35,6 +35,9 @@ export default function RootLayout({
                     <a href="/research/list" className="text-sm hover:underline">
                       分析履歴
                     </a>
+                    <a href="/cases" className="text-sm hover:underline">
+                      案件管理
+                    </a>
                     <a href="/analysis" className="text-sm hover:underline">
                       パイプライン分析
                     </a>

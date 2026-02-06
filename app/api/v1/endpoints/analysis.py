@@ -17,6 +17,7 @@ router = APIRouter()
 # Request/Response Models
 # =============================================================================
 
+
 class StartAnalysisRequest(BaseModel):
     """Request to start a new analysis."""
 
@@ -25,6 +26,7 @@ class StartAnalysisRequest(BaseModel):
     company_id: str | None = None
     product_id: str | None = None
     pipeline: Literal["A", "B", "C", "full"] = "C"
+    claim_nos: list[int] | None = None
 
 
 class StartAnalysisResponse(BaseModel):
@@ -48,6 +50,7 @@ class JobStatusResponse(BaseModel):
     created_at: str
     started_at: str | None
     completed_at: str | None
+    claim_nos: list[int] | None = None
 
 
 class StageResultResponse(BaseModel):
@@ -102,6 +105,7 @@ class RetryResponse(BaseModel):
 # STATIC ROUTES (must be defined before dynamic routes)
 # =============================================================================
 
+
 @router.post("/start", response_model=StartAnalysisResponse)
 def start_analysis(
     request: StartAnalysisRequest,
@@ -120,6 +124,7 @@ def start_analysis(
             target_product=request.target_product,
             company_id=company_uuid,
             product_id=product_uuid,
+            claim_nos=request.claim_nos,
         )
         db.commit()
 
@@ -134,10 +139,10 @@ def start_analysis(
             pipeline=job.pipeline,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}") from e
 
 
 @router.get("/list", response_model=JobListResponse)
@@ -177,7 +182,10 @@ def list_jobs(
         )
     except Exception as e:
         import traceback
-        raise HTTPException(status_code=500, detail=f"Error: {str(e)}\n{traceback.format_exc()}")
+
+        raise HTTPException(
+            status_code=500, detail=f"Error: {str(e)}\n{traceback.format_exc()}"
+        ) from e
 
 
 @router.get("/prompts/list")
@@ -193,6 +201,7 @@ def list_prompts() -> list[dict]:
 # DYNAMIC ROUTES (must be defined after static routes)
 # =============================================================================
 
+
 @router.get("/{job_id}", response_model=JobStatusResponse)
 def get_job_status(
     job_id: str,
@@ -201,8 +210,8 @@ def get_job_status(
     """Get the status of an analysis job."""
     try:
         job_uuid = uuid.UUID(job_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid job ID format")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="Invalid job ID format") from e
 
     service = AnalysisService(db)
     job = service.get_job(job_uuid)
@@ -220,6 +229,7 @@ def get_job_status(
         created_at=job.created_at.isoformat() if job.created_at else "",
         started_at=job.started_at.isoformat() if job.started_at else None,
         completed_at=job.completed_at.isoformat() if job.completed_at else None,
+        claim_nos=job.claim_nos,
     )
 
 
@@ -231,8 +241,8 @@ def get_job_results(
     """Get the results of an analysis job."""
     try:
         job_uuid = uuid.UUID(job_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid job ID format")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="Invalid job ID format") from e
 
     service = AnalysisService(db)
     job = service.get_job(job_uuid)
@@ -246,51 +256,59 @@ def get_job_results(
 
         # Add research_results as a stage
         if job.research_results:
-            phase1_results.append(StageResultResponse(
-                stage="deep_research",
-                output_data=job.research_results,
-                llm_model="openai-deep-research",
-                tokens_input=None,
-                tokens_output=None,
-                latency_ms=None,
-                created_at=job.created_at.isoformat() if job.created_at else "",
-            ))
+            phase1_results.append(
+                StageResultResponse(
+                    stage="deep_research",
+                    output_data=job.research_results,
+                    llm_model="openai-deep-research",
+                    tokens_input=None,
+                    tokens_output=None,
+                    latency_ms=None,
+                    created_at=job.created_at.isoformat() if job.created_at else "",
+                )
+            )
 
         # Add summary as a stage
         if job.summary:
-            phase1_results.append(StageResultResponse(
-                stage="case_summary",
-                output_data=job.summary,
-                llm_model=None,
-                tokens_input=None,
-                tokens_output=None,
-                latency_ms=None,
-                created_at=job.completed_at.isoformat() if job.completed_at else "",
-            ))
+            phase1_results.append(
+                StageResultResponse(
+                    stage="case_summary",
+                    output_data=job.summary,
+                    llm_model=None,
+                    tokens_input=None,
+                    tokens_output=None,
+                    latency_ms=None,
+                    created_at=job.completed_at.isoformat() if job.completed_at else "",
+                )
+            )
 
         # Add requirements if available
         if job.requirements:
-            phase1_results.append(StageResultResponse(
-                stage="requirements_extraction",
-                output_data=job.requirements,
-                llm_model=None,
-                tokens_input=None,
-                tokens_output=None,
-                latency_ms=None,
-                created_at=job.created_at.isoformat() if job.created_at else "",
-            ))
+            phase1_results.append(
+                StageResultResponse(
+                    stage="requirements_extraction",
+                    output_data=job.requirements,
+                    llm_model=None,
+                    tokens_input=None,
+                    tokens_output=None,
+                    latency_ms=None,
+                    created_at=job.created_at.isoformat() if job.created_at else "",
+                )
+            )
 
         # Add compliance_results if available
         if job.compliance_results:
-            phase1_results.append(StageResultResponse(
-                stage="compliance_check",
-                output_data=job.compliance_results,
-                llm_model=None,
-                tokens_input=None,
-                tokens_output=None,
-                latency_ms=None,
-                created_at=job.completed_at.isoformat() if job.completed_at else "",
-            ))
+            phase1_results.append(
+                StageResultResponse(
+                    stage="compliance_check",
+                    output_data=job.compliance_results,
+                    llm_model=None,
+                    tokens_input=None,
+                    tokens_output=None,
+                    latency_ms=None,
+                    created_at=job.completed_at.isoformat() if job.completed_at else "",
+                )
+            )
 
         return JobResultsResponse(
             job_id=str(job.id),
@@ -327,8 +345,8 @@ def retry_job(
     """Retry a failed analysis job."""
     try:
         job_uuid = uuid.UUID(job_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid job ID format")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="Invalid job ID format") from e
 
     service = AnalysisService(db)
     job = service.get_job(job_uuid)

@@ -47,6 +47,26 @@ def _load_field_map(
     typer.echo(f"{label} field map is required (set env or --field-map-file)")
     raise typer.Exit(1)
 
+def _split_csv(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [
+        part.strip()
+        for part in value.replace("、", ",").split(",")
+        if part.strip()
+    ]
+
+
+def _parse_csv_ints(value: str | None) -> list[int]:
+    values: list[int] = []
+    for part in _split_csv(value):
+        try:
+            values.append(int(part))
+        except ValueError:
+            logger.warning("Invalid integer code", code=part)
+    return values
+
+
 app = typer.Typer(help="Phase2 Patent Storage CLI")
 logger = get_logger(__name__)
 
@@ -318,6 +338,30 @@ def company_gbizinfo_import(
     hash_content: Annotated[
         bool, typer.Option(help="Compute file hash for evidence (slow on large files)")
     ] = False,
+    exclude_process_codes: Annotated[
+        str, typer.Option(help="Exclude process codes (comma-separated)")
+    ] = "21",
+    exclude_org_kinds: Annotated[
+        str, typer.Option(help="Exclude org kind codes (comma-separated)")
+    ] = "101,201",
+    min_summary_length: Annotated[
+        int, typer.Option(help="Min business_summary length for observability")
+    ] = 50,
+    required_patent_type: Annotated[
+        str, typer.Option(help="Required patent_type to keep company")
+    ] = "特許",
+    observability_business_items: Annotated[
+        str,
+        typer.Option(
+            help="Observability business_items codes (comma-separated)"
+        ),
+    ] = "304,306,115,215,116,216,117,217,118,218,119,219",
+    record_scope_status: Annotated[
+        bool, typer.Option(help="Record scope_status fields")
+    ] = True,
+    mark_out_of_scope: Annotated[
+        bool, typer.Option(help="Mark out-of-scope companies with scope_status")
+    ] = True,
 ) -> None:
     """Import gBizINFO bulk JSON into company master."""
     import json
@@ -325,6 +369,10 @@ def company_gbizinfo_import(
     from app.db.session import get_db
     from app.services.collection_service import CollectionService
     from app.services.company_ingest import ingest_gbizinfo_path
+
+    exclude_process_set = _split_csv(exclude_process_codes)
+    exclude_org_set = _split_csv(exclude_org_kinds)
+    observability_items = _parse_csv_ints(observability_business_items)
 
     with get_db() as db:
         if dry_run:
@@ -342,6 +390,13 @@ def company_gbizinfo_import(
                 include_patent=include_patent,
                 include_subsidy=include_subsidy,
                 hash_content=hash_content,
+                exclude_process_codes=exclude_process_set,
+                exclude_org_kinds=exclude_org_set,
+                min_summary_length=min_summary_length,
+                required_patent_type=required_patent_type,
+                observability_business_items=observability_items,
+                record_scope_status=record_scope_status,
+                mark_out_of_scope=mark_out_of_scope,
             )
             typer.echo(json.dumps({"status": "dry_run", **stats.__dict__}, ensure_ascii=False, indent=2))
             return
@@ -364,6 +419,13 @@ def company_gbizinfo_import(
                         "include_subsidy": include_subsidy,
                         "batch_size": batch_size,
                         "hash_content": hash_content,
+                        "exclude_process_codes": exclude_process_set,
+                        "exclude_org_kinds": exclude_org_set,
+                        "min_summary_length": min_summary_length,
+                        "required_patent_type": required_patent_type,
+                        "observability_business_items": observability_items,
+                        "record_scope_status": record_scope_status,
+                        "mark_out_of_scope": mark_out_of_scope,
                     },
                 }
             ],
@@ -385,14 +447,19 @@ def company_gbizinfo_import(
                 include_patent=include_patent,
                 include_subsidy=include_subsidy,
                 hash_content=hash_content,
+                exclude_process_codes=exclude_process_set,
+                exclude_org_kinds=exclude_org_set,
+                min_summary_length=min_summary_length,
+                required_patent_type=required_patent_type,
+                observability_business_items=observability_items,
+                record_scope_status=record_scope_status,
+                mark_out_of_scope=mark_out_of_scope,
             )
             return {"status": "succeeded", **stats.__dict__}
 
         result = service.run_job(str(job.job_id), handler)
         typer.echo(json.dumps(result, ensure_ascii=False, indent=2))
 
-
-@app.command("company-seed-patents")
 def company_seed_patents(
     limit: Annotated[int, typer.Option(help="Max applicants to process")] = 500,
     dry_run: Annotated[bool, typer.Option(help="Dry run (no DB writes)")] = False,

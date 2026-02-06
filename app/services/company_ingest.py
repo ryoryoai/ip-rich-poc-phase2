@@ -66,6 +66,10 @@ class GbizinfoIngestStats:
     updated: int = 0
     skipped: int = 0
     skipped_missing: int = 0
+    skipped_closed: int = 0
+    skipped_public: int = 0
+    skipped_no_observability: int = 0
+    skipped_no_patent: int = 0
     errors: int = 0
 
 
@@ -451,6 +455,89 @@ def _is_empty_text(value: object | None) -> bool:
     return False
 
 
+def _parse_business_items(value: object | None) -> list[int]:
+    items: list[int] = []
+    if value is None:
+        return items
+    raw_values = value if isinstance(value, list) else [value]
+    for raw in raw_values:
+        if raw is None:
+            continue
+        if isinstance(raw, (int, float)):
+            items.append(int(raw))
+            continue
+        text = str(raw).strip()
+        if not text:
+            continue
+        for part in text.replace("、", ",").split(","):
+            part = part.strip()
+            if not part:
+                continue
+            try:
+                code = int(part)
+            except ValueError:
+                logger.warning("gBizINFO business_items code invalid", code=part)
+                continue
+            if len(part) != 3:
+                logger.warning("gBizINFO business_items code length unexpected", code=part)
+            items.append(code)
+    seen: set[int] = set()
+    deduped: list[int] = []
+    for code in items:
+        if code in seen:
+            continue
+        seen.add(code)
+        deduped.append(code)
+    return deduped
+
+
+def _has_required_patent(record: dict, required_type: str) -> bool:
+    patents = record.get("patent") or []
+    if not isinstance(patents, list):
+        return False
+    for entry in patents:
+        if not isinstance(entry, dict):
+            continue
+        patent_type = _clean_text(entry.get("patent_type"))
+        if patent_type == required_type:
+            return True
+    return False
+
+
+def _record_scope_status(
+    db: Session,
+    company_id: uuid.UUID,
+    in_scope: bool,
+    reasons: list[str],
+    evidence_id: uuid.UUID | None,
+    source_ref: str | None,
+) -> None:
+    status_value = "in_scope" if in_scope else "out_of_scope"
+    _record_company_field(
+        db,
+        company_id=company_id,
+        field_name="scope_status",
+        value=status_value,
+        evidence_id=evidence_id,
+        source_type="gbizinfo",
+        source_ref=source_ref,
+        confidence=100,
+        captured_at=datetime.now(timezone.utc),
+    )
+    if reasons:
+        _record_company_field(
+            db,
+            company_id=company_id,
+            field_name="scope_reason",
+            value=reasons,
+            evidence_id=evidence_id,
+            source_type="gbizinfo",
+            source_ref=source_ref,
+            confidence=100,
+            captured_at=datetime.now(timezone.utc),
+        )
+
+
 def _iter_json_array(file_obj: io.BufferedReader, chunk_size: int = 1024 * 1024) -> Iterable[dict]:
     decoder = json.JSONDecoder()
     buffer = ""
@@ -620,6 +707,13 @@ def ingest_gbizinfo_path(
     include_patent: bool = False,
     include_subsidy: bool = False,
     hash_content: bool = False,
+    exclude_process_codes: Iterable[str] | None = None,
+    exclude_org_kinds: Iterable[str] | None = None,
+    min_summary_length: int = 50,
+    required_patent_type: str | None = "特許",
+    observability_business_items: Iterable[int] | None = None,
+    record_scope_status: bool = True,
+    mark_out_of_scope: bool = True,
 ) -> GbizinfoIngestStats:
     """Ingest gBizINFO JSON/ZIP into company master."""
     stats = GbizinfoIngestStats()
@@ -636,6 +730,21 @@ def ingest_gbizinfo_path(
             content_type="application/json",
         )
 
+    exclude_process_set = {
+        str(code).strip() for code in (exclude_process_codes or []) if str(code).strip()
+    }
+    exclude_org_set = {
+        str(code).strip() for code in (exclude_org_kinds or []) if str(code).strip()
+    }
+    observability_items: set[int] = set()
+    for code in (observability_business_items or []):
+        try:
+            observability_items.add(int(code))
+        except (TypeError, ValueError):
+            logger.warning("gBizINFO observability business_items code invalid", code=code)
+    if isinstance(required_patent_type, str):
+        required_patent_type = required_patent_type.strip() or None
+
     for source_ref, record in _iter_gbizinfo_records(path):
         if limit and stats.processed >= limit:
             break
@@ -647,6 +756,60 @@ def ingest_gbizinfo_path(
             name = _clean_text(record.get("name"))
             if not corporate_number or not name:
                 stats.skipped += 1
+                continue
+
+            process_code = _clean_text(record.get("process") or record.get("process_type"))
+            kind_code = _clean_text(record.get("kind") or record.get("kind_code"))
+            status_text = _clean_text(record.get("status"))
+
+            reasons: list[str] = []
+            if process_code and process_code in exclude_process_set:
+                reasons.append("process_closed")
+                stats.skipped_closed += 1
+            if status_text == "閉鎖":
+                reasons.append("status_closed")
+                stats.skipped_closed += 1
+            if kind_code and kind_code in exclude_org_set:
+                reasons.append("public_body")
+                stats.skipped_public += 1
+
+            summary = _clean_text(record.get("business_summary"))
+            has_summary = bool(summary) and len(summary) >= min_summary_length
+            has_url = bool(_clean_text(record.get("company_url")))
+            business_codes = _parse_business_items(record.get("business_items"))
+            has_allowed_items = (
+                bool(observability_items.intersection(business_codes))
+                if observability_items
+                else False
+            )
+            if not (has_url or has_summary or has_allowed_items):
+                reasons.append("no_observability")
+                stats.skipped_no_observability += 1
+
+            if required_patent_type:
+                if not _has_required_patent(record, required_patent_type):
+                    reasons.append("no_patent")
+                    stats.skipped_no_patent += 1
+
+            if reasons:
+                stats.skipped += 1
+                if record_scope_status and mark_out_of_scope and not dry_run:
+                    company = (
+                        db.query(Company)
+                        .filter(Company.corporate_number == corporate_number)
+                        .first()
+                    )
+                    if company:
+                        _record_scope_status(
+                            db,
+                            company_id=company.id,
+                            in_scope=False,
+                            reasons=reasons,
+                            evidence_id=evidence.id if evidence else None,
+                            source_ref=source_ref,
+                        )
+                if not dry_run and stats.processed % batch_size == 0:
+                    db.commit()
                 continue
 
             company = (
@@ -691,6 +854,16 @@ def ingest_gbizinfo_path(
             else:
                 stats.skipped += 1
 
+            if record_scope_status and not dry_run:
+                _record_scope_status(
+                    db,
+                    company_id=company.id,
+                    in_scope=True,
+                    reasons=[],
+                    evidence_id=evidence.id if evidence else None,
+                    source_ref=source_ref,
+                )
+
             if dry_run:
                 continue
 
@@ -713,7 +886,7 @@ def ingest_gbizinfo_path(
                     captured_at=datetime.now(timezone.utc),
                 )
 
-            if stats.processed % batch_size == 0:
+            if not dry_run and stats.processed % batch_size == 0:
                 db.commit()
 
         except Exception:  # noqa: BLE001
@@ -729,7 +902,6 @@ def ingest_gbizinfo_path(
     if not dry_run:
         db.commit()
     return stats
-
 
 def seed_companies_from_patents(
     db: Session,

@@ -3,22 +3,23 @@
 from fastapi import APIRouter, Depends
 
 from app.api.deps import require_approved_user
-
 from app.api.v1.endpoints import (
-    health,
-    patents,
     analysis,
-    cron,
-    research,
+    cases,
+    collection,
     companies,
-    products,
-    links,
+    cron,
     evidence,
+    health,
     ingest,
     jobs,
     jp_index,
     keywords,
-    collection,
+    links,
+    matches,
+    patents,
+    products,
+    research,
 )
 
 api_router = APIRouter()
@@ -94,6 +95,18 @@ api_router.include_router(
     collection.router,
     prefix="/v1/collection",
     tags=["collection"],
+    dependencies=[Depends(require_approved_user)],
+)
+api_router.include_router(
+    cases.router,
+    prefix="/v1/cases",
+    tags=["cases"],
+    dependencies=[Depends(require_approved_user)],
+)
+api_router.include_router(
+    matches.router,
+    prefix="/v1/matches",
+    tags=["matches"],
     dependencies=[Depends(require_approved_user)],
 )
 api_router.include_router(cron.router, prefix="/api/cron", tags=["cron"])

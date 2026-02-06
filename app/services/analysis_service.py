@@ -1,14 +1,14 @@
 """Analysis service for running patent infringement investigation pipelines."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy.orm import Session
 
 from app.core import get_logger
-from app.db.models import AnalysisJob, AnalysisResult, Document, Claim, ClaimElement
-from app.llm import get_llm_provider, PromptManager
+from app.db.models import AnalysisJob, AnalysisResult, Claim, ClaimElement, Document
+from app.llm import PromptManager, get_llm_provider
 
 logger = get_logger(__name__)
 
@@ -39,6 +39,19 @@ PIPELINE_STAGES = {
     ],
 }
 
+PER_CLAIM_STAGES = {
+    "10_claim_element_extractor",
+    "11_evidence_query_builder",
+    "12_product_fact_extractor",
+    "13_element_assessment",
+    "14_claim_decision_aggregator",
+}
+
+AGGREGATE_STAGES = {
+    "15_case_summary",
+    "16_investigation_tasks_generator",
+}
+
 
 class AnalysisService:
     """Service for managing and executing analysis pipelines."""
@@ -62,6 +75,7 @@ class AnalysisService:
         target_product: str | None = None,
         company_id: uuid.UUID | None = None,
         product_id: uuid.UUID | None = None,
+        claim_nos: list[int] | None = None,
     ) -> AnalysisJob:
         """Create a new analysis job."""
         if pipeline not in ["A", "B", "C", "full"]:
@@ -69,12 +83,13 @@ class AnalysisService:
 
         job = AnalysisJob(
             patent_id=patent_id,
-            target_product=target_product,
+            product_name=target_product,
             pipeline=pipeline,
             status="pending",
             context_json={},
             company_id=company_id,
             product_id=product_id,
+            claim_nos=claim_nos,
         )
         self.db.add(job)
         self.db.flush()
@@ -84,6 +99,7 @@ class AnalysisService:
             job_id=str(job.id),
             patent_id=patent_id,
             pipeline=pipeline,
+            claim_nos=claim_nos,
         )
         return job
 
@@ -100,18 +116,68 @@ class AnalysisService:
             .all()
         )
 
+    def _resolve_claims(self, job: AnalysisJob, context: dict) -> list[dict]:
+        """Resolve which claims to process based on job configuration."""
+        all_claims = context.get("claims", [])
+        if not all_claims:
+            return [{"claim_no": 1, "claim_text": "", "claim_id": ""}]
+        if job.claim_nos:
+            selected = [c for c in all_claims if c["claim_no"] in job.claim_nos]
+            return selected if selected else all_claims
+        return all_claims
+
+    def _collect_claim_results(self, context: dict, claims: list[dict]) -> None:
+        """Collect per-claim results into aggregated context for stages 15/16."""
+        claim_decisions = []
+        all_open_items: list[str] = []
+
+        for claim in claims:
+            claim_no = claim["claim_no"]
+            suffix = f":claim_{claim_no}"
+
+            # Gather Stage 14 decision
+            decision_key = f"14_claim_decision_aggregator{suffix}"
+            decision = context.get(decision_key, {})
+            if decision:
+                decision["claim_no"] = claim_no
+                claim_decisions.append(decision)
+
+            # Gather missing_information from Stage 13 assessments
+            assessment_key = f"13_element_assessment{suffix}"
+            assessment = context.get(assessment_key, {})
+            assessments_list = assessment.get("assessments", [])
+            for a in assessments_list:
+                missing = a.get("missing_information", [])
+                for item in missing:
+                    all_open_items.append(
+                        f"[Claim {claim_no}, Element {a.get('element_no', '?')}] {item}"
+                    )
+
+            # Gather open items from Stage 14
+            decision_open = decision.get("open_items", [])
+            for item in decision_open:
+                all_open_items.append(f"[Claim {claim_no}] {item}")
+
+        context["claim_decisions"] = claim_decisions
+        context["open_items"] = all_open_items
+
     def run_job(self, job_id: uuid.UUID) -> AnalysisJob:
         """Run an analysis job synchronously."""
         job = self.get_job(job_id)
         if not job:
             raise ValueError(f"Job not found: {job_id}")
 
-        if job.status not in ["pending", "failed"]:
-            raise ValueError(f"Job cannot be run in status: {job.status}")
+        if job.status not in {"pending", "failed"}:
+            # Cron may "claim" a job by setting status=analyzing before calling run_job.
+            # Allow starting only if no stage has started yet.
+            if not (job.status == "analyzing" and job.current_stage is None):
+                raise ValueError(f"Job cannot be run in status: {job.status}")
 
-        # Mark as running
-        job.status = "running"
-        job.started_at = datetime.now(timezone.utc)
+        # Mark as analyzing (active execution)
+        job.status = "analyzing"
+        if not job.queued_at:
+            job.queued_at = datetime.now(UTC)
+        job.started_at = datetime.now(UTC)
         self.db.flush()
 
         try:
@@ -122,58 +188,159 @@ class AnalysisService:
             context = job.context_json or {}
             context = self._initialize_context(job, context)
 
+            # Resolve which claims to process
+            claims_to_process = self._resolve_claims(job, context)
+
             for stage in stages:
                 job.current_stage = stage
                 self.db.flush()
 
-                logger.info("Running stage", job_id=str(job_id), stage=stage)
+                if stage in PER_CLAIM_STAGES:
+                    # Run per-claim stages for each claim
+                    for claim in claims_to_process:
+                        claim_no = claim["claim_no"]
+                        qualified_stage = f"{stage}:claim_{claim_no}"
 
-                try:
-                    result = self._run_stage(job, stage, context)
-
-                    # Save result
-                    analysis_result = AnalysisResult(
-                        job_id=job.id,
-                        stage=stage,
-                        input_data=result.get("input"),
-                        output_data=result.get("output"),
-                        llm_model=result.get("model"),
-                        tokens_input=result.get("tokens_input"),
-                        tokens_output=result.get("tokens_output"),
-                        latency_ms=result.get("latency_ms"),
-                    )
-                    self.db.add(analysis_result)
-
-                    # Update context with output
-                    if result.get("output"):
-                        context[stage] = result["output"]
-                        job.context_json = context
-
-                    # Persist structured outputs when available
-                    if stage == "10_claim_element_extractor":
-                        self._persist_claim_elements(result.get("output"), context)
-
-                    self.db.flush()
-
-                    # Check for errors
-                    if result.get("output", {}).get("errors"):
-                        logger.warning(
-                            "Stage returned errors",
+                        logger.info(
+                            "Running stage (per-claim)",
                             job_id=str(job_id),
-                            stage=stage,
-                            errors=result["output"]["errors"],
+                            stage=qualified_stage,
                         )
 
-                except Exception as e:
-                    logger.exception("Stage failed", job_id=str(job_id), stage=stage)
-                    job.status = "failed"
-                    job.error_message = f"Stage {stage} failed: {str(e)}"
-                    self.db.flush()
-                    return job
+                        try:
+                            # Set current claim in context for variable preparation
+                            context["_current_claim"] = claim
+                            context["_current_claim_no"] = claim_no
+
+                            result = self._run_stage(job, stage, context)
+
+                            # Save result with qualified stage name
+                            analysis_result = AnalysisResult(
+                                job_id=job.id,
+                                stage=qualified_stage,
+                                input_data=result.get("input"),
+                                output_data=result.get("output"),
+                                llm_model=result.get("model"),
+                                tokens_input=result.get("tokens_input"),
+                                tokens_output=result.get("tokens_output"),
+                                latency_ms=result.get("latency_ms"),
+                            )
+                            self.db.add(analysis_result)
+
+                            # Update context with qualified key
+                            if result.get("output"):
+                                context[qualified_stage] = result["output"]
+                                job.context_json = context
+
+                            # Persist claim elements
+                            if stage == "10_claim_element_extractor":
+                                self._persist_claim_elements(result.get("output"), context)
+
+                            self.db.flush()
+
+                            if result.get("output", {}).get("errors"):
+                                logger.warning(
+                                    "Stage returned errors",
+                                    job_id=str(job_id),
+                                    stage=qualified_stage,
+                                    errors=result["output"]["errors"],
+                                )
+
+                        except Exception as e:
+                            logger.exception(
+                                "Stage failed (per-claim)",
+                                job_id=str(job_id),
+                                stage=qualified_stage,
+                            )
+                            job.status = "failed"
+                            job.error_message = f"Stage {qualified_stage} failed: {str(e)}"
+                            self.db.flush()
+                            return job
+
+                elif stage in AGGREGATE_STAGES:
+                    # Collect per-claim results before running aggregate stages
+                    self._collect_claim_results(context, claims_to_process)
+
+                    logger.info("Running stage (aggregate)", job_id=str(job_id), stage=stage)
+
+                    try:
+                        result = self._run_stage(job, stage, context)
+
+                        analysis_result = AnalysisResult(
+                            job_id=job.id,
+                            stage=stage,
+                            input_data=result.get("input"),
+                            output_data=result.get("output"),
+                            llm_model=result.get("model"),
+                            tokens_input=result.get("tokens_input"),
+                            tokens_output=result.get("tokens_output"),
+                            latency_ms=result.get("latency_ms"),
+                        )
+                        self.db.add(analysis_result)
+
+                        if result.get("output"):
+                            context[stage] = result["output"]
+                            job.context_json = context
+
+                        self.db.flush()
+
+                        if result.get("output", {}).get("errors"):
+                            logger.warning(
+                                "Stage returned errors",
+                                job_id=str(job_id),
+                                stage=stage,
+                                errors=result["output"]["errors"],
+                            )
+
+                    except Exception as e:
+                        logger.exception("Stage failed", job_id=str(job_id), stage=stage)
+                        job.status = "failed"
+                        job.error_message = f"Stage {stage} failed: {str(e)}"
+                        self.db.flush()
+                        return job
+                else:
+                    # Stage A/B - existing logic
+                    logger.info("Running stage", job_id=str(job_id), stage=stage)
+
+                    try:
+                        result = self._run_stage(job, stage, context)
+
+                        analysis_result = AnalysisResult(
+                            job_id=job.id,
+                            stage=stage,
+                            input_data=result.get("input"),
+                            output_data=result.get("output"),
+                            llm_model=result.get("model"),
+                            tokens_input=result.get("tokens_input"),
+                            tokens_output=result.get("tokens_output"),
+                            latency_ms=result.get("latency_ms"),
+                        )
+                        self.db.add(analysis_result)
+
+                        if result.get("output"):
+                            context[stage] = result["output"]
+                            job.context_json = context
+
+                        self.db.flush()
+
+                        if result.get("output", {}).get("errors"):
+                            logger.warning(
+                                "Stage returned errors",
+                                job_id=str(job_id),
+                                stage=stage,
+                                errors=result["output"]["errors"],
+                            )
+
+                    except Exception as e:
+                        logger.exception("Stage failed", job_id=str(job_id), stage=stage)
+                        job.status = "failed"
+                        job.error_message = f"Stage {stage} failed: {str(e)}"
+                        self.db.flush()
+                        return job
 
             # Mark as completed
             job.status = "completed"
-            job.completed_at = datetime.now(timezone.utc)
+            job.completed_at = datetime.now(UTC)
             job.current_stage = None
             self.db.flush()
 
@@ -197,14 +364,14 @@ class AnalysisService:
         """Initialize context with patent data from database."""
         # Get patent document
         from app.api.v1.endpoints.patents import normalize_patent_number
-        from app.jp_index.normalize import normalize_number as normalize_jp_number
         from app.db.models import (
-            JpNumberAlias,
+            JpApplicant,
             JpCase,
             JpCaseApplicant,
-            JpApplicant,
             JpClassification,
+            JpNumberAlias,
         )
+        from app.jp_index.normalize import normalize_number as normalize_jp_number
 
         try:
             resolved = normalize_patent_number(job.patent_id)
@@ -270,11 +437,7 @@ class AnalysisService:
                     )
 
                 if alias:
-                    case = (
-                        self.db.query(JpCase)
-                        .filter(JpCase.id == alias.case_id)
-                        .first()
-                    )
+                    case = self.db.query(JpCase).filter(JpCase.id == alias.case_id).first()
                 else:
                     case = None
 
@@ -324,14 +487,10 @@ class AnalysisService:
 
         # Load company/product master data if provided
         try:
-            from app.db.models import Company, Product, ProductVersion, ProductFact
+            from app.db.models import Company, Product, ProductFact, ProductVersion
 
             if job.company_id:
-                company = (
-                    self.db.query(Company)
-                    .filter(Company.id == job.company_id)
-                    .first()
-                )
+                company = self.db.query(Company).filter(Company.id == job.company_id).first()
                 if company:
                     context["company_profile"] = {
                         "company_id": str(company.id),
@@ -347,11 +506,7 @@ class AnalysisService:
                     }
 
             if job.product_id:
-                product = (
-                    self.db.query(Product)
-                    .filter(Product.id == job.product_id)
-                    .first()
-                )
+                product = self.db.query(Product).filter(Product.id == job.product_id).first()
                 if product:
                     context["product_profile"] = {
                         "product_id": str(product.id),
@@ -377,9 +532,7 @@ class AnalysisService:
                             .filter(ProductFact.product_version_id == latest_version.id)
                             .all()
                         )
-                        context["product_facts"] = [
-                            {"fact_text": fact.fact_text} for fact in facts
-                        ]
+                        context["product_facts"] = [{"fact_text": fact.fact_text} for fact in facts]
         except Exception as e:
             logger.warning("Could not load company/product master data", error=str(e))
 
@@ -391,7 +544,7 @@ class AnalysisService:
             }
         else:
             context["target_product"] = job.target_product
-        context["today"] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        context["today"] = datetime.now(UTC).strftime("%Y-%m-%d")
 
         return context
 
@@ -406,9 +559,14 @@ class AnalysisService:
 
         claim_id = output.get("claim_id")
         if not claim_id:
-            claims = context.get("claims") or []
-            if claims and isinstance(claims, list):
-                claim_id = claims[0].get("claim_id")
+            # Use current claim from per-claim context if available
+            current_claim = context.get("_current_claim")
+            if current_claim:
+                claim_id = current_claim.get("claim_id")
+            else:
+                claims = context.get("claims") or []
+                if claims and isinstance(claims, list):
+                    claim_id = claims[0].get("claim_id")
 
         if not claim_id:
             return
@@ -452,7 +610,7 @@ class AnalysisService:
                 if normalized_text:
                     existing.normalized_text = str(normalized_text)
                 existing.metadata_json = metadata
-                existing.updated_at = datetime.now(timezone.utc)
+                existing.updated_at = datetime.now(UTC)
             else:
                 self.db.add(
                     ClaimElement(
@@ -486,7 +644,8 @@ class AnalysisService:
 
         return {
             "input": variables,
-            "output": response.parsed_json or {"raw": response.content, "errors": ["JSON parse failed"]},
+            "output": response.parsed_json
+            or {"raw": response.content, "errors": ["JSON parse failed"]},
             "model": response.model,
             "tokens_input": response.tokens_input,
             "tokens_output": response.tokens_output,
@@ -500,15 +659,23 @@ class AnalysisService:
         # Common variables
         variables["today"] = context.get("today", "")
 
+        # Helper: get per-claim qualified output from context
+        claim_no = context.get("_current_claim_no")
+        suffix = f":claim_{claim_no}" if claim_no else ""
+
         # Stage-specific variable mapping
         if stage == "01_fetch_planner":
             variables["patent_case"] = context.get("patent_info", {})
             variables["poll_state"] = context.get("poll_state", {})
             variables["quota_remaining"] = 100
 
-        elif stage in ["02_status_normalizer", "03_grant_info_normalizer",
-                       "04_citations_normalizer", "05_documents_metadata_normalizer",
-                       "06_number_reference_normalizer"]:
+        elif stage in [
+            "02_status_normalizer",
+            "03_grant_info_normalizer",
+            "04_citations_normalizer",
+            "05_documents_metadata_normalizer",
+            "06_number_reference_normalizer",
+        ]:
             variables["raw_response_meta"] = context.get("raw_response_meta", {})
             variables["raw_payload"] = context.get("raw_payload", {})
 
@@ -526,27 +693,42 @@ class AnalysisService:
             variables["candidates"] = context.get("candidates", [])
 
         elif stage == "10_claim_element_extractor":
-            # Use claim 1 by default
-            claims = context.get("claims", [])
-            claim = claims[0] if claims else {"claim_no": 1, "claim_text": ""}
-            variables["claim"] = claim
+            # Use current claim from per-claim loop, fallback to first claim
+            current_claim = context.get("_current_claim")
+            if current_claim:
+                variables["claim"] = current_claim
+            else:
+                claims = context.get("claims", [])
+                variables["claim"] = claims[0] if claims else {"claim_no": 1, "claim_text": ""}
 
         elif stage == "11_evidence_query_builder":
-            variables["claim_elements"] = context.get("10_claim_element_extractor", {}).get("elements", [])
+            # Get elements from per-claim qualified key
+            elements_key = f"10_claim_element_extractor{suffix}"
+            variables["claim_elements"] = context.get(elements_key, {}).get("elements", [])
             variables["target_product"] = context.get("target_product", "")
 
         elif stage == "12_product_fact_extractor":
+            elements_key = f"10_claim_element_extractor{suffix}"
             variables["evidence_documents"] = context.get("evidence_documents", [])
-            variables["target_elements"] = context.get("10_claim_element_extractor", {}).get("elements", [])
+            variables["target_elements"] = context.get(elements_key, {}).get("elements", [])
 
         elif stage == "13_element_assessment":
-            elements = context.get("10_claim_element_extractor", {}).get("elements", [])
-            variables["claim_element"] = elements[0] if elements else {}
-            variables["product_facts"] = context.get("12_product_fact_extractor", {}).get("product_facts", [])
+            # Batch: pass all elements for this claim
+            elements_key = f"10_claim_element_extractor{suffix}"
+            elements = context.get(elements_key, {}).get("elements", [])
+            variables["claim_elements"] = elements
+            facts_key = f"12_product_fact_extractor{suffix}"
+            variables["product_facts"] = context.get(facts_key, {}).get("product_facts", [])
 
         elif stage == "14_claim_decision_aggregator":
-            variables["claim_id"] = f"{context.get('patent_info', {}).get('patent_id', '')}_claim1"
-            variables["element_assessments"] = context.get("element_assessments", [])
+            patent_id = context.get("patent_info", {}).get("patent_id", "")
+            variables["claim_id"] = (
+                f"{patent_id}_claim{claim_no}" if claim_no else f"{patent_id}_claim1"
+            )
+            assessment_key = f"13_element_assessment{suffix}"
+            variables["element_assessments"] = context.get(assessment_key, {}).get(
+                "assessments", []
+            )
 
         elif stage == "15_case_summary":
             variables["case_context"] = context.get("patent_info", {})

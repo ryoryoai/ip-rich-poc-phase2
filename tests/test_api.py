@@ -3,6 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from app.core import settings
 from app.main import app
 
 
@@ -19,6 +20,26 @@ class TestHealthEndpoint:
         response = client.get("/healthz")
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
+
+    def test_init_db_requires_allow_schema_init(self, client: TestClient) -> None:
+        old = settings.allow_schema_init
+        settings.allow_schema_init = False
+        try:
+            response = client.post("/init-db")
+            assert response.status_code == 403
+        finally:
+            settings.allow_schema_init = old
+
+    def test_init_db_succeeds_when_enabled(self, client: TestClient) -> None:
+        old = settings.allow_schema_init
+        settings.allow_schema_init = True
+        try:
+            response = client.post("/init-db")
+            assert response.status_code == 200
+            data = response.json()
+            assert data["status"] == "ok"
+        finally:
+            settings.allow_schema_init = old
 
 
 class TestResolveEndpoint:
