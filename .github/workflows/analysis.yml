@@ -23,10 +23,9 @@ on:
         required: false
         type: string
 
-  # Scheduled runs
-  schedule:
-    # Run batch analysis every 6 hours
-    - cron: '0 */6 * * *'
+  # Scheduled runs (disabled – DATABASE_URL secret not configured)
+  # schedule:
+  #   - cron: '0 */6 * * *'
 
 jobs:
   analyze:

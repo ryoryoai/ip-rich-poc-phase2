@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.core import get_logger
 from app.db.models import AnalysisJob, AnalysisResult, Claim, ClaimElement, Document
 from app.llm import PromptManager, get_llm_provider
+from app.llm.providers import LLMProvider
 
 logger = get_logger(__name__)
 
@@ -56,10 +57,10 @@ AGGREGATE_STAGES = {
 class AnalysisService:
     """Service for managing and executing analysis pipelines."""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, llm_provider: LLMProvider | None = None):
         self.db = db
         self.prompt_manager = PromptManager()
-        self._llm_provider = None
+        self._llm_provider = llm_provider
 
     @property
     def llm_provider(self):
@@ -191,152 +192,85 @@ class AnalysisService:
             # Resolve which claims to process
             claims_to_process = self._resolve_claims(job, context)
 
-            for stage in stages:
-                job.current_stage = stage
-                self.db.flush()
+            # Pre-compute per-claim stages in pipeline order for claim-first loop
+            per_claim_stages = [s for s in stages if s in PER_CLAIM_STAGES]
 
+            for stage in stages:
                 if stage in PER_CLAIM_STAGES:
-                    # Run per-claim stages for each claim
+                    # Claim-first loop: run all per-claim stages for each claim
+                    # before moving to the next claim
                     for claim in claims_to_process:
                         claim_no = claim["claim_no"]
-                        qualified_stage = f"{stage}:claim_{claim_no}"
+                        context["_current_claim"] = claim
+                        context["_current_claim_no"] = claim_no
 
-                        logger.info(
-                            "Running stage (per-claim)",
-                            job_id=str(job_id),
-                            stage=qualified_stage,
-                        )
-
-                        try:
-                            # Set current claim in context for variable preparation
-                            context["_current_claim"] = claim
-                            context["_current_claim_no"] = claim_no
-
-                            result = self._run_stage(job, stage, context)
-
-                            # Save result with qualified stage name
-                            analysis_result = AnalysisResult(
-                                job_id=job.id,
-                                stage=qualified_stage,
-                                input_data=result.get("input"),
-                                output_data=result.get("output"),
-                                llm_model=result.get("model"),
-                                tokens_input=result.get("tokens_input"),
-                                tokens_output=result.get("tokens_output"),
-                                latency_ms=result.get("latency_ms"),
-                            )
-                            self.db.add(analysis_result)
-
-                            # Update context with qualified key
-                            if result.get("output"):
-                                context[qualified_stage] = result["output"]
-                                job.context_json = context
-
-                            # Persist claim elements
-                            if stage == "10_claim_element_extractor":
-                                self._persist_claim_elements(result.get("output"), context)
-
+                        for pc_stage in per_claim_stages:
+                            qualified_stage = f"{pc_stage}:claim_{claim_no}"
+                            job.current_stage = qualified_stage
                             self.db.flush()
 
-                            if result.get("output", {}).get("errors"):
-                                logger.warning(
-                                    "Stage returned errors",
+                            logger.info(
+                                "Running stage (per-claim)",
+                                job_id=str(job_id),
+                                stage=qualified_stage,
+                            )
+
+                            try:
+                                self._execute_and_save_stage(
+                                    job, pc_stage, qualified_stage, context
+                                )
+                            except Exception as e:
+                                logger.exception(
+                                    "Stage failed (per-claim)",
                                     job_id=str(job_id),
                                     stage=qualified_stage,
-                                    errors=result["output"]["errors"],
                                 )
+                                job.status = "failed"
+                                job.error_message = f"Stage {qualified_stage} failed: {e!s}"
+                                self.db.flush()
+                                return job
 
-                        except Exception as e:
-                            logger.exception(
-                                "Stage failed (per-claim)",
-                                job_id=str(job_id),
-                                stage=qualified_stage,
-                            )
-                            job.status = "failed"
-                            job.error_message = f"Stage {qualified_stage} failed: {str(e)}"
-                            self.db.flush()
-                            return job
+                    # All per-claim stages done; skip remaining per-claim entries
+                    break
 
                 elif stage in AGGREGATE_STAGES:
-                    # Collect per-claim results before running aggregate stages
-                    self._collect_claim_results(context, claims_to_process)
-
-                    logger.info("Running stage (aggregate)", job_id=str(job_id), stage=stage)
-
-                    try:
-                        result = self._run_stage(job, stage, context)
-
-                        analysis_result = AnalysisResult(
-                            job_id=job.id,
-                            stage=stage,
-                            input_data=result.get("input"),
-                            output_data=result.get("output"),
-                            llm_model=result.get("model"),
-                            tokens_input=result.get("tokens_input"),
-                            tokens_output=result.get("tokens_output"),
-                            latency_ms=result.get("latency_ms"),
-                        )
-                        self.db.add(analysis_result)
-
-                        if result.get("output"):
-                            context[stage] = result["output"]
-                            job.context_json = context
-
-                        self.db.flush()
-
-                        if result.get("output", {}).get("errors"):
-                            logger.warning(
-                                "Stage returned errors",
-                                job_id=str(job_id),
-                                stage=stage,
-                                errors=result["output"]["errors"],
-                            )
-
-                    except Exception as e:
-                        logger.exception("Stage failed", job_id=str(job_id), stage=stage)
-                        job.status = "failed"
-                        job.error_message = f"Stage {stage} failed: {str(e)}"
-                        self.db.flush()
-                        return job
+                    # Aggregate stages are handled after the per-claim loop below
+                    continue
                 else:
-                    # Stage A/B - existing logic
+                    # Stage A/B
+                    job.current_stage = stage
+                    self.db.flush()
+
                     logger.info("Running stage", job_id=str(job_id), stage=stage)
 
                     try:
-                        result = self._run_stage(job, stage, context)
-
-                        analysis_result = AnalysisResult(
-                            job_id=job.id,
-                            stage=stage,
-                            input_data=result.get("input"),
-                            output_data=result.get("output"),
-                            llm_model=result.get("model"),
-                            tokens_input=result.get("tokens_input"),
-                            tokens_output=result.get("tokens_output"),
-                            latency_ms=result.get("latency_ms"),
-                        )
-                        self.db.add(analysis_result)
-
-                        if result.get("output"):
-                            context[stage] = result["output"]
-                            job.context_json = context
-
-                        self.db.flush()
-
-                        if result.get("output", {}).get("errors"):
-                            logger.warning(
-                                "Stage returned errors",
-                                job_id=str(job_id),
-                                stage=stage,
-                                errors=result["output"]["errors"],
-                            )
-
+                        self._execute_and_save_stage(job, stage, stage, context)
                     except Exception as e:
                         logger.exception("Stage failed", job_id=str(job_id), stage=stage)
                         job.status = "failed"
-                        job.error_message = f"Stage {stage} failed: {str(e)}"
+                        job.error_message = f"Stage {stage} failed: {e!s}"
                         self.db.flush()
                         return job
+
+            # Run aggregate stages after per-claim loop
+            # (break above exits the for-loop before reaching them)
+            aggregate_stages = [s for s in stages if s in AGGREGATE_STAGES]
+            for stage in aggregate_stages:
+                self._collect_claim_results(context, claims_to_process)
+
+                job.current_stage = stage
+                self.db.flush()
+
+                logger.info("Running stage (aggregate)", job_id=str(job_id), stage=stage)
+
+                try:
+                    self._execute_and_save_stage(job, stage, stage, context)
+                except Exception as e:
+                    logger.exception("Stage failed", job_id=str(job_id), stage=stage)
+                    job.status = "failed"
+                    job.error_message = f"Stage {stage} failed: {e!s}"
+                    self.db.flush()
+                    return job
 
             # Mark as completed
             job.status = "completed"
@@ -487,7 +421,14 @@ class AnalysisService:
 
         # Load company/product master data if provided
         try:
-            from app.db.models import Company, Product, ProductFact, ProductVersion
+            from app.db.models import (
+                Company,
+                DocChunk,
+                Product,
+                ProductDocument,
+                ProductFact,
+                ProductVersion,
+            )
 
             if job.company_id:
                 company = self.db.query(Company).filter(Company.id == job.company_id).first()
@@ -533,6 +474,45 @@ class AnalysisService:
                             .all()
                         )
                         context["product_facts"] = [{"fact_text": fact.fact_text} for fact in facts]
+
+                    # Load evidence documents linked to this product
+                    product_docs = (
+                        self.db.query(ProductDocument)
+                        .filter(ProductDocument.product_id == product.id)
+                        .all()
+                    )
+
+                    evidence_docs = []
+                    for pd in product_docs:
+                        ev = pd.evidence
+                        if not ev or not ev.full_text:
+                            continue
+                        chunks = (
+                            self.db.query(DocChunk)
+                            .filter(DocChunk.evidence_id == ev.id)
+                            .order_by(DocChunk.chunk_index)
+                            .all()
+                        )
+                        evidence_docs.append(
+                            {
+                                "evidence_id": str(ev.id),
+                                "url": ev.url,
+                                "doc_type": pd.doc_type,
+                                "title": pd.title or ev.title,
+                                "text": ev.full_text[:8000],
+                                "chunks": [
+                                    {
+                                        "chunk_index": c.chunk_index,
+                                        "text": c.text,
+                                        "section_type": c.section_type,
+                                        "page_no": c.page_no,
+                                    }
+                                    for c in chunks[:20]
+                                ],
+                            }
+                        )
+
+                    context["evidence_documents"] = evidence_docs
         except Exception as e:
             logger.warning("Could not load company/product master data", error=str(e))
 
@@ -621,6 +601,48 @@ class AnalysisService:
                         metadata_json=metadata,
                     )
                 )
+
+    def _execute_and_save_stage(
+        self,
+        job: AnalysisJob,
+        stage: str,
+        qualified_stage: str,
+        context: dict,
+    ) -> dict[str, Any]:
+        """Execute a single stage and persist the result."""
+        result = self._run_stage(job, stage, context)
+
+        analysis_result = AnalysisResult(
+            job_id=job.id,
+            stage=qualified_stage,
+            input_data=result.get("input"),
+            output_data=result.get("output"),
+            llm_model=result.get("model"),
+            tokens_input=result.get("tokens_input"),
+            tokens_output=result.get("tokens_output"),
+            latency_ms=result.get("latency_ms"),
+        )
+        self.db.add(analysis_result)
+
+        if result.get("output"):
+            context[qualified_stage] = result["output"]
+            job.context_json = context
+
+        # Persist claim elements after Stage 10
+        if stage == "10_claim_element_extractor":
+            self._persist_claim_elements(result.get("output"), context)
+
+        self.db.flush()
+
+        if result.get("output", {}).get("errors"):
+            logger.warning(
+                "Stage returned errors",
+                job_id=str(job.id),
+                stage=qualified_stage,
+                errors=result["output"]["errors"],
+            )
+
+        return result
 
     def _run_stage(
         self,
